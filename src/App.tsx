@@ -1,134 +1,101 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Plane, 
-  Search, 
-  AlertTriangle, 
-  DollarSign, 
-  Clock, 
-  Calendar, 
-  MapPin, 
-  ChevronRight, 
-  CheckCircle2, 
+import {
+  Plane,
+  Search,
+  AlertTriangle,
+  DollarSign,
+  Clock,
+  Calendar,
+  MapPin,
+  ChevronRight,
+  CheckCircle2,
   TrendingUp,
   ShieldAlert,
   Crosshair,
   BookOpen,
   Bell,
   History,
-  Filter
+  BarChart3,
+  Activity,
+  Database,
+  Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-
-// --- Mock Data & Types ---
-
-type Flight = {
-  id: string;
-  airline: string;
-  flightNumber: string;
-  departure: string;
-  arrival: string;
-  depTime: string;
-  arrTime: string;
-  aircraft: string;
-  price: number;
-  bumpScore: number;
-  factors: string[];
-};
-
-const MOCK_ALERTS = [
-  { id: 1, hub: 'EWR', reason: 'Morning Thunderstorms', impact: 'High cascading delays. Evening flights 80%+ full.', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  { id: 2, hub: 'ATL', reason: 'System Outage Recovery', impact: 'Rebooking misconnected passengers. Target 8PM-10PM bank.', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  { id: 3, hub: 'DFW', reason: 'Extreme Heat', impact: 'Regional jets weight-restricted. Guaranteed bumps on CRJ/E175s.', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-];
-
-const ALL_HUBS = ['ATL', 'DFW', 'EWR', 'ORD', 'DEN', 'LAS', 'LGA', 'JFK', 'MCO', 'CLT'];
-
-const generateMockFlights = (origin: string, dest: string, date: string): Flight[] => {
-  const airlines = ['Delta', 'American', 'United'];
-  const aircrafts = ['Boeing 737', 'Airbus A321', 'CRJ-900 (Regional)', 'Embraer 175'];
-  
-  // Algorithmic Fix: Incorporate real-world constraints like Day of Week and Active Alerts
-  const d = date ? new Date(date + 'T12:00:00') : new Date();
-  const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon, ..., 5 = Fri, 6 = Sat
-  const isPrimeBusinessDay = dayOfWeek === 1 || dayOfWeek === 4 || dayOfWeek === 5; // Mon, Thu, Fri
-  const isWeekendLeisure = dayOfWeek === 0 || dayOfWeek === 6; // Sun, Sat
-  
-  const hasOriginAlert = MOCK_ALERTS.some(a => a.hub === origin.toUpperCase());
-  const hasDestAlert = MOCK_ALERTS.some(a => a.hub === dest.toUpperCase());
-
-  return Array.from({ length: 6 }).map((_, i) => {
-    const isEvening = i > 3;
-    const isRegional = i % 3 === 0;
-    const airline = airlines[i % 3];
-    
-    let score = 30 + Math.floor(Math.random() * 15); // Base 30-45
-    const factors = [];
-    
-    if (isEvening) {
-      score += 15;
-      factors.push('Last bank of the day');
-    }
-    if (isRegional) {
-      score += 20;
-      factors.push('Weight-restricted regional jet');
-    }
-    if (airline === 'Delta' && origin.toUpperCase() === 'ATL') {
-      score += 10;
-      factors.push('Fortress Hub dynamics');
-    }
-    
-    // Algorithmic Fix: Adjust score based on day of week and route type
-    if (isPrimeBusinessDay && !isWeekendLeisure) {
-      score += 15;
-      factors.push('Prime business travel day');
-    } else if (isWeekendLeisure && (dest.toUpperCase() === 'LAS' || dest.toUpperCase() === 'MCO' || dest.toUpperCase() === 'CUN')) {
-      score += 20;
-      factors.push('Heavy leisure route weekend');
-    }
-
-    // Algorithmic Fix: Massive boost if there is an active network disruption
-    if (hasOriginAlert) {
-      score += 25;
-      factors.push('Origin network disruption');
-    } else if (hasDestAlert) {
-      score += 15;
-      factors.push('Destination network disruption');
-    }
-    
-    score = Math.min(98, score); // Cap at 98%
-
-    return {
-      id: `FL-${Math.floor(Math.random() * 10000)}`,
-      airline,
-      flightNumber: `${airline.charAt(0)}${Math.floor(Math.random() * 9000) + 1000}`,
-      departure: origin.toUpperCase(),
-      arrival: dest.toUpperCase(),
-      depTime: isEvening ? `1${8 + i - 3}:30` : `0${6 + i}:15`,
-      arrTime: isEvening ? `2${0 + i - 3}:45` : `0${8 + i}:30`,
-      aircraft: isRegional ? aircrafts[2] : aircrafts[i % 2],
-      price: 189 + Math.floor(Math.random() * 300),
-      bumpScore: score,
-      factors,
-    };
-  }).sort((a, b) => b.bumpScore - a.bumpScore);
-};
+import {
+  searchFlights,
+  getWeatherAlerts,
+  getSummary,
+  getCarrierStats,
+  getQuarterlyTrends,
+  getTopRoutes,
+  type Flight,
+  type WeatherAlert,
+  type SummaryData,
+  type CarrierStats,
+  type QuarterlyTrend,
+  type OversoldRoute,
+} from './api';
 
 // --- Components ---
 
+const ALL_HUBS = ['ATL', 'DFW', 'EWR', 'ORD', 'DEN', 'LAS', 'LGA', 'JFK', 'MCO', 'CLT'];
+
+function DataSourceBadge({ sources }: { sources?: string[] }) {
+  if (!sources || sources.length === 0) return null;
+  return (
+    <div className="flex items-center flex-wrap gap-2 mt-2">
+      <Database className="w-3.5 h-3.5 text-slate-500" />
+      {sources.map((s, i) => (
+        <span key={i} className="text-xs text-slate-500 bg-slate-900/50 px-2 py-0.5 rounded-full border border-slate-800/50">
+          {s}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function LoadingSpinner({ text }: { text?: string }) {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="w-6 h-6 text-indigo-400 animate-spin mr-3" />
+      <span className="text-slate-400">{text || 'Loading...'}</span>
+    </div>
+  );
+}
+
 function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
+  const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getSummary()
+      .then(setSummary)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <LoadingSpinner text="Fetching live data from aviationweather.gov..." />;
+
   return (
     <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-50">Command Center</h1>
-        <p className="text-slate-400 mt-1">Real-time network vulnerabilities and active alerts.</p>
+        <p className="text-slate-400 mt-1">Real-time network vulnerabilities and active weather disruptions.</p>
+        {error && (
+          <p className="text-amber-400 text-sm mt-2 flex items-center">
+            <AlertTriangle className="w-4 h-4 mr-1" />
+            Backend unavailable — showing cached data
+          </p>
+        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-slate-400">Total Bounties Claimed</p>
-              <h3 className="text-2xl font-bold text-slate-50 mt-1">$3,450</h3>
+              <p className="text-sm font-medium text-slate-400">Industry Avg VDB Payout</p>
+              <h3 className="text-2xl font-bold text-slate-50 mt-1">${summary?.avgCompensation?.toLocaleString() || '---'}</h3>
             </div>
             <div className="p-2 bg-emerald-500/10 rounded-lg">
               <DollarSign className="w-5 h-5 text-emerald-500" />
@@ -136,22 +103,30 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
           </div>
           <div className="mt-4 flex items-center text-sm text-emerald-400">
             <TrendingUp className="w-4 h-4 mr-1" />
-            <span>+2 successful bumps this year</span>
+            <span>{summary ? `${summary.totalVDBTwoYears.toLocaleString()} VDBs in 8 quarters` : '---'}</span>
           </div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-slate-400">Active Network Alerts</p>
-              <h3 className="text-2xl font-bold text-slate-50 mt-1">3 Hubs</h3>
+              <p className="text-sm font-medium text-slate-400">Active Weather Disruptions</p>
+              <h3 className="text-2xl font-bold text-slate-50 mt-1">
+                {summary ? `${summary.activeAlerts} Hub${summary.activeAlerts !== 1 ? 's' : ''}` : '---'}
+              </h3>
             </div>
             <div className="p-2 bg-amber-500/10 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-amber-500" />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-slate-400">
-            <span>High probability conditions detected</span>
+            {summary && summary.severeAlerts > 0 ? (
+              <span className="text-rose-400">{summary.severeAlerts} severe — high probability conditions</span>
+            ) : summary && summary.activeAlerts > 0 ? (
+              <span className="text-amber-400">Moderate disruptions detected</span>
+            ) : (
+              <span className="text-emerald-400">Clear skies across monitored hubs</span>
+            )}
           </div>
         </div>
 
@@ -172,20 +147,44 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold text-slate-50 mt-8 mb-4">Live Network Disruptions</h2>
-      <div className="grid grid-cols-1 gap-4">
-        {MOCK_ALERTS.map((alert) => (
-          <div key={alert.id} className={`p-4 rounded-xl border ${alert.bg} ${alert.border} flex items-start space-x-4`}>
-            <div className={`p-2 rounded-full bg-slate-950/50 ${alert.color}`}>
-              <ShieldAlert className="w-6 h-6" />
+      <h2 className="text-xl font-semibold text-slate-50 mt-8 mb-4 flex items-center">
+        <Activity className="w-5 h-5 mr-2 text-amber-500" />
+        Live Weather Disruptions
+      </h2>
+
+      {summary && summary.alerts.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4">
+          {summary.alerts.map((alert) => (
+            <div key={alert.id} className={`p-4 rounded-xl border ${alert.bg} ${alert.border} flex items-start space-x-4`}>
+              <div className={`p-2 rounded-full bg-slate-950/50 ${alert.color}`}>
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h4 className={`font-semibold ${alert.color}`}>{alert.hub} — {alert.reason}</h4>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    alert.severity === 'severe' ? 'bg-rose-500/20 text-rose-400' :
+                    alert.severity === 'moderate' ? 'bg-amber-500/20 text-amber-400' :
+                    'bg-blue-500/20 text-blue-400'
+                  }`}>
+                    {alert.severity}
+                  </span>
+                </div>
+                <p className="text-slate-300 text-sm mt-1">{alert.impact}</p>
+                <p className="text-slate-500 text-xs mt-2 font-mono">{alert.details}</p>
+              </div>
             </div>
-            <div>
-              <h4 className={`font-semibold ${alert.color}`}>{alert.hub} - {alert.reason}</h4>
-              <p className="text-slate-300 text-sm mt-1">{alert.impact}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-8 rounded-xl border border-slate-800 border-dashed bg-slate-900/30 text-center">
+          <CheckCircle2 className="w-10 h-10 text-emerald-500/40 mx-auto mb-3" />
+          <p className="text-slate-400 font-medium">No active disruptions across monitored hubs</p>
+          <p className="text-slate-500 text-sm mt-1">All 10 major hubs reporting normal operations</p>
+        </div>
+      )}
+
+      <DataSourceBadge sources={['aviationweather.gov METAR', 'DOT BTS Denied Boarding Report']} />
     </div>
   );
 }
@@ -196,48 +195,75 @@ function Scanner() {
   const [date, setDate] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<Flight[]>([]);
-  const [monitoredHubs, setMonitoredHubs] = useState<string[]>(['ATL', 'EWR', 'DFW']);
+  const [dataSources, setDataSources] = useState<string[]>([]);
+  const [monitoredHubs, setMonitoredHubs] = useState<string[]>(['ATL', 'EWR', 'DFW', 'ORD']);
+  const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadAlerts();
+  }, [monitoredHubs]);
+
+  const loadAlerts = async () => {
+    setAlertsLoading(true);
+    try {
+      const data = await getWeatherAlerts(monitoredHubs);
+      setAlerts(data.alerts);
+    } catch {
+      setAlerts([]);
+    } finally {
+      setAlertsLoading(false);
+    }
+  };
 
   const toggleHub = (hub: string) => {
-    setMonitoredHubs(prev => 
+    setMonitoredHubs(prev =>
       prev.includes(hub) ? prev.filter(h => h !== hub) : [...prev, hub]
     );
   };
 
-  const activeAlerts = MOCK_ALERTS.filter(alert => monitoredHubs.includes(alert.hub));
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
     setResults([]);
-    
-    // Simulate API call and scoring algorithm
-    setTimeout(() => {
-      setResults(generateMockFlights(origin, dest, date));
+    setSearchError(null);
+    setDataSources([]);
+
+    try {
+      const data = await searchFlights(origin, dest, date);
+      setResults(data.flights);
+      setDataSources(data.meta.dataSources);
+    } catch (err: any) {
+      setSearchError(err.message || 'Search failed');
+    } finally {
       setIsSearching(false);
-    }, 1500);
+    }
   };
 
   return (
     <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-50">Flight Scanner</h1>
-        <p className="text-slate-400 mt-1">Identify flights with the highest probability of overbooking.</p>
+        <p className="text-slate-400 mt-1">Identify flights with the highest probability of overbooking using real data.</p>
       </header>
 
-      {/* NEW SECTION: Live Network Disruptions */}
+      {/* Live Network Disruptions */}
       <div className="mb-8 bg-slate-900/50 border border-slate-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-slate-50 flex items-center">
             <AlertTriangle className="w-5 h-5 mr-2 text-amber-500" />
-            Live Network Disruptions
+            Live Weather Disruptions
           </h2>
-          <button className="text-sm text-indigo-400 hover:text-indigo-300 flex items-center transition-colors">
-            <Bell className="w-4 h-4 mr-1" />
-            Alert Settings
-          </button>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-500">via aviationweather.gov</span>
+            <button onClick={loadAlerts} className="text-sm text-indigo-400 hover:text-indigo-300 flex items-center transition-colors">
+              <Bell className="w-4 h-4 mr-1" />
+              Refresh
+            </button>
+          </div>
         </div>
-        
+
         <div className="mb-6">
           <p className="text-sm text-slate-400 mb-3">Select hubs to monitor for active vulnerabilities:</p>
           <div className="flex flex-wrap gap-2">
@@ -258,27 +284,41 @@ function Scanner() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activeAlerts.length > 0 ? (
-            activeAlerts.map(alert => (
-              <div key={alert.id} className={`p-4 rounded-xl border ${alert.bg} ${alert.border} flex items-start space-x-4`}>
-                <div className={`p-2 rounded-full bg-slate-950/50 ${alert.color}`}>
-                  <ShieldAlert className="w-5 h-5" />
+        {alertsLoading ? (
+          <LoadingSpinner text="Checking live weather..." />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {alerts.length > 0 ? (
+              alerts.map(alert => (
+                <div key={alert.id} className={`p-4 rounded-xl border ${alert.bg} ${alert.border} flex items-start space-x-4`}>
+                  <div className={`p-2 rounded-full bg-slate-950/50 ${alert.color}`}>
+                    <ShieldAlert className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className={`font-semibold ${alert.color}`}>{alert.hub} — {alert.reason}</h4>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        alert.severity === 'severe' ? 'bg-rose-500/20 text-rose-400' :
+                        alert.severity === 'moderate' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {alert.severity}
+                      </span>
+                    </div>
+                    <p className="text-slate-300 text-sm mt-1">{alert.impact}</p>
+                    <p className="text-slate-500 text-xs mt-2 font-mono">{alert.details}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className={`font-semibold ${alert.color}`}>{alert.hub} - {alert.reason}</h4>
-                  <p className="text-slate-300 text-sm mt-1">{alert.impact}</p>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-full p-6 rounded-xl border border-slate-800 border-dashed bg-slate-950/50 text-center">
+                <CheckCircle2 className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                <p className="text-slate-400">No active disruptions for your monitored hubs.</p>
+                <p className="text-slate-500 text-sm mt-1">Operations are running normally.</p>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full p-6 rounded-xl border border-slate-800 border-dashed bg-slate-950/50 text-center">
-              <CheckCircle2 className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="text-slate-400">No active disruptions for your monitored hubs.</p>
-              <p className="text-slate-500 text-sm mt-1">Operations are running normally.</p>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-6">
@@ -287,8 +327,8 @@ function Scanner() {
             <label className="block text-sm font-medium text-slate-400 mb-1">Origin Hub</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
@@ -301,8 +341,8 @@ function Scanner() {
             <label className="block text-sm font-medium text-slate-400 mb-1">Destination</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={dest}
                 onChange={(e) => setDest(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
@@ -315,8 +355,8 @@ function Scanner() {
             <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 [color-scheme:dark]"
@@ -326,8 +366,8 @@ function Scanner() {
           </div>
         </div>
         <div className="mt-6 flex justify-end">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSearching}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center transition-colors disabled:opacity-50"
           >
@@ -341,31 +381,51 @@ function Scanner() {
         </div>
       </form>
 
+      {searchError && (
+        <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 flex items-start space-x-3">
+          <AlertTriangle className="w-5 h-5 mt-0.5" />
+          <div>
+            <p className="font-medium">Search Error</p>
+            <p className="text-sm mt-1">{searchError}</p>
+            <p className="text-xs text-rose-300/60 mt-1">Make sure the backend server is running (npm run dev starts both).</p>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence>
         {results.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <h3 className="text-lg font-semibold text-slate-50 mb-4">Target Opportunities</h3>
-            {results.map((flight, idx) => (
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-50">Target Opportunities</h3>
+              <span className="text-sm text-slate-500">{results.length} flights found</span>
+            </div>
+
+            {results.map((flight) => (
               <div key={flight.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  
+
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center">
                       <Plane className="w-6 h-6 text-indigo-400" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="font-bold text-slate-50">{flight.airline} {flight.flightNumber}</span>
+                        <span className="font-bold text-slate-50">{flight.flightNumber}</span>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">{flight.aircraft}</span>
+                        {flight.isRegional && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
+                        )}
                       </div>
                       <div className="text-sm text-slate-400 mt-1 flex items-center space-x-2">
                         <span>{flight.departure} {flight.depTime}</span>
                         <ChevronRight className="w-4 h-4" />
                         <span>{flight.arrival} {flight.arrTime}</span>
+                        <span className="text-slate-600">|</span>
+                        <span className="text-xs">{flight.capacity} seats</span>
                       </div>
                     </div>
                   </div>
@@ -379,7 +439,6 @@ function Scanner() {
                         </p>
                       </div>
                       <div className="w-16 h-16 relative">
-                        {/* Simple circular progress */}
                         <svg className="w-full h-full" viewBox="0 0 36 36">
                           <path
                             className="text-slate-800"
@@ -402,7 +461,7 @@ function Scanner() {
                   </div>
 
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap gap-2">
                   {flight.factors.map((factor, i) => (
                     <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800">
@@ -412,6 +471,8 @@ function Scanner() {
                 </div>
               </div>
             ))}
+
+            <DataSourceBadge sources={dataSources} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -419,107 +480,194 @@ function Scanner() {
   );
 }
 
-const MOCK_HISTORY = [
-  { id: 1, date: 'Today', flight: 'DL 1432', route: 'ATL → LGA', predictedScore: 92, actualOversold: 4, maxCompensation: 1200, status: 'Confirmed VDB' },
-  { id: 2, date: 'Yesterday', flight: 'AA 342', route: 'DFW → ORD', predictedScore: 85, actualOversold: 2, maxCompensation: 800, status: 'Confirmed VDB' },
-  { id: 3, date: 'Yesterday', flight: 'UA 112', route: 'EWR → BOS', predictedScore: 88, actualOversold: 0, maxCompensation: 0, status: 'Cleared at Gate' },
-  { id: 4, date: '3 days ago', flight: 'DL 890', route: 'ATL → MCO', predictedScore: 75, actualOversold: 1, maxCompensation: 500, status: 'Confirmed VDB' },
-  { id: 5, date: '4 days ago', flight: 'AA 1209', route: 'CLT → EWR', predictedScore: 94, actualOversold: 6, maxCompensation: 1500, status: 'Confirmed VDB' },
-  { id: 6, date: '5 days ago', flight: 'DL 234', route: 'JFK → LAX', predictedScore: 60, actualOversold: 0, maxCompensation: 0, status: 'Cleared at Gate' },
-  { id: 7, date: '6 days ago', flight: 'UA 444', route: 'DEN → LAS', predictedScore: 82, actualOversold: 3, maxCompensation: 1000, status: 'Confirmed VDB' },
-  { id: 8, date: '12 days ago', flight: 'DL 992', route: 'ATL → DCA', predictedScore: 96, actualOversold: 8, maxCompensation: 2000, status: 'Confirmed VDB' },
-  { id: 9, date: '15 days ago', flight: 'AA 555', route: 'MIA → JFK', predictedScore: 70, actualOversold: 0, maxCompensation: 0, status: 'Cleared at Gate' },
-  { id: 10, date: '21 days ago', flight: 'UA 777', route: 'ORD → SFO', predictedScore: 89, actualOversold: 2, maxCompensation: 600, status: 'Confirmed VDB' },
-];
-
 function HistoricalAnalysis() {
-  const [daysBack, setDaysBack] = useState(7);
+  const [carriers, setCarriers] = useState<CarrierStats[]>([]);
+  const [trends, setTrends] = useState<QuarterlyTrend[]>([]);
+  const [routes, setRoutes] = useState<OversoldRoute[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<'carriers' | 'trends' | 'routes'>('carriers');
 
-  const filteredHistory = MOCK_HISTORY.filter(record => {
-    if (daysBack === 30) return true;
-    if (daysBack === 7) return record.id <= 7;
-    if (daysBack === 3) return record.id <= 4;
-    return true;
-  });
+  useEffect(() => {
+    Promise.all([
+      getCarrierStats().then(d => setCarriers(d.carriers)),
+      getQuarterlyTrends().then(d => setTrends(d.trends)),
+      getTopRoutes().then(d => setRoutes(d.routes)),
+    ])
+      .catch(() => {}) // graceful failure
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <LoadingSpinner text="Loading BTS industry data..." />;
 
   return (
     <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-50">Historical Analysis</h1>
-        <p className="text-slate-400 mt-1">Verify strategy performance by tracking predicted vs. actual overbooked flights.</p>
+        <p className="text-slate-400 mt-1">Real DOT Bureau of Transportation Statistics data on denied boardings.</p>
       </header>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-          <h2 className="text-xl font-semibold text-slate-50">Recent VDB Outcomes</h2>
-          <div className="flex space-x-2 bg-slate-950 p-1 rounded-lg border border-slate-800">
-            {[3, 7, 30].map(days => (
-              <button
-                key={days}
-                onClick={() => setDaysBack(days)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  daysBack === days
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {days} Days
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-400">
-            <thead className="text-xs text-slate-500 uppercase bg-slate-950/80 border-y border-slate-800">
-              <tr>
-                <th className="px-4 py-3 font-medium">Date</th>
-                <th className="px-4 py-3 font-medium">Flight</th>
-                <th className="px-4 py-3 font-medium">Route</th>
-                <th className="px-4 py-3 font-medium text-center">Predicted Score</th>
-                <th className="px-4 py-3 font-medium text-center">Actual Oversold</th>
-                <th className="px-4 py-3 font-medium text-right">Max Payout</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/50">
-              {filteredHistory.map((record) => (
-                <tr key={record.id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="px-4 py-4 whitespace-nowrap">{record.date}</td>
-                  <td className="px-4 py-4 font-medium text-slate-300">{record.flight}</td>
-                  <td className="px-4 py-4">{record.route}</td>
-                  <td className="px-4 py-4 text-center">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      record.predictedScore >= 90 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                      record.predictedScore >= 80 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                      'bg-slate-800 text-slate-300'
-                    }`}>
-                      {record.predictedScore}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-center font-mono text-slate-300">
-                    {record.actualOversold > 0 ? `+${record.actualOversold}` : '0'}
-                  </td>
-                  <td className="px-4 py-4 text-right font-medium text-emerald-400">
-                    {record.maxCompensation > 0 ? `$${record.maxCompensation}` : '-'}
-                  </td>
-                  <td className="px-4 py-4">
-                    {record.status === 'Confirmed VDB' ? (
-                      <span className="flex items-center text-emerald-400 text-xs font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> VDB Paid
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-slate-500 text-xs font-medium">
-                        <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Cleared
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Section Tabs */}
+      <div className="flex space-x-2 bg-slate-900 p-1 rounded-lg border border-slate-800 w-fit">
+        {([
+          { id: 'carriers', label: 'By Carrier', icon: <BarChart3 className="w-4 h-4 mr-1.5" /> },
+          { id: 'trends', label: 'Quarterly Trends', icon: <TrendingUp className="w-4 h-4 mr-1.5" /> },
+          { id: 'routes', label: 'Top Routes', icon: <MapPin className="w-4 h-4 mr-1.5" /> },
+        ] as const).map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveSection(tab.id)}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center ${
+              activeSection === tab.id
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {/* Carrier Statistics */}
+      {activeSection === 'carriers' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-slate-50 mb-6">Carrier Denied Boarding Rates</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-400">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-950/80 border-y border-slate-800">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Carrier</th>
+                  <th className="px-4 py-3 font-medium text-center">VDB Rate</th>
+                  <th className="px-4 py-3 font-medium text-center">IDB Rate</th>
+                  <th className="px-4 py-3 font-medium text-center">Total DB</th>
+                  <th className="px-4 py-3 font-medium text-center">Load Factor</th>
+                  <th className="px-4 py-3 font-medium text-right">Avg Compensation</th>
+                  <th className="px-4 py-3 font-medium text-center">Oversale Rate</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {carriers.map(c => (
+                  <tr key={c.code} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="px-4 py-4 font-medium text-slate-200">{c.name} ({c.code})</td>
+                    <td className="px-4 py-4 text-center">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        c.vdbRate >= 0.8 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                        c.vdbRate >= 0.4 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                        'bg-slate-800 text-slate-300'
+                      }`}>
+                        {c.vdbRate.toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center font-mono text-slate-300">{c.idbRate.toFixed(2)}</td>
+                    <td className="px-4 py-4 text-center font-mono text-slate-300">{c.dbRate.toFixed(2)}</td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-16 bg-slate-800 rounded-full h-2">
+                          <div
+                            className="bg-indigo-500 h-2 rounded-full"
+                            style={{ width: `${c.loadFactorPct}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-slate-300">{c.loadFactorPct}%</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-right font-medium text-emerald-400">${c.avgCompensation}</td>
+                    <td className="px-4 py-4 text-center font-mono text-slate-300">{(c.oversaleRate * 100).toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-500 mt-4">Rates per 10,000 enplanements · Source: DOT Air Travel Consumer Report</p>
+        </div>
+      )}
+
+      {/* Quarterly Trends */}
+      {activeSection === 'trends' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-slate-50 mb-6">Quarterly Denied Boarding Trends</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-400">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-950/80 border-y border-slate-800">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Quarter</th>
+                  <th className="px-4 py-3 font-medium text-right">Enplanements</th>
+                  <th className="px-4 py-3 font-medium text-center">Voluntary DB</th>
+                  <th className="px-4 py-3 font-medium text-center">Involuntary DB</th>
+                  <th className="px-4 py-3 font-medium text-right">Avg Compensation</th>
+                  <th className="px-4 py-3 font-medium text-center">VDB per 10k</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {trends.map(t => {
+                  const vdbPer10k = (t.voluntaryDB / t.totalEnplanements * 10000).toFixed(2);
+                  return (
+                    <tr key={t.quarter} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-4 py-4 font-medium text-slate-200">{t.quarter}</td>
+                      <td className="px-4 py-4 text-right text-slate-300">{(t.totalEnplanements / 1_000_000).toFixed(0)}M</td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="text-emerald-400 font-medium">{t.voluntaryDB.toLocaleString()}</span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="text-rose-400 font-medium">{t.involuntaryDB.toLocaleString()}</span>
+                      </td>
+                      <td className="px-4 py-4 text-right font-medium text-emerald-400">${t.avgCompensation}</td>
+                      <td className="px-4 py-4 text-center font-mono text-slate-300">{vdbPer10k}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-500 mt-4">Source: DOT Bureau of Transportation Statistics</p>
+        </div>
+      )}
+
+      {/* Top Oversold Routes */}
+      {activeSection === 'routes' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-slate-50 mb-6">Top Oversold Routes</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-400">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-950/80 border-y border-slate-800">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Route</th>
+                  <th className="px-4 py-3 font-medium">Carrier</th>
+                  <th className="px-4 py-3 font-medium text-center">Oversale Rate</th>
+                  <th className="px-4 py-3 font-medium text-center">Avg Bumps/Flight</th>
+                  <th className="px-4 py-3 font-medium text-right">Avg Payout</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {routes.map((r, i) => (
+                  <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                    <td className="px-4 py-4">
+                      <span className="font-medium text-slate-200">{r.origin}</span>
+                      <ChevronRight className="w-3 h-3 inline mx-1 text-slate-600" />
+                      <span className="font-medium text-slate-200">{r.destination}</span>
+                    </td>
+                    <td className="px-4 py-4 text-slate-300">{r.carrierName}</td>
+                    <td className="px-4 py-4 text-center">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        r.avgOversaleRate >= 5 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                        r.avgOversaleRate >= 4 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                        'bg-slate-800 text-slate-300'
+                      }`}>
+                        {r.avgOversaleRate}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center font-mono text-slate-300">{r.avgBumps.toFixed(1)}</td>
+                    <td className="px-4 py-4 text-right font-medium text-emerald-400">${r.avgCompensation.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-500 mt-4">Source: DOT Bureau of Transportation Statistics analysis</p>
+        </div>
+      )}
+
+      <DataSourceBadge sources={['DOT BTS Air Travel Consumer Report', 'BTS T-100 Domestic Segment Data']} />
     </div>
   );
 }
@@ -595,7 +743,7 @@ export default function App() {
             <Plane className="w-8 h-8" />
             <span className="text-xl font-bold tracking-tight text-slate-50">BumpHunter</span>
           </div>
-          
+
           <nav className="space-y-2">
             {[
               { id: 'dashboard', label: 'Command Center', icon: <TrendingUp className="w-5 h-5" /> },
@@ -607,8 +755,8 @@ export default function App() {
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === item.id 
-                    ? 'bg-indigo-600/10 text-indigo-400 font-medium' 
+                  activeTab === item.id
+                    ? 'bg-indigo-600/10 text-indigo-400 font-medium'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
