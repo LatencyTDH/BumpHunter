@@ -1,0 +1,5 @@
+{
+  "name": "BumpHunter",
+  "description": "A flight scanning and strategy app to help users find overbooked flights and maximize voluntary denied boarding compensation.",
+  "requestFramePermissions": []
+}
