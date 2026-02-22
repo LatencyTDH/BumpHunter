@@ -120,6 +120,7 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     name: string;
     boarding: number;
     idb: number;
+    vdb: number;      // PAX_COMP_1 + PAX_COMP_2 = compensated pax (VDB volunteers)
     comp: number;
   }> = {};
 
@@ -130,9 +131,11 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     const name = r.MKT_CARRIER_NAME;
     if (!carrier || !name) continue;
 
-    if (!agg[carrier]) agg[carrier] = { name, boarding: 0, idb: 0, comp: 0 };
+    if (!agg[carrier]) agg[carrier] = { name, boarding: 0, idb: 0, vdb: 0, comp: 0 };
     agg[carrier].boarding += parseInt(r.TOT_BOARDING) || 0;
     agg[carrier].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
+    // PAX_COMP_1 + PAX_COMP_2 = passengers who received compensation (VDB volunteers)
+    agg[carrier].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
     agg[carrier].comp += (parseInt(r.COMP_PAID_1) || 0)
                        + (parseInt(r.COMP_PAID_2) || 0)
                        + (parseInt(r.COMP_PAID_3) || 0);
@@ -169,10 +172,12 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     if (!d || d.boarding === 0) continue;
 
     const idbRate = (d.idb / d.boarding) * 10000;
-    const avgComp = d.idb > 0 ? Math.round(d.comp / d.idb) : 0;
-    // VDB estimated at ~3× IDB (DOT reports typically show VDB 3-5× higher than IDB)
-    const vdbRate = Math.round(idbRate * 3 * 100) / 100;
-    const dbRate = Math.round((idbRate + vdbRate) * 100) / 100;
+    // VDB from real BTS data: PAX_COMP_1 + PAX_COMP_2 (compensated pax = VDB volunteers)
+    const vdbRate = (d.vdb / d.boarding) * 10000;
+    const dbRate = idbRate + vdbRate;
+    // Avg compensation per compensated passenger (VDB + IDB combined)
+    const totalCompPax = d.vdb + d.idb;
+    const avgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
     const lf = knownLF[code] ?? industryLF;
     // Oversale rate estimate: DOT reports ~2-5% of flights oversold industry-wide
     // Scale by relative IDB rate
@@ -182,9 +187,9 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     result[code] = {
       code,
       name: shortNames[code] || d.name.replace(/\s*(Inc\.|Co\.|Corp\.?|Corporation|Airlines?)\s*/gi, '').trim(),
-      dbRate: Math.round(dbRate * 100) / 100,
+      dbRate: Math.round(dbRate * 1000) / 1000,
       idbRate: Math.round(idbRate * 1000) / 1000,
-      vdbRate: Math.round(vdbRate * 100) / 100,
+      vdbRate: Math.round(vdbRate * 1000) / 1000,
       loadFactor: Math.round(lf * 1000) / 1000,
       avgCompensation: avgComp,
       oversaleRate: Math.round(oversaleRate * 1000) / 1000,
@@ -446,7 +451,7 @@ export const SCHEDULE_TEMPLATES: ScheduleTemplate[] = buildScheduleTemplates();
 // ---------------------------------------------------------------------------
 
 function buildQuarterlyTrends(): QuarterlyStats[] {
-  const qMap: Record<string, { boarding: number; idb: number; comp: number }> = {};
+  const qMap: Record<string, { boarding: number; idb: number; vdb: number; comp: number }> = {};
 
   for (const r of idbRows) {
     const year = r.YEAR;
@@ -454,9 +459,11 @@ function buildQuarterlyTrends(): QuarterlyStats[] {
     if (!year || !quarter) continue;
 
     const key = `${year} Q${quarter}`;
-    if (!qMap[key]) qMap[key] = { boarding: 0, idb: 0, comp: 0 };
+    if (!qMap[key]) qMap[key] = { boarding: 0, idb: 0, vdb: 0, comp: 0 };
     qMap[key].boarding += parseInt(r.TOT_BOARDING) || 0;
     qMap[key].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
+    // Real VDB from PAX_COMP_1 + PAX_COMP_2 (compensated passengers = VDB volunteers)
+    qMap[key].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
     qMap[key].comp += (parseInt(r.COMP_PAID_1) || 0)
                     + (parseInt(r.COMP_PAID_2) || 0)
                     + (parseInt(r.COMP_PAID_3) || 0);
@@ -468,13 +475,12 @@ function buildQuarterlyTrends(): QuarterlyStats[] {
 
   return recentQuarters.map(q => {
     const d = qMap[q];
-    const avgComp = d.idb > 0 ? Math.round(d.comp / d.idb) : 0;
-    // VDB estimated at 3× IDB
-    const vdb = Math.round(d.idb * 3);
+    const totalCompPax = d.vdb + d.idb;
+    const avgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
     return {
       quarter: q,
       totalEnplanements: d.boarding,
-      voluntaryDB: vdb,
+      voluntaryDB: d.vdb,
       involuntaryDB: d.idb,
       avgCompensation: avgComp,
     };
@@ -493,7 +499,7 @@ export const QUARTERLY_TRENDS: QuarterlyStats[] = buildQuarterlyTrends();
 
 function buildTopOversoldRoutes(): OversoldRoute[] {
   // Use carrier IDB rates from 2019 (best pre-COVID data)
-  const carrierIdb: Record<string, { idb: number; boarding: number; comp: number; name: string }> = {};
+  const carrierIdb: Record<string, { idb: number; vdb: number; boarding: number; comp: number; name: string }> = {};
 
   for (const r of idbRows) {
     const year = parseInt(r.YEAR);
@@ -501,8 +507,9 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
     const carrier = r.MKT_CARRIER;
     const name = r.MKT_CARRIER_NAME;
     if (!carrier) continue;
-    if (!carrierIdb[carrier]) carrierIdb[carrier] = { idb: 0, boarding: 0, comp: 0, name };
+    if (!carrierIdb[carrier]) carrierIdb[carrier] = { idb: 0, vdb: 0, boarding: 0, comp: 0, name };
     carrierIdb[carrier].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
+    carrierIdb[carrier].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
     carrierIdb[carrier].boarding += parseInt(r.TOT_BOARDING) || 0;
     carrierIdb[carrier].comp += (parseInt(r.COMP_PAID_1) || 0)
                                + (parseInt(r.COMP_PAID_2) || 0)
@@ -538,25 +545,34 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
     { origin: 'JFK', dest: 'LAX', carrier: 'DL' },
   ];
 
+  // Get airport departures for route variation
+  const airportDeps: Record<string, number> = {};
+  for (const r of t100Rows) {
+    if (r.origin) airportDeps[r.origin] = parseInt(r.departures) || 0;
+  }
+
   const routes: OversoldRoute[] = [];
 
   for (const route of candidateRoutes) {
     const cd = carrierIdb[route.carrier];
     if (!cd || cd.boarding === 0) continue;
 
-    const idbRate = cd.idb / cd.boarding * 10000;
-    const avgComp = cd.idb > 0 ? Math.round(cd.comp / cd.idb) : 0;
-    // Oversale rate: IDB rate scaled to percentage, with hub premium
-    const oversaleRate = Math.round(idbRate * 20 * 10) / 10; // e.g., 0.2/10k → ~4%
-    const avgBumps = Math.round(idbRate * 10 * 10) / 10;
+    const totalDbRate = (cd.idb + cd.vdb) / cd.boarding * 10000;
+    const totalCompPax = cd.vdb + cd.idb;
+    const avgComp = totalCompPax > 0 ? Math.round(cd.comp / totalCompPax) : 0;
+    // Route-level variation using destination traffic as multiplier
+    const destDeps = airportDeps[route.dest] || 50_000;
+    const routeHeat = Math.min(1.5, 0.5 + destDeps / 20_000_000);
+    const oversaleRate = Math.round(Math.min(8.0, Math.max(1.5, totalDbRate * 0.5 * routeHeat)) * 10) / 10;
+    const avgBumps = Math.round(Math.min(4.0, Math.max(1.0, totalDbRate * 0.25 * routeHeat)) * 10) / 10;
 
     routes.push({
       origin: route.origin,
       destination: route.dest,
       carrier: route.carrier,
       carrierName: shortNames[route.carrier] || cd.name,
-      avgOversaleRate: Math.min(8.0, Math.max(1.5, oversaleRate)),
-      avgBumps: Math.min(4.0, Math.max(1.0, avgBumps)),
+      avgOversaleRate: oversaleRate,
+      avgBumps: avgBumps,
       avgCompensation: avgComp,
     });
   }
