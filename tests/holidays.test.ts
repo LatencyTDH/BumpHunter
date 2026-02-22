@@ -19,7 +19,6 @@ describe('Holiday/Event Calendar Scoring', () => {
 
   it('Random Tuesday Feb 11 2026 → zero', () => {
     // Feb 11, 2026: Presidents' Day is Feb 16 (5 days away, window=2) → no match
-    // Super Bowl LX is Feb 8 (3 days ago, afterWindow=1) → no match
     const date = new Date('2026-02-11T12:00:00');
     const result = getHolidayScore(date);
     expect(result.score).toBe(0);
@@ -107,13 +106,12 @@ describe('Holiday/Event Calendar Scoring', () => {
     expect(result.match).not.toBeNull();
   });
 
-  it('Super Bowl weekend 2026 → event match', () => {
-    // Super Bowl LX = Feb 8, 2026. Feb 6 = 2 days before.
-    // travelWindowBefore = 4, intensity = 10 → score = 10 - 2 = 8
-    const date = new Date('2026-02-06T12:00:00');
-    const result = getHolidayScore(date);
-    expect(result.score).toBeGreaterThanOrEqual(8);
-    expect(result.match!.name).toBe('Super Bowl LX');
+  it('works for any year — no hardcoded dates', () => {
+    // Labor Day = 1st Monday of September
+    // 2040: Sep 3
+    const result = getHolidayScore(new Date(2040, 8, 3));
+    expect(result.score).toBe(10);
+    expect(result.match!.name).toBe('Labor Day');
   });
 
   // =========================================================================
@@ -127,8 +125,8 @@ describe('Holiday/Event Calendar Scoring', () => {
     expect(formatHolidayTag({ name: 'Spring Break', intensity: 8, daysUntil: 0 }))
       .toBe('Spring break window');
 
-    expect(formatHolidayTag({ name: 'Super Bowl LX', intensity: 10, daysUntil: 2 }))
-      .toBe('Super Bowl LX travel surge');
+    expect(formatHolidayTag({ name: 'Memorial Day', intensity: 10, daysUntil: 0 }))
+      .toBe('Memorial Day travel week (DOT peak period)');
 
     expect(formatHolidayTag({ name: 'MLK Jr. Day', intensity: 6, daysUntil: 1 }))
       .toBe('MLK Jr. Day weekend');

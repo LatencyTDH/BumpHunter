@@ -265,12 +265,10 @@ describe('Holiday / Event Calendar Scoring', () => {
     expect(result.match?.name).toMatch(/Independence Day/i);
   });
 
-  it('CES week boosts LAS flights', () => {
-    // January, origin = LAS
-    const date = new Date(2026, 0, 6);
-    const result = getHolidayScore(date);
-    expect(result.score).toBeGreaterThanOrEqual(8);
-    expect(result.match?.name).toMatch(/CES/i);
+  it('New Years Day scores high (any year)', () => {
+    const result = getHolidayScore(new Date(2030, 0, 1));
+    expect(result.score).toBe(12);
+    expect(result.match?.name).toMatch(/New Year/i);
   });
 
 
