@@ -29,9 +29,9 @@ Airlines routinely oversell flights — they book more passengers than seats, be
 Real-time dashboard showing live weather disruptions across major US hubs (ATL, DFW, EWR, ORD, DEN, LAS, LGA, JFK, MCO, CLT). Weather data pulled directly from **aviationweather.gov** METAR reports — thunderstorms, low visibility, and high winds all create cascading delays that lead to oversold flights.
 
 ### ✈️ Flight Scanner
-Search any route and date to find **real flights** ranked by **bump probability**. Flight data comes from FlightRadar24 (live flights in the air) and OpenSky Network (recent departures), with routes verified via ADSBDB. Each result includes:
+Search any route and date to find **real flights** ranked by **Bump Score**. Flight data comes from FlightRadar24 (scheduled departures + live flights) and OpenSky Network (fallback), with routes verified via ADSBDB. Each result includes:
 - Airline, aircraft type, capacity, departure time
-- Bump probability score with detailed factor breakdown
+- Bump Score with detailed factor breakdown
 - Verification badge (FR24 live data or ADSBDB route verification)
 - Direct link to FlightAware for authoritative flight tracking
 
@@ -43,35 +43,36 @@ Real denied boarding statistics from the **DOT Bureau of Transportation Statisti
 - **Quarterly Trends** — How denied boardings track across seasons (summer peaks, holiday surges)
 - **Top Oversold Routes** — The specific city pairs with the highest oversale rates
 
-Data notes are displayed inline — compensation figures marked with `~` use DOT-published industry averages where BTS fields report $0 (BTS tracks IDB cash only, not VDB vouchers). Latest available data: Q3 2021.
+Data notes are displayed inline — compensation figures marked with `~` use DOT-published industry averages where BTS fields report $0 (BTS tracks IDB cash only, not VDB vouchers). Carrier statistics from DOT Air Travel Consumer Report, Jan–Sep 2025.
 
 ### 📖 The Playbook
 Step-by-step execution guide covering the full bump-hunting lifecycle: strategic booking, check-in bidding, gate agent approach, and compensation negotiation tactics.
 
 ## Scoring Algorithm
 
-Each flight receives a **bump probability score (0-98%)** based on 8 weighted factors:
+Each flight receives a **Bump Score (0–100)** — a relative index ranking flights by VDB opportunity, based on 8 weighted factors:
 
 | Factor | Max Points | Data Source |
 |--------|-----------|-------------|
-| Carrier denied boarding rate | 15 | DOT BTS Consumer Report |
-| Route load factor | 20 | BTS T-100 Domestic Segment |
-| Day of week pattern | 15 | Historical analysis |
-| Time of day (bank position) | 15 | Departure time analysis |
-| Aircraft type & capacity | 20 | FR24 aircraft data / Fleet estimation |
-| Weather disruptions | 25 | aviationweather.gov METAR |
-| Season / holiday period | 10 | Calendar |
-| Fortress hub dynamics | 5 | Hub concentration analysis |
+| Carrier VDB rate | 22 | DOT ATCR 2025 (operating carrier) |
+| Aircraft size | 15 | FR24 aircraft data |
+| Cascade boost | 13 | Upstream hub weather disruptions |
+| Weather disruptions | 11 | aviationweather.gov METAR |
+| Timing & demand | 10 | Day of week + holiday calendar |
+| Route type | 10 | Hub / slot-controlled dynamics |
+| Route reliability | 8 | BTS on-time performance |
+| Time of day | 7 | Peak departure windows |
 
-**Base score: 25** → factors are additive → **capped at 98%**
+**This is a relative index, not a probability.** A score of 78 means "high relative opportunity," not a 78% chance of being bumped.
 
 ### What Makes a Flight Score High?
 
-- **Regional jets** (CRJ-900, E175) with only 76 seats oversell easily → +20 pts
-- **Last-bank departures** (after 6 PM) catch all the day's misconnections → +15 pts
-- **Thunderstorms at origin** cause ground stops and rebooking waves → +25 pts
-- **Monday/Thursday/Friday** are peak business travel days → +15 pts
-- **Delta at ATL**, **American at DFW/CLT**, **United at EWR/ORD/DEN** — fortress hubs with less competition → +5 pts
+- **Regional jets** (CRJ-900, E175) with only 76 seats oversell easily → +15 pts
+- **Last-bank departures** (after 6 PM) catch all the day's misconnections → +7 pts
+- **Thunderstorms at origin** cause ground stops and rebooking waves → +11 pts
+- **Cascade disruptions** — bad weather at upstream hub ripples downstream → +13 pts
+- **Monday/Thursday/Friday** are peak business travel days → +10 pts
+- **Regional carriers** (SkyWest, Republic, PSA) have the highest VDB rates → +22 pts
 
 ## Data Sources
 
@@ -126,15 +127,6 @@ This starts both the API server (port 3001) and Vite dev server (port 3000). Ope
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript type check |
 
-### Optional: Gemini AI
-
-If you want AI-powered analysis, add your Gemini API key:
-
-```bash
-cp .env.example .env.local
-# Edit .env.local and set GEMINI_API_KEY
-```
-
 ## API Endpoints
 
 The Express backend exposes these endpoints (proxied through Vite in dev):
@@ -144,7 +136,10 @@ The Express backend exposes these endpoints (proxied through Vite in dev):
 | `GET /api/health` | Health check |
 | `GET /api/weather/alerts?hubs=ATL,EWR` | Live weather disruptions from METAR data |
 | `GET /api/weather/metar?airports=ATL` | Raw METAR observations |
-| `GET /api/flights/search?origin=ATL&dest=LGA&date=2026-03-01` | Flight search with bump scoring (real flights only) |
+| `GET /api/faa/status?airports=ATL` | FAA airport delay / GDP status |
+| `GET /api/flights/search?origin=ATL&dest=LGA&date=2026-03-01` | Flight search with bump scoring |
+| `GET /api/flights/heatmap?origin=ATL&dest=LGA` | Best-day-to-fly calendar |
+| `GET /api/flights/lookup?flight=AA100` | Reverse lookup: flight number → bump score |
 | `GET /api/stats/carriers` | Carrier denied boarding statistics |
 | `GET /api/stats/trends` | Quarterly denied boarding trends |
 | `GET /api/stats/routes` | Top oversold routes |
@@ -155,21 +150,31 @@ The Express backend exposes these endpoints (proxied through Vite in dev):
 ```
 bumphunter/
 ├── server/
-│   ├── index.ts        # Express API server & routes
-│   ├── data.ts         # BTS statistics, aircraft DB (NO schedule templates)
-│   ├── fr24.ts         # FlightRadar24 public feed client
-│   ├── opensky.ts      # OpenSky + ADSBDB + FR24 unified flight fetcher
-│   ├── scoring.ts      # Bump probability scoring algorithm
+│   ├── index.ts        # Dev API server entry point
+│   ├── prod.ts         # Production server (serves Vite build + API)
+│   ├── routes.ts       # All API route handlers
+│   ├── scoring.ts      # 8-factor bump scoring engine
+│   ├── data.ts         # Static data loader (ATCR 2025, BTS CSVs, carrier/aircraft maps)
+│   ├── fr24.ts         # FlightRadar24 schedule + live feed integration
+│   ├── opensky.ts      # OpenSky Network + ADSBDB route verification
 │   ├── weather.ts      # aviationweather.gov METAR service
-│   └── cache.ts        # SQLite cache layer
+│   ├── faa.ts          # FAA NASSTATUS airport delay/GDP data
+│   ├── otp.ts          # BTS on-time performance (route reliability)
+│   ├── heatmap.ts      # Best-day-to-fly calendar scoring
+│   ├── holidays.ts     # Holiday/event calendar boosting
+│   ├── compensation.ts # DOT compensation estimator + last-flight detection
+│   ├── cache.ts        # SQLite cache layer
+│   └── webhook.ts      # GitHub webhook handler
 ├── src/
 │   ├── App.tsx         # React app with all UI components
-│   ├── api.ts          # Frontend API client with retry logic
+│   ├── api.ts          # Frontend API client with typed models
 │   ├── main.tsx        # React entry point
 │   └── index.css       # Tailwind CSS imports
+├── tests/              # Vitest test suite (92 tests, 12 files)
 ├── data/
-│   ├── bts_involuntary_denied_boarding.csv
-│   └── bts_t100_airports_2024.csv
+│   ├── atcr_2025_ytd.json              # DOT ATCR 2025 denied boarding (primary)
+│   ├── bts_involuntary_denied_boarding.csv  # Historical IDB (2010-2021)
+│   └── bts_t100_airports_2024.csv      # Airport-level data
 ├── index.html
 ├── vite.config.ts
 ├── package.json
