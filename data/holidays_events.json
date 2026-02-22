@@ -1,0 +1,141 @@
+{
+  "holidays": [
+    {
+      "name": "New Year's Day",
+      "dates": ["2025-01-01", "2026-01-01"],
+      "travelWindowBefore": 3,
+      "travelWindowAfter": 1,
+      "intensity": 12
+    },
+    {
+      "name": "MLK Jr. Day",
+      "dates": ["2025-01-20", "2026-01-19"],
+      "travelWindowBefore": 2,
+      "travelWindowAfter": 1,
+      "intensity": 6
+    },
+    {
+      "name": "Presidents' Day",
+      "dates": ["2025-02-17", "2026-02-16"],
+      "travelWindowBefore": 2,
+      "travelWindowAfter": 1,
+      "intensity": 6
+    },
+    {
+      "name": "Memorial Day",
+      "dates": ["2025-05-26", "2026-05-25"],
+      "travelWindowBefore": 3,
+      "travelWindowAfter": 1,
+      "intensity": 10
+    },
+    {
+      "name": "Juneteenth",
+      "dates": ["2025-06-19", "2026-06-19"],
+      "travelWindowBefore": 1,
+      "travelWindowAfter": 1,
+      "intensity": 5
+    },
+    {
+      "name": "Independence Day",
+      "dates": ["2025-07-04", "2026-07-04"],
+      "travelWindowBefore": 3,
+      "travelWindowAfter": 2,
+      "intensity": 12
+    },
+    {
+      "name": "Labor Day",
+      "dates": ["2025-09-01", "2026-09-07"],
+      "travelWindowBefore": 3,
+      "travelWindowAfter": 1,
+      "intensity": 10
+    },
+    {
+      "name": "Columbus Day",
+      "dates": ["2025-10-13", "2026-10-12"],
+      "travelWindowBefore": 2,
+      "travelWindowAfter": 1,
+      "intensity": 5
+    },
+    {
+      "name": "Veterans Day",
+      "dates": ["2025-11-11", "2026-11-11"],
+      "travelWindowBefore": 1,
+      "travelWindowAfter": 1,
+      "intensity": 5
+    },
+    {
+      "name": "Thanksgiving",
+      "dates": ["2025-11-27", "2026-11-26"],
+      "travelWindowBefore": 3,
+      "travelWindowAfter": 2,
+      "intensity": 15
+    },
+    {
+      "name": "Christmas",
+      "dates": ["2025-12-25", "2026-12-25"],
+      "travelWindowBefore": 4,
+      "travelWindowAfter": 3,
+      "intensity": 15
+    }
+  ],
+  "periods": [
+    {
+      "name": "Spring Break",
+      "ranges": [
+        { "start": "2025-03-08", "end": "2025-03-30" },
+        { "start": "2026-03-07", "end": "2026-03-29" }
+      ],
+      "intensity": 8
+    },
+    {
+      "name": "Summer Peak",
+      "ranges": [
+        { "start": "2025-06-15", "end": "2025-08-20" },
+        { "start": "2026-06-15", "end": "2026-08-20" }
+      ],
+      "intensity": 7
+    },
+    {
+      "name": "Holiday Season",
+      "ranges": [
+        { "start": "2025-12-20", "end": "2026-01-03" },
+        { "start": "2026-12-20", "end": "2027-01-03" }
+      ],
+      "intensity": 10
+    }
+  ],
+  "events": [
+    {
+      "name": "Super Bowl LIX",
+      "dates": ["2025-02-09"],
+      "travelWindowBefore": 4,
+      "travelWindowAfter": 1,
+      "intensity": 10,
+      "airports": ["MSY"]
+    },
+    {
+      "name": "Super Bowl LX",
+      "dates": ["2026-02-08"],
+      "travelWindowBefore": 4,
+      "travelWindowAfter": 1,
+      "intensity": 10,
+      "airports": ["SFO", "SJC"]
+    },
+    {
+      "name": "CES",
+      "dates": ["2025-01-07", "2026-01-06"],
+      "travelWindowBefore": 2,
+      "travelWindowAfter": 4,
+      "intensity": 8,
+      "airports": ["LAS"]
+    },
+    {
+      "name": "SXSW",
+      "dates": ["2025-03-07", "2026-03-13"],
+      "travelWindowBefore": 2,
+      "travelWindowAfter": 10,
+      "intensity": 7,
+      "airports": ["AUS"]
+    }
+  ]
+}

@@ -1,3 +1,6 @@
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import {
   CARRIER_STATS,
   AIRCRAFT_TYPES,
@@ -11,6 +14,132 @@ import {
 import { getWeatherSeverity } from './weather.js';
 import { getFlightsForRoute, type RealFlight, type RouteSearchResult } from './opensky.js';
 import { FR24_AIRCRAFT_MAP } from './fr24.js';
+import { getHolidayScore, formatHolidayTag } from './holidays.js';
+import { getAirportStatus, type FAAStatus } from './faa.js';
+import {
+  calculateCompensation,
+  isLastFlightOfDay,
+  type CompensationEstimate,
+} from './compensation.js';
+import { getFR24ScheduleForRoute } from './fr24.js';
+
+// =============================================================================
+// Holiday / Event Calendar — static data loaded once at startup
+// =============================================================================
+
+const __hdir = dirname(fileURLToPath(import.meta.url));
+const __holidaysPath = join(__hdir, '..', 'data', 'holidays_events.json');
+
+type HolidayFixed = {
+  name: string;
+  date: string;
+  travel_window_before: number;
+  travel_window_after: number;
+  intensity: number;
+};
+type HolidayRange = {
+  name: string;
+  date_range: [string, string];
+  intensity: number;
+};
+type EventEntry = {
+  name: string;
+  month: number;
+  airport: string;
+  intensity: number;
+  note?: string;
+};
+type HolidaysData = {
+  holidays: (HolidayFixed | HolidayRange)[];
+  events: EventEntry[];
+};
+
+const holidaysData: HolidaysData = JSON.parse(readFileSync(__holidaysPath, 'utf-8'));
+
+function _parseMonthDay(mmdd: string, year: number): Date {
+  const [m, d] = mmdd.split('-').map(Number);
+  return new Date(year, m - 1, d);
+}
+
+function _toDateOnly(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+/**
+ * Holiday / Event Calendar scoring (0-15 pts).
+ *
+ * Checks whether a flight date falls within a holiday travel window or
+ * a major-event month. Returns the single highest-scoring match (no stacking).
+ */
+export function holidayEventScore(
+  flightDate: Date,
+  origin?: string,
+  dest?: string,
+): { score: number; factor: string | null } {
+  const year = flightDate.getFullYear();
+  const month = flightDate.getMonth() + 1;
+  const fd = _toDateOnly(flightDate);
+
+  let bestScore = 0;
+  let bestFactor: string | null = null;
+
+  for (const h of holidaysData.holidays) {
+    if ('date_range' in h) {
+      // Range-based entry (spring break, summer peak)
+      const rangeStart = _toDateOnly(_parseMonthDay(h.date_range[0], year));
+      const rangeEnd = _toDateOnly(_parseMonthDay(h.date_range[1], year));
+
+      if (fd >= rangeStart && fd <= rangeEnd) {
+        const score = Math.min(15, h.intensity);
+        if (score > bestScore) {
+          bestScore = score;
+          bestFactor = `${h.name} travel window`;
+        }
+      }
+    } else {
+      // Fixed ("MM-DD") or year-specific ("YYYY-MM-DD") holiday
+      let holidayDate: Date;
+      if (h.date.length > 5) {
+        const [hy, hm, hd] = h.date.split('-').map(Number);
+        if (hy !== year) continue; // wrong year for a moving holiday
+        holidayDate = new Date(hy, hm - 1, hd);
+      } else {
+        holidayDate = _parseMonthDay(h.date, year);
+      }
+
+      const windowStart = new Date(holidayDate);
+      windowStart.setDate(windowStart.getDate() - h.travel_window_before);
+      const windowEnd = new Date(holidayDate);
+      windowEnd.setDate(windowEnd.getDate() + h.travel_window_after);
+
+      const wsEpoch = _toDateOnly(windowStart);
+      const weEpoch = _toDateOnly(windowEnd);
+
+      if (fd >= wsEpoch && fd <= weEpoch) {
+        const score = Math.min(15, h.intensity);
+        if (score > bestScore) {
+          bestScore = score;
+          const displayName = h.name.replace(/\s+\d{4}$/, '');
+          bestFactor = `${displayName} travel week (DOT peak period)`;
+        }
+      }
+    }
+  }
+
+  // Events — only match when airport is specified (skip "TBD" placeholders)
+  for (const e of holidaysData.events) {
+    if (e.airport === 'TBD') continue;
+    if (month === e.month && (origin === e.airport || dest === e.airport)) {
+      const score = Math.min(15, e.intensity);
+      if (score > bestScore) {
+        bestScore = score;
+        bestFactor = `${e.name} week — ${e.airport} hub demand`;
+      }
+    }
+  }
+
+  return { score: bestScore, factor: bestFactor };
+}
 
 // =============================================================================
 // Bump Opportunity Index — Honest Scoring (0-100)
@@ -22,7 +151,7 @@ import { FR24_AIRCRAFT_MAP } from './fr24.js';
 // The score ranks flights by relative likelihood of VDB opportunity based on:
 //   1. Carrier VDB rate (30 pts) — strongest predictor, uses OPERATING carrier
 //   2. Aircraft size (20 pts) — smaller = tighter margins
-//   3. Day of week (15 pts) — empirical DOT patterns
+//   3. Timing & Demand (15 pts) — day of week + holiday/event calendar
 //   4. Time of day (10 pts) — peak departure windows
 //   5. Weather disruptions (15 pts) — real METAR data
 //   6. Route type (10 pts) — hub/slot-controlled dynamics
@@ -31,6 +160,13 @@ import { FR24_AIRCRAFT_MAP } from './fr24.js';
 // Key insight: uses OPERATING carrier rates, not marketing carrier.
 // AA 4533 operated by Republic Airways → scored at 9.70/10k, not AA's 3.46/10k.
 // =============================================================================
+
+export type FactorDetail = {
+  name: string;
+  score: number;
+  maxScore: number;
+  description: string;
+};
 
 export type ScoredFlight = {
   id: string;
@@ -48,6 +184,7 @@ export type ScoredFlight = {
   isRegional: boolean;
   bumpScore: number;
   factors: string[];
+  factorsDetailed: FactorDetail[];
   carrierDbRate: number;
   dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
@@ -57,6 +194,9 @@ export type ScoredFlight = {
   registration: string;
   codeshares: string[];
   aircraftFullName: string;
+  // Last-flight-of-day + DOT compensation
+  lastFlightOfDay: boolean;
+  compensation: CompensationEstimate;
 };
 
 export type ScoreResult = {
@@ -148,14 +288,21 @@ function scoreAircraftSize(aircraft: AircraftType): { score: number; factor: str
 }
 
 // =============================================================================
-// Factor 3: Day of Week (0-15 pts)
+// Factor 3: Timing & Demand (0-15 pts)
 //
-// Based on DOT data showing which days historically have highest DB rates.
-// Sunday: 15 (highest — return travel)
-// Monday/Friday: 12 (business travel peaks)
-// Thursday: 10
-// Saturday: 7
-// Tuesday/Wednesday: 5
+// Combines day-of-week patterns (DOT empirical data) with holiday/event
+// calendar scoring. Uses the HIGHER of the two signals — holidays like
+// Thanksgiving can boost an otherwise-low Wednesday to near-max score.
+//
+// Day-of-week base scores:
+//   Sunday: 15 (highest — return travel)
+//   Monday/Friday: 12 (business travel peaks)
+//   Thursday: 10 | Saturday: 7 | Tue/Wed: 5
+//
+// Holiday intensity (from data/holidays_events.json):
+//   Thanksgiving/Christmas: 15 (peak), decays by 1/day within travel window
+//   Memorial/Labor Day: 10 | Spring break period: 8 | 3-day weekends: 6
+//   Major events (Super Bowl, CES, SXSW): 7-10
 // =============================================================================
 
 const DAY_SCORES: Record<number, { score: number; label: string }> = {
@@ -168,9 +315,27 @@ const DAY_SCORES: Record<number, { score: number; label: string }> = {
   6: { score: 7,  label: 'Saturday leisure travel' },
 };
 
-function scoreDayOfWeek(dayOfWeek: number): { score: number; factor: string | null } {
+function scoreTimingAndDemand(dayOfWeek: number, date: Date): { score: number; factors: string[] } {
   const day = DAY_SCORES[dayOfWeek] ?? { score: 5, label: '' };
-  return { score: day.score, factor: day.label || null };
+  const holiday = getHolidayScore(date);
+  const factors: string[] = [];
+
+  // Use the higher of day-of-week or holiday score, capped at 15
+  const score = Math.min(15, Math.max(day.score, holiday.score));
+
+  if (holiday.match && holiday.score >= day.score) {
+    // Holiday dominates — show holiday tag
+    factors.push(formatHolidayTag(holiday.match));
+  } else {
+    // Day-of-week dominates
+    if (day.label) factors.push(day.label);
+    // Still mention holiday if it matched (secondary signal)
+    if (holiday.match && holiday.score > 0) {
+      factors.push(formatHolidayTag(holiday.match));
+    }
+  }
+
+  return { score, factors };
 }
 
 // =============================================================================
@@ -210,35 +375,104 @@ function scoreTimeOfDay(depTime: string): { score: number; factor: string | null
 }
 
 // =============================================================================
-// Factor 5: Weather Disruptions (0-15 pts)
+// Factor 5: Weather & Disruption (0-15 pts)
 //
-// From real METAR data via aviationweather.gov.
-// Severe (IFR/thunderstorm): 13-15
-// Moderate (snow, low visibility): 8-10
-// Clear: 0-2
+// Combines real METAR weather data with FAA Ground Delay Programs / Ground
+// Stops. Takes the MAX of weather score and FAA disruption score.
+//
+// FAA Disruption scoring:
+//   Ground Stop at origin: 15 pts
+//   GDP at origin: 12 pts
+//   Ground Stop at dest: 10 pts
+//   GDP at dest: 8 pts
+//   General delay: 5 pts
+//
+// Weather scoring (from METAR):
+//   Severe (IFR/thunderstorm): 13-15
+//   Moderate (snow, low visibility): 8-10
+//   Clear: 0-2
 // =============================================================================
 
-function scoreWeather(
-  originWx: { score: number; reason: string | null },
-  destWx: { score: number; reason: string | null }
+function scoreFAADisruption(
+  originFAA: FAAStatus | null,
+  destFAA: FAAStatus | null,
+  origin: string,
+  dest: string,
 ): { score: number; factors: string[] } {
   const factors: string[] = [];
   let score = 0;
 
+  if (originFAA?.delay) {
+    const avgStr = originFAA.avgDelay ? ` — avg ${originFAA.avgDelay}` : '';
+    if (originFAA.delayType === 'GS') {
+      score = Math.max(score, 15);
+      factors.push(`FAA Ground Stop at ${origin}${avgStr}`);
+    } else if (originFAA.delayType === 'GDP') {
+      score = Math.max(score, 12);
+      factors.push(`FAA Ground Delay at ${origin}${avgStr}`);
+    } else if (originFAA.delayType === 'CLOSURE') {
+      score = Math.max(score, 15);
+      factors.push(`FAA Closure at ${origin}${avgStr}`);
+    } else {
+      score = Math.max(score, 5);
+      factors.push(`FAA Delay at ${origin}${avgStr}`);
+    }
+  }
+
+  if (destFAA?.delay) {
+    const avgStr = destFAA.avgDelay ? ` — avg ${destFAA.avgDelay}` : '';
+    if (destFAA.delayType === 'GS') {
+      score = Math.max(score, 10);
+      factors.push(`FAA Ground Stop at ${dest}${avgStr}`);
+    } else if (destFAA.delayType === 'GDP') {
+      score = Math.max(score, 8);
+      factors.push(`FAA Ground Delay at ${dest}${avgStr}`);
+    } else if (destFAA.delayType === 'CLOSURE') {
+      score = Math.max(score, 10);
+      factors.push(`FAA Closure at ${dest}${avgStr}`);
+    } else {
+      score = Math.max(score, 5);
+      factors.push(`FAA Delay at ${dest}${avgStr}`);
+    }
+  }
+
+  return { score: Math.min(15, score), factors };
+}
+
+function scoreWeatherAndDisruption(
+  originWx: { score: number; reason: string | null },
+  destWx: { score: number; reason: string | null },
+  originFAA: FAAStatus | null,
+  destFAA: FAAStatus | null,
+  origin: string,
+  dest: string,
+): { score: number; factors: string[] } {
+  // Weather score (original logic)
+  const wxFactors: string[] = [];
+  let wxScore = 0;
+
   if (originWx.score > 0 && originWx.reason) {
-    const wxScore = Math.min(15, Math.round(originWx.score * 0.6));
-    score += wxScore;
-    factors.push(`Origin: ${originWx.reason}`);
+    const s = Math.min(15, Math.round(originWx.score * 0.6));
+    wxScore += s;
+    wxFactors.push(`Origin: ${originWx.reason}`);
   }
 
   if (destWx.score > 0 && destWx.reason) {
-    const wxScore = Math.min(8, Math.round(destWx.score * 0.3));
-    score += wxScore;
-    factors.push(`Dest: ${destWx.reason}`);
+    const s = Math.min(8, Math.round(destWx.score * 0.3));
+    wxScore += s;
+    wxFactors.push(`Dest: ${destWx.reason}`);
   }
 
-  score = Math.min(15, score);
-  return { score, factors };
+  wxScore = Math.min(15, wxScore);
+
+  // FAA disruption score
+  const faa = scoreFAADisruption(originFAA, destFAA, origin, dest);
+
+  // Take max of weather vs FAA, but include all factor tags
+  const allFactors = [...wxFactors, ...faa.factors];
+  const score = Math.min(15, Math.max(wxScore, faa.score));
+
+  return { score, factors: allFactors };
 }
 
 // =============================================================================
@@ -367,39 +601,57 @@ function computeBumpScore(params: {
   dayOfWeek: number;
   originWx: { score: number; reason: string | null };
   destWx: { score: number; reason: string | null };
-}): { score: number; factors: string[]; carrierDbRate: number } {
-  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx } = params;
+  originFAA: FAAStatus | null;
+  destFAA: FAAStatus | null;
+}): { score: number; factors: string[]; factorsDetailed: FactorDetail[]; carrierDbRate: number } {
+  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx, originFAA, destFAA } = params;
   const factors: string[] = [];
+  const factorsDetailed: FactorDetail[] = [];
 
   // Factor 1: Carrier DB Rate (0-30 pts) — uses OPERATING carrier
   const f1 = scoreCarrierRate(operatingCarrier, marketingCarrier);
   factors.push(f1.factor);
+  factorsDetailed.push({ name: 'Carrier Rate', score: f1.score, maxScore: 30, description: f1.factor });
 
   // Factor 2: Aircraft Size (0-20 pts)
   const f2 = scoreAircraftSize(aircraft);
   if (f2.factor) factors.push(f2.factor);
+  factorsDetailed.push({ name: 'Aircraft Size', score: f2.score, maxScore: 20, description: f2.factor || `${aircraft.name} (${aircraft.capacity} seats)` });
 
-  // Factor 3: Day of Week (0-15 pts)
-  const f3 = scoreDayOfWeek(dayOfWeek);
+  // Factor 3: Timing & Demand (0-15 pts)
+  // Merges day-of-week signal with holiday/event calendar.
+  // max(dayOfWeekScore / 2, holidayScore) — holidays override weak day signals,
+  // but a strong travel-day still contributes when no holiday applies.
+  const f3dow = scoreDayOfWeek(dayOfWeek);
+  const f3hol = holidayEventScore(params.date, origin, dest);
+  const f3DowHalf = Math.round(f3dow.score / 2);
+  const f3: { score: number; factor: string | null } =
+    f3hol.score >= f3DowHalf
+      ? { score: f3hol.score, factor: f3hol.factor }
+      : { score: f3DowHalf, factor: f3dow.factor };
   if (f3.factor) factors.push(f3.factor);
+  factorsDetailed.push({ name: 'Timing & Demand', score: f3.score, maxScore: 15, description: f3.factor || 'Midweek (lower demand)' });
 
   // Factor 4: Time of Day (0-10 pts)
   const f4 = scoreTimeOfDay(depTime);
   if (f4.factor) factors.push(f4.factor);
+  factorsDetailed.push({ name: 'Time of Day', score: f4.score, maxScore: 10, description: f4.factor || `Departure at ${depTime}` });
 
-  // Factor 5: Weather (0-15 pts)
-  const f5 = scoreWeather(originWx, destWx);
+  // Factor 5: Weather & Disruption (0-15 pts) — max(weather, FAA)
+  const f5 = scoreWeatherAndDisruption(originWx, destWx, originFAA, destFAA, origin, dest);
   factors.push(...f5.factors);
+  factorsDetailed.push({ name: 'Weather & Disruption', score: f5.score, maxScore: 15, description: f5.factors.length > 0 ? f5.factors.join(' · ') : 'Clear conditions, no FAA delays' });
 
   // Factor 6: Route Type (0-10 pts)
   const f6 = scoreRouteType(origin, dest, marketingCarrier);
   if (f6.factor) factors.push(f6.factor);
+  factorsDetailed.push({ name: 'Route Type', score: f6.score, maxScore: 10, description: f6.factor || `${origin} → ${dest}` });
 
   // Sum all factors (theoretical max = 100)
   const rawScore = f1.score + f2.score + f3.score + f4.score + f5.score + f6.score;
   const score = Math.min(100, Math.max(5, rawScore));
 
-  return { score, factors, carrierDbRate: f1.dbRate };
+  return { score, factors, factorsDetailed, carrierDbRate: f1.dbRate };
 }
 
 // =============================================================================
@@ -416,9 +668,11 @@ export async function scoreFlights(
   const date = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
   const dayOfWeek = date.getDay();
 
-  const [originWx, destWx] = await Promise.all([
+  const [originWx, destWx, originFAA, destFAA] = await Promise.all([
     getWeatherSeverity(originUpper),
     getWeatherSeverity(destUpper),
+    getAirportStatus(originUpper),
+    getAirportStatus(destUpper),
   ]);
 
   // Fetch real flights from all sources
@@ -458,18 +712,35 @@ export async function scoreFlights(
     };
   }
 
+  // Collect all departure times for this route (for last-flight-of-day detection)
+  const allRouteDepTimes = routeResult.flights.map(f => f.departureTime);
+
+  // Supplement with FR24 schedule data (may have more flights than route result)
+  try {
+    const scheduleRoute = await getFR24ScheduleForRoute(originUpper, destUpper, dateStr);
+    if (scheduleRoute.flights.length > 0) {
+      const scheduleTimes = scheduleRoute.flights.map(f => f.depTime);
+      const timeSet = new Set([...allRouteDepTimes, ...scheduleTimes]);
+      allRouteDepTimes.length = 0;
+      allRouteDepTimes.push(...timeSet);
+    }
+  } catch {
+    // Best effort — schedule data is supplementary
+  }
+
+  const durationMin = estimateDuration(originUpper, destUpper);
+
   // Score each real flight
   const flights: ScoredFlight[] = [];
 
   for (const rf of routeResult.flights) {
     const aircraft = resolveAircraft(originUpper, destUpper, rf.carrierCode, rf.isRegional, rf.fr24AircraftCode);
-    const durationMin = estimateDuration(originUpper, destUpper);
     const arrTime = addMinutes(rf.departureTime, durationMin);
 
     // Use operating carrier for scoring (the airline that actually flies the plane)
     const operatingCarrier = rf.operatingCarrierCode || rf.carrierCode;
 
-    const { score, factors, carrierDbRate } = computeBumpScore({
+    const { score, factors, factorsDetailed, carrierDbRate } = computeBumpScore({
       marketingCarrier: rf.carrierCode,
       operatingCarrier,
       depTime: rf.departureTime,
@@ -480,7 +751,28 @@ export async function scoreFlights(
       dayOfWeek,
       originWx,
       destWx,
+      originFAA,
+      destFAA,
     });
+
+    // Calculate DOT compensation estimate
+    const compensation = calculateCompensation(
+      originUpper, destUpper, rf.departureTime, allRouteDepTimes, durationMin,
+    );
+
+    // Last-flight-of-day bonus: jackpot flights get a scoring boost
+    let finalScore = score;
+    if (compensation.lastFlightOfDay) {
+      const lastFlightBonus = 8;
+      finalScore = Math.min(100, score + lastFlightBonus);
+      factors.push('🎰 Last flight of day — 400% rule if bumped ($1,550 max)');
+      factorsDetailed.push({
+        name: 'Last Flight of Day',
+        score: lastFlightBonus,
+        maxScore: 8,
+        description: 'No more flights today on this route — bumped passengers rebook tomorrow (400% rule)',
+      });
+    }
 
     const aircraftDisplayName = rf.aircraftName || aircraft.name;
 
@@ -498,8 +790,9 @@ export async function scoreFlights(
       aircraftCode: rf.fr24AircraftCode || aircraft.iataCode,
       capacity: aircraft.capacity,
       isRegional: rf.isRegional || aircraft.isRegional,
-      bumpScore: score,
+      bumpScore: finalScore,
       factors,
+      factorsDetailed,
       carrierDbRate,
       dataSource: rf.dataSource,
       verified: rf.verified,
@@ -509,6 +802,8 @@ export async function scoreFlights(
       registration: rf.registration || '',
       codeshares: rf.codeshares || [],
       aircraftFullName: rf.aircraftName || '',
+      lastFlightOfDay: compensation.lastFlightOfDay,
+      compensation,
     });
   }
 
