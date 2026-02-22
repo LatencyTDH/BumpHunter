@@ -91,6 +91,18 @@ app.get('/api/flights/search', async (req, res) => {
 
     const flights = await scoreFlights(originStr, destStr, dateStr);
 
+    // Determine which data sources were used
+    const openskyCount = flights.filter((f: any) => f.dataSource === 'opensky').length;
+    const scheduleCount = flights.filter((f: any) => f.dataSource === 'schedule').length;
+    const dataSources = [
+      'BTS load factors',
+      'BTS denied boarding rates',
+      'aviationweather.gov METAR',
+      'DOT carrier statistics',
+    ];
+    if (openskyCount > 0) dataSources.unshift('OpenSky Network (live flights)');
+    if (scheduleCount > 0) dataSources.push('Schedule templates (supplemental)');
+
     const result = {
       flights,
       meta: {
@@ -98,7 +110,9 @@ app.get('/api/flights/search', async (req, res) => {
         destination: destStr,
         date: dateStr,
         totalFlights: flights.length,
-        dataSources: ['BTS load factors', 'BTS denied boarding rates', 'aviationweather.gov METAR', 'DOT carrier statistics'],
+        realFlights: openskyCount,
+        scheduleFlights: scheduleCount,
+        dataSources,
         timestamp: new Date().toISOString(),
       },
     };
@@ -186,7 +200,7 @@ app.get('/api/stats/summary', async (_req, res) => {
 // =============================================================================
 app.listen(PORT, () => {
   console.log(`🛫 BumpHunter API running on http://localhost:${PORT}`);
-  console.log('   Data sources: aviationweather.gov, DOT BTS');
+  console.log('   Data sources: OpenSky Network, aviationweather.gov, DOT BTS');
   console.log('   Endpoints:');
   console.log('     GET /api/health');
   console.log('     GET /api/weather/alerts');

@@ -1,0 +1,900 @@
+YEAR,MONTH,QUARTER,MKT_CARRIER,MKT_CARRIER_AIRLINE_ID,MKT_CARRIER_NAME,MKT_UNIQUE_CARRIER,MKT_UNIQUE_CARRIER_NAME,OP_CARRIER,OP_CARRIER_AIRLINE_ID,OP_CARRIER_NAME,OP_UNIQUE_CARRIER,OP_UNIQUE_CARRIER_NAME,PAX_ALT_TRANS,PAX_NO_ALT_TRANS,PAX_NO_COMP_1,PAX_NO_COMP_2,PAX_NO_COMP_3,TOT_DEN_BOARDING,PAX_COMP_1,PAX_COMP_2,PAX_UPGRADE,PAX_DOWNGRADE,TOT_BOARDING,COMP_PAID_1,COMP_PAID_2,COMP_PAID_3,CODE_SHARE,OP_CARRIER_SOURCE
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,1,0,0,0,1,1,871,0,0,762892,0,1350,0,true,ZW
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,1110,0,0,1046874,0,0,0,true,ZW
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,1035,0,0,979383,0,0,0,true,ZW
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,688,2,0,997846,0,0,0,true,ZW
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,1,0,0,0,0,1,1,1047,0,0,926950,0,0,0,true,ZW
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,1075,0,0,1077064,0,0,0,true,ZW
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,1,0,0,0,1,1,1242,0,0,1078761,0,0,0,true,ZW
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,1,0,0,0,1,1,846,2,0,1045063,0,0,0,true,ZW
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,690,1,0,811231,0,0,0,true,ZW
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,0,0,0,56895,0,0,0,true,ZW
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,16,0,0,200074,0,0,0,true,ZW
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,51,0,0,375127,0,0,0,true,ZW
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,69,,,399854,,,0,true,ZW
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,2,0,0,0,2,1,294,,,698950,,,0,true,ZW
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,ZW,20046,Air Wisconsin Airlines Corp,ZW,Air Wisconsin Airlines Corp,0,0,0,0,0,0,0,529,,,1047313,,,0,true,ZW
+2010,12,4,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,149,0,0,12,161,149,10016,0,0,6121134,23131,0,0,false,FL
+2011,3,1,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,239,0,0,7,246,239,9648,0,0,5604721,35140,0,0,false,FL
+2011,6,2,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,271,0,0,13,284,271,11766,0,0,6704438,49841,0,0,false,FL
+2011,9,3,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,360,0,0,9,369,360,13380,0,0,6533019,80825,0,0,false,FL
+2011,12,4,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,402,0,0,2,404,402,10556,0,0,5855058,186292,0,0,false,FL
+2012,3,1,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,429,0,0,2,431,429,10427,0,0,5188466,268773,0,0,false,FL
+2012,6,2,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,567,0,0,34,601,567,12026,0,0,5990763,277201,0,0,false,FL
+2012,9,3,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,360,0,0,5,365,360,9041,0,0,5658334,144908,0,0,false,FL
+2012,12,4,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,654,0,0,9,663,654,7000,0,0,4906630,337694,0,0,false,FL
+2013,3,1,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,834,0,0,7,841,834,10336,0,0,4525112,487449,0,0,false,FL
+2013,6,2,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,671,0,0,12,683,671,8832,0,0,5031798,368761,0,0,false,FL
+2013,9,3,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,271,0,0,5,276,271,4799,0,0,4452451,147494,0,0,false,FL
+2013,12,4,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,472,0,0,30,502,472,3507,0,0,3822884,330009,0,0,false,FL
+2014,3,1,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,798,0,0,12,810,798,2722,0,0,2761020,558289,0,0,false,FL
+2014,6,2,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,568,0,0,13,581,568,2251,0,0,2692186,386411,0,0,false,FL
+2014,9,3,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,383,0,0,2,385,383,1515,0,0,2027579,192613,0,0,false,FL
+2014,12,4,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,FL,20437,AirTran Airways Corporation,FL,AirTran Airways Corporation,0,75,0,0,7,82,75,394,0,0,1090988,44324,0,0,false,FL
+2010,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,99,192,38,89,418,99,1638,24,3,3852268,0,70382,0,false,AS
+2011,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,182,140,41,76,439,182,1798,86,3,3759030,0,152346,0,false,AS
+2011,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,194,53,41,96,384,194,1592,138,19,4242336,0,133355,0,false,AS
+2011,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,147,20,10,92,269,147,1424,85,2,4590676,0,126264,0,false,AS
+2011,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,181,0,13,81,275,181,1226,13,9,4008655,0,166961,0,false,AS
+2012,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,123,0,27,97,247,123,1465,19,4,3910885,0,207684,0,false,AS
+2012,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,166,0,22,88,276,166,1281,33,0,4478826,0,176453,0,false,AS
+2012,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,154,0,31,98,283,154,1365,20,7,4767167,0,246478,0,false,AS
+2012,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,145,0,44,108,297,145,1162,19,11,4218458,0,236196,0,false,AS
+2013,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,124,0,15,51,190,124,1155,11,21,4203186,0,131215,0,false,AS
+2013,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,104,0,13,35,152,104,877,71,3,4780086,0,119054,0,false,AS
+2013,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,137,0,14,94,245,137,1048,99,6,5098158,0,242031,0,false,AS
+2013,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,72,0,15,40,127,72,754,82,5,4436523,0,111570,0,false,AS
+2014,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,129,0,31,88,248,129,1026,16,3,4384631,0,255647,0,false,AS
+2014,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,61,0,31,104,196,61,1027,27,3,4999049,0,129113,0,false,AS
+2014,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,115,0,48,120,283,115,1305,31,13,5517702,0,227526,0,false,AS
+2014,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,81,0,14,42,137,81,818,13,4,4937496,0,138500,0,false,AS
+2015,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,156,0,20,43,219,156,1737,9,8,4975547,0,251037,0,false,AS
+2015,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,122,0,34,35,191,122,1315,30,9,5624304,0,208708,0,false,AS
+2015,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,106,0,15,50,171,106,1267,20,8,6064451,0,180715,0,false,AS
+2015,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,106,0,15,38,159,106,1093,23,1,5430824,0,176107,0,false,AS
+2016,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,196,0,20,68,284,196,1982,39,24,5344476,0,256714,0,false,AS
+2016,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,176,0,27,62,265,176,1597,44,23,6059214,0,297984,0,false,AS
+2016,9,3,,19931,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,140,0,4,41,185,140,1627,62,8,6321507,0,228906,0,,
+2016,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,102,0,16,79,197,102,1600,37,170,5665703,0,202080,0,false,AS
+2017,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,173,0,24,9,206,173,1981,24,29,5595050,0,321346,0,false,AS
+2017,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,194,0,68,14,276,194,2680,48,52,6520730,0,338203,0,false,AS
+2017,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,122,0,45,9,176,122,1761,35,31,6702144,0,203774,0,false,AS
+2017,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,94,0,22,15,131,94,1552,44,22,6103747,0,202047,0,false,AS
+2018,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,99,0,17,4,120,99,1206,6,28,5844254,0,179492,0,false,AS
+2018,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,271,0,89,1,361,271,1170,149,2,2426932,0,91986,0,true,AS
+2018,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,237,0,87,2,326,237,2795,76,60,8923390,0,459474,0,false,AS
+2018,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,133,0,2,3,138,133,649,124,0,2593412,0,117688,0,true,AS
+2018,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,121,0,65,6,192,121,2494,88,33,9274760,0,262356,0,false,AS
+2018,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,54,0,0,1,55,54,631,57,2,2565369,0,56839,0,true,AS
+2018,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,56,0,42,7,105,56,2226,76,55,8260367,0,189554,0,false,AS
+2019,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,107,0,44,7,158,107,2498,98,27,7612627,0,265456,0,false,AS
+2019,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,107,0,36,12,155,107,3188,375,24,9035684,0,249430,0,false,AS
+2019,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,65,0,16,11,92,65,2730,212,21,9563449,0,160741,0,false,AS
+2019,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,60,0,36,12,108,60,3147,78,35,8547197,0,138826,0,false,AS
+2020,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,24,0,3,3,30,24,1515,75,14,6420719,0,40080,0,false,AS
+2020,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,0,0,0,0,0,0,43,0,1,916543,0,0,0,false,AS
+2020,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,0,0,0,0,0,0,0,0,1,2110763,0,0,0,false,AS
+2020,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,0,0,0,0,0,0,0,0,13,2247354,0,0,0,false,AS
+2021,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,1,0,1,0,2,1,117,,,3007066,,,0,false,AS
+2021,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,16,0,17,0,33,16,915,,,5911527,,,3092,false,AS
+2021,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,17,0,15,0,32,17,1059,,,6891202,,,350,false,AS
+2018,3,1,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,58,0,58,0,0,0,0,3306693,0,0,0,false,G4
+2018,6,2,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,216,0,0,3729600,0,0,0,false,G4
+2018,9,3,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,10,68,78,0,141,0,0,3529711,0,0,0,false,G4
+2018,12,4,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,1,65,66,0,46,0,0,3263797,0,0,0,false,G4
+2019,3,1,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,434,76,510,0,34,0,0,3473390,0,0,0,false,G4
+2019,6,2,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,123,0,123,0,25,0,0,4198976,0,0,0,false,G4
+2019,9,3,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,2,0,2,0,135,0,0,3836145,0,0,0,false,G4
+2019,12,4,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,2,0,2,0,347,0,0,3613426,0,0,0,false,G4
+2020,3,1,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,272,0,0,3197140,0,0,0,false,G4
+2020,6,2,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,15,0,0,1296542,0,0,0,false,G4
+2020,9,3,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,11,0,0,2036795,0,0,0,false,G4
+2020,12,4,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,6,0,0,2180397,0,0,0,false,G4
+2021,3,1,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,3,,,2322946,,,0,false,G4
+2021,6,2,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,203,,,3699217,,,0,false,G4
+2021,9,3,G4,20368,Allegiant Air,G4,Allegiant Air,G4,20368,Allegiant Air,G4,Allegiant Air,0,0,0,0,0,0,0,519,,,3872651,,,0,false,G4
+2011,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,866,623,4,659,43,2191,2148,11820,845,225,17751646,301872,291542,0,false,AA
+2011,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,760,340,10,504,56,1660,1604,15587,1369,269,19650620,249274,156420,0,false,AA
+2011,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,515,671,0,445,46,1677,1631,18097,1803,172,19890022,176168,436629,0,false,AA
+2011,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,305,746,0,353,54,1458,1404,17326,1197,225,18720802,176354,821921,0,false,AA
+2012,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,221,899,0,328,30,1478,1448,14589,1142,210,18320011,168607,916149,0,false,AA
+2012,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,210,904,0,169,66,1349,1283,15263,1475,131,19749730,83042,847781,800,false,AA
+2012,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,180,860,0,269,46,1355,1309,16131,1301,131,19277469,96083,897626,0,false,AA
+2012,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,114,853,0,394,28,1389,1361,14442,968,237,18536509,51087,866451,0,false,AA
+2013,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,126,678,0,182,39,1025,986,12822,1078,223,18267561,49157,638099,0,false,AA
+2013,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,60,482,0,68,37,647,610,13609,1046,171,19581262,23711,429465,200,false,AA
+2013,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,76,644,0,138,26,884,858,13511,1084,148,19549221,20593,651312,0,false,AA
+2013,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,88,423,0,136,30,677,647,12864,819,117,18664581,42098,463467,0,false,AA
+2014,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,150,939,0,147,28,1264,1236,9975,580,175,18416989,33809,947498,0,false,AA
+2014,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,90,467,0,98,41,696,655,9014,500,177,19957730,23297,481266,0,false,AA
+2014,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,84,328,0,80,16,508,492,7614,472,131,19864969,32408,320855,0,false,AA
+2014,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,58,426,0,201,35,720,685,8549,390,205,18826185,27820,467943,0,false,AA
+2015,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,148,852,0,409,22,1431,1409,9928,520,234,18101123,55269,929513,2000,false,AA
+2015,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,88,569,0,360,72,1089,1017,11703,656,202,20066407,59692,579938,0,false,AA
+2015,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,164,1106,0,1214,74,2558,2484,15366,686,256,36891115,42501,1057341,0,false,AA
+2015,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,196,1296,0,872,62,2426,2364,13320,600,387,22033306,83827,1226806,0,false,AA
+2016,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,193,1162,0,1214,73,2642,2569,14766,515,669,31360650,61295,1117302,0,false,AA
+2016,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,129,879,0,743,49,1800,1751,12217,501,494,34214085,41385,771058,0,false,AA
+2016,9,3,,19806,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,179,1298,0,652,27,2156,2129,15470,771,843,33773358,49190,1211835,0,,
+2016,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,111,854,0,727,22,1714,1692,11806,299,1265,31546560,32476,1092284,0,false,AA
+2017,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,156,1311,0,815,19,2301,2282,10870,252,1293,30582875,53613,1414883,0,false,AA
+2017,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,140,1261,0,495,8,1904,1896,12328,289,1357,33982409,24754,1317614,0,false,AA
+2017,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,24,161,0,127,0,312,312,10046,263,1341,33451848,4427,195177,0,false,AA
+2017,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,19,164,0,232,1,416,415,14215,285,1543,32802049,6176,149534,0,false,AA
+2018,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,3,83,0,147,0,233,233,11763,432,149,12508268,741,105022,0,true,AA
+2018,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,9,295,0,177,2,483,481,15658,342,2220,31525870,1950,275239,0,false,AA
+2011,3,1,,,,,,OH,20417,Comair Inc.,OH,Comair Inc.,4,43,1,0,1,49,47,3340,2362,320,1293985,1600,22596,0,false,OH
+2018,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,2,87,0,105,0,194,194,12510,453,133,14202068,0,71183,0,true,AA
+2018,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,6,90,0,98,1,195,194,12751,256,3455,34773590,0,94845,0,false,AA
+2018,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,1,117,0,285,0,403,403,11068,307,152,14036150,0,119025,0,true,AA
+2018,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,10,132,0,173,48,363,315,12697,264,1501,34232162,0,154801,0,false,AA
+2018,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,12,330,0,999,0,1341,1341,11561,462,119,13609631,3173,324969,0,true,AA
+2018,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,21,839,0,713,0,1573,1573,20168,383,1252,33312446,7403,917469,0,false,AA
+2019,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,25,955,0,727,17,1724,1707,28362,486,1087,33083888,8509,957850,0,false,AA
+2019,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,44,1227,0,1999,28,3298,3270,41562,852,2037,36110590,15195,1135837,0,false,AA
+2019,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,21,832,0,997,40,1890,1850,25733,555,732,36283824,4826,755746,0,false,AA
+2019,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,40,446,0,554,31,1071,1040,15503,245,504,35416937,9523,568007,0,false,AA
+2020,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,8,198,0,256,3,465,462,6127,82,388,27440927,3795,294457,0,false,AA
+2020,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,11,68,0,6,0,85,85,647,8,22,5369982,601,43852,0,false,AA
+2020,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,14,558,0,65,1,638,637,2899,42,175,13703995,939,274410,0,false,AA
+2020,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,0,8,0,20,0,28,28,591,9,105,14695523,0,8420,0,false,AA
+2021,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,7,66,0,7,0,80,80,1453,,,14719488,,,0,false,AA
+2021,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,24,331,0,53,0,408,408,5192,,,28314308,,,0,false,AA
+2021,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,33,374,0,62,11,480,480,6008,,,31669647,,,10320,false,AA
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,708,0,0,521210,0,0,1350,true,C5
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,1088,3,0,472007,0,0,0,true,C5
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,1088,4,0,557350,0,0,0,true,C5
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,1,1,0,1116,0,0,637151,0,0,0,true,C5
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,824,0,0,630084,0,0,0,true,C5
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,614,0,0,466376,0,0,0,true,C5
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,1,0,0,51139,0,0,0,true,C5
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,90,0,0,338370,0,0,0,true,C5
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,136,,,414266,,,0,true,C5
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,710,,,723597,,,0,true,C5
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,4,2,0,0,0,6,6,639,,,830728,,,500,true,C5
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,9K,20253,Cape Air,9K,Cape Air,0,0,0,0,0,0,0,17,0,0,31881,0,0,0,true,9K
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,9K,20253,Cape Air,9K,Cape Air,0,0,0,0,0,0,0,1,0,0,22595,0,0,0,true,9K
+2010,12,4,,,,,,OH,20417,Comair Inc.,OH,Comair Inc.,5,48,3,0,1,57,53,3938,2362,408,1597859,999,24291,0,false,OH
+2011,6,2,,,,,,OH,20417,Comair Inc.,OH,Comair Inc.,7,91,2,1,0,101,98,4553,2791,391,1487413,2343,54236,0,false,OH
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,1,0,0,0,1,1,595,0,0,341028,0,500,0,true,C5
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,1,0,0,0,0,1,1,706,1,0,477181,0,0,0,true,C5
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,1041,0,0,516022,0,0,0,true,C5
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,C5,20445,Commutair Aka Champlain Enterprises,C5,Commutair Aka Champlain Enterprises,0,0,0,0,0,0,0,1,0,0,140824,0,0,0,true,C5
+2011,3,1,,,,,,CP,21167,Compass Airlines,CP,Compass Airlines,1,31,0,1,0,33,32,1219,2838,437,729569,341,19052,0,false,CP
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,1,0,0,0,1,1,835,3651,526,875981,0,1128,0,true,CP
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,1,0,1,0,610,4176,704,986856,0,0,0,true,CP
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,1,1,0,768,4731,733,1033701,0,0,0,true,CP
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,1,0,0,0,1,1,1119,4812,664,985641,0,820,0,true,CP
+2019,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,1449,4415,707,960303,0,0,0,true,CP
+2019,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,1882,5378,832,1116997,0,0,0,true,CP
+2019,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,2131,5132,876,1056989,0,0,0,true,CP
+2019,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,1035,2845,574,679304,0,0,0,true,CP
+2020,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,442,1282,181,360840,0,0,0,true,CP
+2020,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,CP,21167,Compass Airlines,CP,Compass Airlines,0,0,0,0,0,0,0,0,1,0,155,0,0,0,true,CP
+2010,12,4,,,,,,CO,19704,Continental Air Lines Inc.,CO,Continental Air Lines Inc.,51,1152,8,67,88,1366,1265,6665,2080,1136,9220356,15432,472128,8813,false,CO
+2011,3,1,,,,,,CO,19704,Continental Air Lines Inc.,CO,Continental Air Lines Inc.,65,1080,17,23,113,1298,1155,7133,1210,798,8706805,18275,404592,8479,false,CO
+2011,6,2,,,,,,CO,19704,Continental Air Lines Inc.,CO,Continental Air Lines Inc.,75,1266,18,234,119,1712,1555,7981,1872,1398,10177417,13499,461277,7520,false,CO
+2011,9,3,,,,,,CO,19704,Continental Air Lines Inc.,CO,Continental Air Lines Inc.,61,1273,73,121,129,1657,1441,8628,2531,1151,10157979,11208,532014,17758,false,CO
+2011,12,4,,,,,,CO,19704,Continental Air Lines Inc.,CO,Continental Air Lines Inc.,63,908,13,20,73,1077,946,6593,1409,1317,9633366,23833,738290,3438,false,CO
+2010,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,38,608,11,22,25,704,646,18424,39790,12018,24546433,11494,387540,0,false,DL
+2011,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,19,600,16,15,6,656,619,23802,29604,10246,22640522,5778,392284,0,false,DL
+2011,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,40,696,22,2,3,763,736,28195,49330,11480,26752092,12635,461027,0,false,DL
+2011,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,92,926,9,2,7,1036,1018,30608,68871,11730,27524156,37493,843719,0,false,DL
+2011,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,74,647,6,2,1,730,721,20145,37229,8991,24550823,42692,731701,0,false,DL
+2012,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,93,883,37,9,1,1023,976,28208,26713,8578,23153402,54580,1011119,0,false,DL
+2012,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,69,825,117,31,2,1044,894,28487,47764,10517,27142748,39302,934058,0,false,DL
+2012,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,110,969,166,9,0,1254,1079,33809,65443,13468,28164144,60584,1063410,0,false,DL
+2012,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,90,1792,125,8,6,2021,1882,31031,35934,11719,25496756,51688,2066507,0,false,DL
+2013,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,76,847,197,18,139,1277,923,22445,27969,11651,24130377,41526,987176,0,false,DL
+2013,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,49,959,620,69,677,2374,1008,20416,39428,13810,27642624,29400,1169396,0,false,DL
+2013,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,74,809,22,2,153,1060,883,18240,42548,13203,28644455,45306,902110,0,false,DL
+2013,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,86,1246,9,2,16,1359,1332,19924,22815,13980,26365699,51804,1462992,0,false,DL
+2014,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,114,1752,8,0,4,1878,1866,24329,20528,15731,25357895,67586,1943093,0,false,DL
+2014,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,123,1245,16,16,5,1405,1368,29451,26486,15867,30361746,72922,1427602,0,false,DL
+2014,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,22,422,20,86,14,564,444,26777,37060,16018,31309829,12358,477000,0,false,DL
+2014,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,3,140,3,38,21,205,143,27149,20402,10490,28707710,2918,162947,0,false,DL
+2015,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,17,485,10,80,12,604,502,40939,19244,14356,27561992,9444,570872,0,false,DL
+2015,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,54,276,4,51,4,389,330,38643,21981,19553,32706490,5538,320192,0,false,DL
+2015,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,34,306,13,113,13,479,340,33166,31522,17613,33714771,5384,350906,0,false,DL
+2015,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,21,349,12,80,4,466,370,32658,20079,18917,31061602,12872,422220,0,false,DL
+2016,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,4,227,14,55,4,304,231,28325,25050,14689,29449621,2243,267168,3762,false,DL
+2016,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9,234,4,46,9,302,243,31642,28091,15523,33838031,4696,271782,7100,false,DL
+2016,9,3,DL,19791,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,12,218,2,68,6,306,230,33387,25493,32208,33949408,6584,258501,0,,
+2016,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,15,255,2,44,10,326,270,36471,25425,13541,32044038,8494,296986,0,false,DL
+2017,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,6,310,4,30,4,354,316,34388,21877,12852,29863259,2603,370784,0,false,DL
+2017,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,5,260,0,25,6,296,265,37110,31216,14993,34575839,2961,321750,4000,false,DL
+2017,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,2,15,0,5,7,29,17,32040,36917,13467,35357057,940,14556,0,false,DL
+2017,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,4,1,2,3,10,4,24793,23798,15382,32506060,0,2352,0,false,DL
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,6,0,6,1,13,6,23777,25912,16395,30868044,0,7582,0,false,DL
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,4,0,4,1,9,4,17602,28225,13937,36208900,0,5400,0,false,DL
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,17722,32710,14842,37139292,0,0,0,false,DL
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,22605,26408,12918,34570464,0,0,0,false,DL
+2019,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,1,0,0,0,0,1,1,28276,27096,12838,32597931,675,0,0,false,DL
+2019,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,32820,34242,16954,39153662,0,0,0,false,DL
+2019,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,1,0,0,2,3,1,24642,34178,16493,40050497,0,1350,0,false,DL
+2019,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,26246,25437,13199,36796401,0,0,0,false,DL
+2020,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,16399,23947,10222,27870231,0,0,0,false,DL
+2020,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,1546,3710,1249,2956649,0,0,0,false,DL
+2020,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,634,5994,3178,9298752,0,0,0,false,DL
+2020,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,570,8535,3362,11484571,0,0,0,false,DL
+2021,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,1386,,,12861197,,,950300,false,DL
+2021,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,3231,,,24200394,,,2033608,false,DL
+2021,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,0,0,0,0,0,0,0,12292,,,30691987,,,7876961,false,DL
+2010,12,4,DL,19791,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Pinnacle Airlines Inc.,9E,Endeavor Air Inc.,8,132,2,0,0,142,140,6065,1869,245,2527629,2158,79640,0,false,9E
+2013,3,1,DL,19792,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Pinnacle Airlines Inc.,9E,Endeavor Air Inc.,23,232,36,0,22,313,255,5738,3420,1119,3029359,12750,266538,0,false,9E
+2013,6,2,DL,19793,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Pinnacle Airlines Inc.,9E,Endeavor Air Inc.,22,194,44,0,21,281,216,5144,3328,961,3350594,11868,217106,0,false,9E
+2013,9,3,DL,19794,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,35,199,0,1,5,240,234,4104,3546,864,3291022,19462,223049,0,false,9E
+2013,12,4,DL,19795,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,29,215,2,0,3,249,244,4958,4118,1525,3036170,16069,230556,0,false,9E
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,1,0,1,2,4,1,3117,6627,1288,2709157,0,824,0,true,9E
+2018,3,1,DL,19791,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,1,0,1,2,4,1,3117,6627,1288,2709157,0,824,0,false,9E
+2018,6,2,DL,19792,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,1,1,0,4100,9619,1809,3617308,0,0,0,true,9E
+2018,6,2,DL,19793,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,1,1,0,4100,9619,1809,3617308,0,0,0,false,9E
+2018,9,3,DL,19794,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,5131,9694,2157,3518387,0,0,0,true,9E
+2018,9,3,DL,19795,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,5131,9694,2157,3518387,0,0,0,false,9E
+2018,12,4,DL,19796,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,2,2,0,4559,8766,1769,3446544,0,0,0,true,9E
+2018,12,4,DL,19797,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,2,2,0,4559,8766,1769,3446544,0,0,0,false,9E
+2019,3,1,DL,19798,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,4432,8064,1896,3113553,0,0,0,true,9E
+2019,3,1,DL,19799,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,4432,8064,1896,3113553,0,0,0,false,9E
+2019,6,2,DL,19800,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,8011,11013,2370,3767698,0,0,0,true,9E
+2019,6,2,DL,19801,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,8011,11013,2370,3767698,0,0,0,false,9E
+2019,9,3,DL,19802,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,6451,9013,2364,3850464,0,0,0,true,9E
+2019,9,3,DL,19803,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,6451,9013,2364,3850464,0,0,0,false,9E
+2019,12,4,DL,19804,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,6772,7131,2050,3780820,0,0,0,true,9E
+2019,12,4,DL,19805,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,6772,7131,2050,3780820,0,0,0,false,9E
+2020,3,1,DL,19806,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,3775,5843,2010,2964249,0,0,0,true,9E
+2020,3,1,DL,19807,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,3775,5843,2010,2964249,0,0,0,false,9E
+2020,6,2,DL,19808,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,277,2010,229,404077,0,0,0,true,9E
+2020,6,2,DL,19809,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,277,2010,229,404077,0,0,0,false,9E
+2020,9,3,DL,19810,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,77,3945,784,1550894,0,0,0,true,9E
+2020,9,3,DL,19811,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,77,3945,784,1550894,0,0,0,false,9E
+2020,12,4,DL,19812,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,233,5994,1124,2013531,0,0,0,true,9E
+2020,12,4,DL,19813,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,233,5994,1124,2013531,0,0,0,false,9E
+2021,3,1,DL,19814,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,385,,,1940986,,,239500,true,9E
+2021,3,1,DL,19815,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,385,,,1940986,,,239500,false,9E
+2021,6,2,DL,19816,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,1181,,,3517547,,,725549,true,9E
+2021,6,2,DL,19817,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,1181,,,3517547,,,725549,false,9E
+2021,9,3,DL,19818,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,3642,,,3824655,,,2710439,true,9E
+2021,9,3,DL,19819,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,9E,20363,Endeavor Air Inc.,9E,Endeavor Air Inc.,0,0,0,0,0,0,0,3642,,,3824655,,,2710439,false,9E
+2011,3,1,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,242,71,7,652,22,994,957,6107,0,0,3627278,43766,28218,0,false,MQ
+2011,6,2,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,417,63,11,802,52,1345,1251,7647,0,0,4377094,67455,23178,0,false,MQ
+2011,9,3,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,161,158,3,483,22,827,791,7556,0,0,4449341,39864,83126,0,false,MQ
+2011,12,4,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,107,223,8,229,26,593,550,7561,0,0,4293651,43283,202577,0,false,MQ
+2012,3,1,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,72,263,7,238,23,603,556,6437,0,0,4098471,32838,206312,0,false,MQ
+2012,6,2,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,75,256,5,156,36,528,483,6767,0,0,4820334,22762,220115,0,false,MQ
+2012,9,3,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,49,160,9,159,25,402,359,5098,0,0,4762988,18891,126247,0,false,MQ
+2012,12,4,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,30,160,0,200,16,412,396,4265,52,4,4433663,11279,130564,0,false,MQ
+2013,3,1,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,35,227,0,264,17,543,526,5320,73,10,3970731,8304,191631,0,false,MQ
+2013,6,2,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,43,179,0,269,18,509,491,5301,36,7,4420134,7654,158198,0,false,MQ
+2013,9,3,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,21,148,0,140,14,323,309,4020,30,7,4449933,4979,123575,0,false,MQ
+2013,12,4,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,44,174,0,324,6,548,542,5018,35,2,4098294,12772,169943,0,false,MQ
+2014,3,1,,,,,,MQ,20398,American Eagle Airlines Inc.,MQ,Envoy Air,32,294,0,419,21,766,745,5175,16,7,3712100,7039,270779,0,false,MQ
+2014,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,34,272,0,367,29,702,673,5351,41,11,4146074,5770,239113,0,false,MQ
+2014,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,41,142,0,234,5,422,417,3340,34,18,3940167,4342,83486,0,false,MQ
+2014,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,16,174,0,411,10,611,601,4749,84,3,3643382,2850,149222,0,false,MQ
+2015,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,30,211,0,535,8,784,776,4485,48,5,3094217,6236,251671,0,false,MQ
+2015,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,50,325,0,532,17,924,907,5596,58,60,3255510,9717,249685,0,false,MQ
+2015,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,40,205,0,276,8,529,521,4279,75,39,2958349,10713,172725,0,false,MQ
+2015,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,40,199,0,308,8,555,547,3765,55,78,2592952,5813,154225,0,false,MQ
+2016,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,36,214,0,212,29,491,462,2463,49,43,2389463,6146,168814,0,false,MQ
+2016,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,36,299,0,494,6,835,829,3257,67,32,2987199,4209,250375,0,false,MQ
+2016,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,36,369,0,326,6,737,731,3785,172,42,3209128,8030,287621,0,,
+2016,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,20,188,0,185,1,394,393,2093,75,40,2937726,4920,140492,0,false,MQ
+2018,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,0,22,0,37,0,59,59,3839,82,41,2943408,0,22161,0,false,MQ
+2018,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,0,27,0,34,0,61,61,4273,117,29,3415654,0,27402,0,false,MQ
+2018,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,2,39,0,120,0,161,161,3437,74,21,3388554,0,21833,0,false,MQ
+2018,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,2,75,0,376,0,453,453,3104,49,6,3303994,0,66541,0,false,MQ
+2019,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,1,104,0,385,0,490,490,3807,114,31,3137713,0,79482,0,false,MQ
+2019,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,5,96,0,428,8,537,529,4439,176,58,3751462,1455,109241,0,false,MQ
+2019,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,11,127,0,423,0,561,561,3286,187,35,3861879,3855,122264,0,false,MQ
+2019,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,2,67,0,475,0,544,544,2427,69,31,3703185,0,123101,0,false,MQ
+2020,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,1,39,0,241,0,281,281,1895,69,48,2863191,675,89569,0,false,MQ
+2020,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,5,17,0,4,0,26,26,190,5,12,847305,0,8337,0,false,MQ
+2020,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,9,70,0,53,0,132,132,747,30,2,1994013,163,32164,0,false,MQ
+2020,12,4,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,2,14,0,14,0,30,30,408,14,4,2164410,0,16338,0,false,MQ
+2021,3,1,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,1,22,0,9,0,32,32,849,,,2172455,,,0,false,MQ
+2021,6,2,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,1,64,1,49,0,115,114,1422,,,3409015,,,0,false,MQ
+2021,9,3,,,,,,MQ,20398,Envoy Air,MQ,Envoy Air,2,59,0,13,2,76,76,1150,,,3628897,,,7981,false,MQ
+2010,12,4,,,,,,XE,20374,ExpressJet Airlines Inc.,XE,ExpressJet Airlines Inc.,32,553,22,1,56,664,596,5306,0,0,3893575,3261,131196,2522,false,XE
+2011,3,1,,,,,,XE,20374,ExpressJet Airlines Inc.,XE,ExpressJet Airlines Inc.,59,443,22,0,32,556,528,6434,0,0,3512336,11585,124794,3228,false,XE
+2011,6,2,,,,,,XE,20374,ExpressJet Airlines Inc.,XE,ExpressJet Airlines Inc.,74,662,24,0,51,811,752,7985,0,0,4339911,13291,185327,8256,false,XE
+2011,9,3,,,,,,XE,20374,ExpressJet Airlines Inc.,XE,ExpressJet Airlines Inc.,163,702,19,0,35,919,872,7699,0,0,4367314,24850,288315,6309,false,XE
+2011,12,4,,,,,,XE,20374,ExpressJet Airlines Inc.,XE,ExpressJet Airlines Inc.,48,616,1,0,13,678,649,5857,0,0,4062518,20416,305352,14923,false,XE
+2010,12,4,,,,,,EV,20366,Atlantic Southeast Airlines,EV,ExpressJet Airlines LLC,16,136,10,1,2,165,152,6766,5120,909,3527999,3925,78636,0,false,EV
+2011,3,1,,,,,,EV,20366,Atlantic Southeast Airlines,EV,ExpressJet Airlines LLC,15,157,4,3,0,179,172,7702,3531,823,3185462,2870,95498,0,false,EV
+2011,6,2,,,,,,EV,20366,Atlantic Southeast Airlines,EV,ExpressJet Airlines LLC,39,294,10,0,3,346,333,11694,5558,921,3708749,8492,167274,0,false,EV
+2011,9,3,,,,,,EV,20366,Atlantic Southeast Airlines,EV,ExpressJet Airlines LLC,38,343,10,0,2,393,381,10215,6337,837,3723441,9652,268311,0,false,EV
+2011,12,4,,,,,,EV,20366,Atlantic Southeast Airlines,EV,ExpressJet Airlines LLC,41,317,7,0,1,366,358,7463,4399,804,3426978,21909,301664,0,false,EV
+2012,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,63,1173,26,27,12,1301,1224,13962,3330,854,6940687,33365,834540,10147,false,EV
+2012,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,103,1297,74,69,34,1577,1471,14476,4043,910,7989888,43618,886114,43654,false,EV
+2012,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,75,1784,101,32,17,2009,1867,16699,5483,1385,8193856,49078,1242909,50111,false,EV
+2012,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,36,1517,79,27,18,1677,1512,13374,4584,1735,7729179,40414,1121100,36918,false,EV
+2013,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,30,1616,63,22,32,1763,1610,13100,3999,2343,7107265,29071,1070441,32225,false,EV
+2013,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,50,1399,90,28,26,1593,1459,11602,5388,1797,8226123,27073,1132337,0,false,EV
+2013,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,76,997,22,43,20,1158,1104,9715,5105,1807,8253891,29129,783227,0,false,EV
+2013,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,115,1684,51,35,23,1908,1821,13427,4685,1872,7769435,54558,1341374,0,false,EV
+2014,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,123,2490,99,58,40,2810,2704,16093,3917,2133,6805801,59603,2042841,0,false,EV
+2014,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,112,2451,72,95,54,2784,2645,16961,6336,2245,7735969,59280,2132120,0,false,EV
+2014,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,64,931,22,80,23,1120,1030,10615,6350,2294,7834239,20256,714781,0,false,EV
+2014,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,66,1056,55,42,28,1247,1165,11856,4414,1547,6968965,26154,827722,1300,false,EV
+2015,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,62,1056,55,121,18,1312,1237,12437,3498,1566,6083566,29789,851724,0,false,EV
+2015,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,73,1042,35,172,16,1338,1280,12001,3842,2200,6567149,31941,878936,0,false,EV
+2015,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,51,758,20,128,5,962,909,9527,4535,2170,6328398,26037,663404,500,false,EV
+2015,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,38,826,19,107,6,996,970,8968,3426,1966,5757488,20851,683972,0,false,EV
+2016,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,32,562,18,138,7,757,710,7708,3293,1736,5175359,12765,489205,500,false,EV
+2016,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,38,561,17,222,9,847,823,8087,3546,1730,5498667,18690,473685,0,false,EV
+2016,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,46,710,19,154,8,937,900,9180,4267,1885,5445840,16959,622663,0,,
+2016,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,34,554,12,36,5,641,622,8615,3313,1757,5019172,12958,454151,1350,false,EV
+2017,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,27,445,7,24,4,507,481,7354,2538,1323,4137528,11622,381182,1000,false,EV
+2017,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,8,230,3,13,2,256,252,4991,2722,2148,4061138,2427,207042,0,false,EV
+2017,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,19,1,0,2,22,19,3902,3409,1713,3540146,0,18055,0,false,EV
+2017,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,1,1,4,1,7,6,3213,2514,1055,2977522,0,6008,0,false,EV
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,972,1779,657,713060,0,0,0,true,EV
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,2,0,0,0,2,2,1082,0,0,1425341,0,2017,0,true,EV
+2018,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,3,0,0,0,3,3,2230,1595,1349,2411261,0,3101,0,false,EV
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,675,1470,440,566909,0,0,0,true,EV
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,1,0,0,0,1,1,1140,0,0,1460502,0,500,0,true,EV
+2018,6,2,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,7,0,5,0,12,12,2225,1197,1098,2350886,0,4303,0,false,EV
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,437,726,269,358858,0,0,0,true,EV
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,1226,0,0,1423293,0,0,0,true,EV
+2018,9,3,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,1,0,2,0,3,3,1866,488,545,2175952,0,2700,0,false,EV
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,152,135,55,88217,0,0,0,true,EV
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,7,0,0,0,7,7,1318,1,0,1539834,0,2011,0,true,EV
+2018,12,4,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,9,0,13,0,22,22,1658,98,98,1835755,0,8639,0,false,EV
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,1,0,0,1,1,1470,0,0,1447984,0,0,0,true,EV
+2019,3,1,,,,,,EV,20366,ExpressJet Airlines Inc.,EV,ExpressJet Airlines LLC,0,0,1,0,0,1,1,1470,0,0,1454843,0,0,0,false,EV
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,1,0,0,0,1,1,1522,4,7,1257349,0,1350,0,true,EV
+2019,6,2,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,1,0,0,0,1,1,1522,4,7,1257349,0,1350,0,false,EV
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,1358,4,10,1433425,0,0,0,true,EV
+2019,9,3,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,1358,4,10,1433425,0,0,0,false,EV
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,1,0,0,0,1,1,990,21,21,1467237,0,0,0,true,EV
+2019,12,4,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,1,0,0,0,1,1,990,21,21,1467237,0,0,0,false,EV
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,669,20,21,1239445,0,0,0,true,EV
+2020,3,1,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,669,20,21,1239445,0,0,0,false,EV
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,5,0,5,115481,0,0,0,true,EV
+2020,6,2,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,5,0,5,115481,0,0,0,false,EV
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,12,0,0,227234,0,0,0,true,EV
+2020,9,3,,,,,,EV,20366,ExpressJet Airlines LLC,EV,ExpressJet Airlines LLC,0,0,0,0,0,0,0,12,0,0,227234,0,0,0,false,EV
+2010,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,10,98,6,48,26,188,18,784,0,0,2241300,678,3465,1229,false,F9
+2011,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,23,119,8,69,14,233,23,837,0,0,2090355,592,7096,1850,false,F9
+2011,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,7,191,6,36,8,248,10,1201,0,0,2638684,322,3802,600,false,F9
+2011,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,14,213,6,88,9,330,23,1297,0,0,3045475,296,7564,512,false,F9
+2011,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,8,142,5,51,6,212,47,1108,0,0,2721582,1271,25345,689,false,F9
+2012,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,5,68,3,29,4,109,17,399,0,0,2409538,886,14409,4754,false,F9
+2012,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,7,132,8,108,6,261,20,798,0,0,2597591,795,13598,2251,false,F9
+2012,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,13,140,12,158,10,333,26,1059,0,0,2779046,896,18215,3251,false,F9
+2012,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,5,62,5,28,5,105,7,426,0,0,2537924,227,4899,2215,false,F9
+2013,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,4,118,3,48,7,180,18,492,0,0,2264114,898,13724,498,false,F9
+2013,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,6,171,10,145,25,357,29,908,0,0,2589674,1346,26456,1023,false,F9
+2013,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,8,189,5,179,35,416,68,1169,0,0,2842615,2549,52596,1987,false,F9
+2013,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,10,140,3,98,68,319,48,924,0,0,2665493,3522,63580,1562,false,F9
+2014,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,9,145,5,89,38,286,46,655,0,0,2401997,3498,29943,1485,false,F9
+2014,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,12,219,3,87,28,349,37,934,0,0,2937116,2962,38560,3256,false,F9
+2014,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,10,370,5,112,43,540,68,1069,0,0,3323385,3175,44064,8566,false,F9
+2014,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,8,289,6,79,59,441,108,1206,0,0,3125104,2495,49548,7980,false,F9
+2015,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,8,102,1,89,14,209,42,682,0,0,2632410,1987,27450,2899,false,F9
+2015,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,10,109,2,101,31,253,44,699,0,0,2962152,1899,21550,3150,false,F9
+2015,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,5,229,2,112,42,390,52,715,0,0,3201831,1798,31352,3545,false,F9
+2015,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,8,219,1,87,65,380,42,648,0,0,3547147,2108,19475,3545,false,F9
+2016,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,4,91,1,47,18,161,38,379,0,0,3151585,1452,24567,2011,false,F9
+2016,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,10,176,3,59,26,274,61,842,0,0,3614118,3894,29580,4258,false,F9
+2016,9,3,F10,20437,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,4,91,1,122,35,253,60,425,0,0,4129349,2150,33174,4059,,
+2016,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,2,110,0,36,15,163,59,450,0,0,3771280,1326,46243,1892,false,F9
+2017,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,1,110,0,48,8,167,63,312,0,0,3582185,822,45338,877,false,F9
+2017,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,1,97,1,92,12,203,114,644,0,0,4138695,1198,74846,2174,false,F9
+2017,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,6,102,2,39,21,170,64,560,0,0,4339063,2344,48266,3211,false,F9
+2017,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,3,150,2,226,22,403,53,860,0,0,4538268,1025,41342,1895,false,F9
+2018,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,98,0,78,12,188,53,949,0,0,4416868,0,48488,2382,false,F9
+2018,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,161,0,80,14,255,114,991,0,0,4946148,0,99737,2782,false,F9
+2018,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,169,0,328,22,519,122,1790,0,0,5128189,0,86078,1986,false,F9
+2018,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,101,0,138,18,257,61,895,0,0,4932227,0,39111,1152,false,F9
+2019,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,81,0,73,14,168,59,587,0,0,5128189,0,29636,989,false,F9
+2019,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,96,0,82,6,184,98,838,0,0,5128189,0,57587,1852,false,F9
+2019,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,118,0,99,13,230,61,893,0,0,5731264,0,37688,2489,false,F9
+2019,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,145,0,83,21,249,98,821,0,0,5764965,0,48204,2489,false,F9
+2020,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,58,0,26,12,96,29,481,0,0,4685687,0,19587,943,false,F9
+2020,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,40,0,0,5,45,24,170,0,0,690113,0,9906,149,false,F9
+2020,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,54,1,0,9,64,23,256,0,0,2508125,0,14890,1150,false,F9
+2020,12,4,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,43,0,0,8,51,23,167,0,0,2619595,0,10095,876,false,F9
+2021,3,1,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,129,12,82,0,223,129,626,,,4812979,,,0,false,F9
+2021,6,2,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,198,6,130,0,334,330,886,,,5456373,,,4210,false,F9
+2021,9,3,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,F9,20436,Frontier Airlines Inc.,F9,Frontier Airlines Inc.,0,421,12,186,0,619,616,1489,,,5776460,,,3845,false,F9
+2011,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,15,33,0,0,0,48,48,1102,1095,403,537470,2403,10729,0,false,G7
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,844,1155,458,633986,0,0,0,true,G7
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,600,16,40,563007,0,0,0,true,G7
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,1007,1154,545,733301,0,0,0,true,G7
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,2,0,0,0,2,2,593,7,38,575152,0,0,0,true,G7
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,1,0,0,0,1,1,1160,1690,1046,760653,0,596,0,true,G7
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,1,0,0,0,1,1,658,20,57,603085,0,1350,0,true,G7
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,1204,1787,645,698885,0,0,0,true,G7
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,425,17,41,564690,0,0,0,true,G7
+2019,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,1122,1523,600,635400,0,0,0,true,G7
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,1,0,0,0,1,1,682,10,18,492554,0,0,0,true,G7
+2019,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,2133,1666,577,714202,0,0,0,true,G7
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,732,29,23,583555,0,0,0,true,G7
+2019,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,1312,1553,704,692048,0,0,0,true,G7
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,385,6,15,422889,0,0,0,true,G7
+2019,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,1079,1023,593,500780,0,0,0,true,G7
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,296,9,81,443592,0,0,0,true,G7
+2020,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,309,475,204,182510,0,0,0,true,G7
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,162,24,17,400263,0,0,0,true,G7
+2020,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,0,8,0,75,0,0,0,true,G7
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,0,0,0,58770,0,0,0,true,G7
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,13,20,0,204241,0,0,0,true,G7
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,65,95,4,342329,0,0,0,true,G7
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,0,0,0,0,0,0,186,,,338451,,,0,true,G7
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,1,0,0,0,1,0,260,,,580826,,,0,true,G7
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,G7,20500,GoJet Airlines LLC d/b/a United Express,G7,GoJet Airlines LLC d/b/a United Express,0,3,0,0,0,3,3,427,,,770737,,,0,true,G7
+2010,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,2,0,0,0,2,0,118,0,0,2097578,0,0,0,false,HA
+2011,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,25,0,0,0,0,25,25,83,0,0,2089095,1000,0,200,false,HA
+2011,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,9,0,0,0,0,9,9,146,0,0,2151581,836,0,1800,false,HA
+2011,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,3,0,0,0,0,3,3,171,0,0,2266585,2760,0,1200,false,HA
+2011,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,55,0,0,0,0,55,55,225,0,0,2152144,6280,0,14620,false,HA
+2012,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,80,0,0,0,0,80,80,174,0,0,2218145,21234,0,200,false,HA
+2012,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,11,0,0,0,0,11,11,189,0,0,2328787,1769,0,2100,false,HA
+2012,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,33,3,0,0,0,36,36,325,0,0,2518738,6318,1274,2915,false,HA
+2012,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,41,0,0,0,0,41,41,219,0,0,2410581,10907,0,11350,false,HA
+2013,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,51,0,0,0,0,51,51,332,0,0,2397157,7837,0,13717,false,HA
+2013,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,54,2,0,0,0,56,56,449,0,0,2481456,1116,660,21472,false,HA
+2013,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,21,0,0,0,0,21,21,199,0,0,2644328,6800,0,15285,false,HA
+2013,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,43,1,0,0,0,44,44,167,0,0,2405889,7027,1000,13734,false,HA
+2014,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,25,0,0,0,0,25,25,94,0,0,2400372,12700,0,15200,false,HA
+2014,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,10,0,0,0,0,10,10,102,0,0,2505196,4640,0,2100,false,HA
+2014,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,80,1,0,0,0,81,81,92,0,0,2671867,2450,0,9250,false,HA
+2014,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,78,0,0,2507376,0,0,15980,false,HA
+2015,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,7,0,0,0,0,7,7,110,0,0,2472431,500,0,8550,false,HA
+2015,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,2,0,0,0,0,2,0,54,0,0,2605895,0,0,600,false,HA
+2015,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,6,6,0,0,0,12,0,124,0,0,2775894,5538,998,9200,false,HA
+2015,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,8,0,0,0,0,8,0,70,0,0,2608124,5460,0,5750,false,HA
+2016,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,2,0,0,0,0,2,0,37,0,0,2599123,0,0,12673,false,HA
+2016,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,18,0,0,0,0,18,0,59,0,0,2700783,10430,0,2950,false,HA
+2016,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,10,0,0,0,0,10,0,104,0,0,2854932,3179,0,7500,,
+2016,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,19,0,0,0,0,19,0,126,0,0,2669657,10896,0,12185,false,HA
+2017,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,4,0,0,51,0,55,0,113,0,0,2649691,873,0,12300,false,HA
+2017,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,1,0,21,0,22,1,40,6,0,2829910,0,360,1500,false,HA
+2017,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,2,5,1,7,0,15,7,77,9,2,2943133,1468,2515,5700,false,HA
+2017,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,7,0,2,0,9,7,408,17,1,2710707,0,6466,3200,false,HA
+2018,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,7,0,0,55965,0,0,0,true,HA
+2018,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,2,0,0,0,2,2,160,4,11,2676265,0,1350,1600,false,HA
+2018,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,13,0,0,50420,0,0,0,true,HA
+2018,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,2,0,0,0,0,2,2,345,3,10,2804422,720,0,0,false,HA
+2018,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,10,0,0,50158,0,0,0,true,HA
+2018,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,3,0,0,0,3,3,274,2,8,2802150,0,2768,0,false,HA
+2018,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,14,0,0,49891,0,0,0,true,HA
+2018,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,5,0,1,0,6,5,326,5,69,2680823,0,1999,0,false,HA
+2019,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,72,7,3,2615452,0,0,400,false,HA
+2019,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,39,8,6,2742590,0,0,0,false,HA
+2019,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,34,1,2,2828870,0,0,0,false,HA
+2019,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,101,17,29,2674636,0,0,1000,false,HA
+2020,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,1,0,0,0,1,1,125,5,13,2185709,0,919,2000,false,HA
+2020,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,30,0,8,176278,0,0,0,false,HA
+2020,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,14,0,7,320241,0,0,0,false,HA
+2020,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,8,0,4,469717,0,0,0,false,HA
+2021,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,3,,,727796,,,0,false,HA
+2021,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,10,,,1717710,,,0,false,HA
+2021,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,2,,,2047990,,,0,false,HA
+2018,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,QX,19687,Horizon Air,QX,Horizon Air,0,120,0,19,4,143,120,477,55,0,2203846,0,124064,0,true,QX
+2021,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,QX,19687,Horizon Air,QX,Horizon Air,0,15,0,0,0,15,15,126,,,1111080,,,0,false,QX
+2021,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,QX,19687,Horizon Air,QX,Horizon Air,0,57,0,0,0,57,57,706,,,1730321,,,0,false,QX
+2021,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,QX,19687,Horizon Air,QX,Horizon Air,0,50,0,0,0,50,50,459,,,1899889,,,1196,false,QX
+2010,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,12,0,0,0,0,12,12,21,0,0,6039231,9850,0,10613,false,B6
+2011,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,12,0,0,0,0,12,12,14,0,0,6038693,8000,0,7000,false,B6
+2011,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,0,0,0,0,9,0,0,6622343,0,0,3430,false,B6
+2011,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,8,0,0,0,0,8,8,16,0,0,7015965,9600,0,3930,false,B6
+2011,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,0,11,11,0,56,0,0,6291058,0,0,17862,false,B6
+2012,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,4,0,0,0,0,4,4,0,0,0,6371852,5200,0,0,false,B6
+2012,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,11,1,0,0,0,12,12,114,0,0,6832293,6105,1300,49389,false,B6
+2012,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,8,0,0,0,2,10,8,77,0,0,7138623,2230,0,30525,false,B6
+2012,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,13,0,0,0,0,13,13,54,0,0,6573215,9688,0,22324,false,B6
+2013,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,1,0,0,0,0,1,1,170,0,0,6765286,1300,0,61250,false,B6
+2013,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,15,0,0,0,0,15,15,126,0,0,7188445,9400,0,46354,false,B6
+2013,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,1,1,0,0,0,2,2,61,0,0,7381669,695,500,27598,false,B6
+2013,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,1,0,0,0,0,1,1,145,0,0,6831371,1000,0,60277,false,B6
+2014,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,24,0,0,0,0,24,24,469,0,0,6696787,21127,0,220782,false,B6
+2014,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,70,0,0,0,0,70,70,279,0,0,7489539,52029,0,127024,false,B6
+2014,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,13,0,0,510,3,526,13,851,8,2,7727979,10370,0,322592,false,B6
+2014,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,2,0,0,27,1,30,2,407,0,1,7350027,3200,0,128521,false,B6
+2015,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,39,0,0,0,0,39,39,619,0,147,7357389,37789,0,264132,false,B6
+2015,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,5,0,0,0,0,5,5,266,0,83,8105136,6300,0,96726,false,B6
+2015,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,8,0,0,0,0,8,8,358,0,39,8318476,8371,0,127117,false,B6
+2015,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,21,0,0,0,0,21,17,598,0,64,8168250,14200,0,269970,false,B6
+2016,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,28,0,0,0,0,28,27,488,0,27,8244033,31200,0,221911,false,B6
+2016,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,1,0,798,0,799,1,298,0,48,8795633,0,1350,109199,false,B6
+2016,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,5,12,0,1295,1,1313,17,480,1,7,8951162,6750,16200,212402,,
+2016,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,8,0,1028,0,1036,8,439,0,86,8719175,0,10950,197966,false,B6
+2017,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,11,2,1402,0,1415,11,553,0,38,8770054,0,15300,314471,false,B6
+2017,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,22,0,20,0,42,22,567,0,215,9355804,0,29700,306926,false,B6
+2017,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,18,0,0,0,18,18,529,0,34,9129180,0,24300,291160,false,B6
+2017,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,3,0,0,0,3,3,432,0,97,8936805,0,4050,249618,false,B6
+2018,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,7,0,0,0,7,7,844,0,202,8927623,0,9450,550230,false,B6
+2018,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,8,0,1,0,9,8,557,0,102,9893611,0,15000,333696,false,B6
+2018,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,7,0,0,0,7,7,612,0,69,9824474,0,10050,369730,false,B6
+2018,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,13,0,0,0,13,13,487,0,107,9351646,0,17550,291469,false,B6
+2019,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,23,0,0,0,23,23,721,0,108,9061253,0,31500,451304,false,B6
+2019,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,5,0,2,0,7,5,641,0,89,9851842,0,7500,404614,false,B6
+2019,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,7,0,1,0,8,7,785,0,150,9760018,0,10200,426338,false,B6
+2019,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,12,0,4,0,16,12,637,0,176,9504092,0,16200,386415,false,B6
+2020,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,2,0,2,0,250,0,157,7303799,0,0,137640,false,B6
+2020,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,0,0,0,0,29,0,177,583894,0,0,19800,false,B6
+2020,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,0,0,0,0,9,0,350,1433931,0,0,5800,false,B6
+2020,12,4,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,0,0,0,0,0,0,62,0,240,2560789,0,0,24950,false,B6
+2021,3,1,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,2,2,12,0,16,14,81,,,3875067,,,32693,false,B6
+2021,6,2,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,1,0,2,0,3,1,463,,,6993996,,,335840,false,B6
+2021,9,3,B6,20409,JetBlue Airways,B6,JetBlue Airways,B6,20409,JetBlue Airways,B6,JetBlue Airways,0,24,0,0,0,24,24,901,,,7813396,,,594150,false,B6
+2010,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,377,111,55,27,81,564,383,3575,1039,444,2018689,103731,7733,0,false,YV
+2011,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,247,52,21,4,37,352,290,2897,775,445,2080943,93007,13138,0,false,YV
+2011,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,421,23,39,4,54,541,416,2125,349,131,1794852,135053,0,0,false,YV
+2011,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,253,52,43,4,35,387,268,2953,763,880,2097955,93305,6015,0,false,YV
+2011,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,363,81,39,7,12,495,367,2226,564,1132,1844739,209901,12145,0,false,YV
+2012,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,320,92,19,1,14,446,370,1900,307,1227,1877874,233881,32816,300,false,YV
+2012,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,265,146,35,2,33,481,346,2566,15,1266,1863476,187933,43941,9063,false,YV
+2012,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,296,121,59,0,14,490,459,1637,26,1608,1957583,180031,70999,3900,false,YV
+2012,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,379,107,29,3,11,512,464,1510,17,1263,1899862,226733,70459,5180,false,YV
+2013,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,314,190,11,0,24,539,503,1202,5,776,1834793,185536,132105,4224,false,YV
+2013,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,441,159,28,2,18,648,597,1725,7,1213,2156621,295441,103604,0,false,YV
+2013,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,348,102,23,5,39,517,404,1907,7,1123,2298325,192092,87711,0,false,YV
+2013,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,269,220,17,0,12,518,479,1915,11,957,2111954,195611,221217,0,false,YV
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,1,0,0,0,1,1,803,77,174,1449088,0,0,0,true,YV
+2018,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,2,5,0,40,0,47,47,2413,123,185,2864946,0,16214,0,false,YV
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,0,0,0,0,1,1,883,233,147,1744496,0,0,0,true,YV
+2018,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,6,0,3,0,10,10,1722,277,160,3378023,0,7530,0,false,YV
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,1007,406,173,1907092,0,0,0,true,YV
+2018,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,5,0,46,0,51,51,2581,456,199,3604845,0,26409,0,false,YV
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,3,0,3,3,837,487,172,1876019,0,0,0,true,YV
+2018,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,15,0,86,0,101,101,2047,558,188,3536496,0,16315,0,false,YV
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,966,310,172,1635422,0,0,0,true,YV
+2019,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,24,0,461,0,485,485,3864,366,231,3288521,0,73063,0,false,YV
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,1134,268,78,1859073,0,0,0,true,YV
+2019,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,20,0,293,0,314,314,2836,322,244,3589375,260,53301,0,false,YV
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,1,0,0,0,1,1,956,212,90,1863733,0,451,0,true,YV
+2019,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,16,0,72,0,88,88,1861,259,109,3599017,0,15233,0,false,YV
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,10,0,0,0,10,10,713,217,107,1842690,0,0,0,true,YV
+2019,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,2,31,0,69,0,102,102,1428,257,128,3528613,1236,42306,0,false,YV
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,531,71,58,1331284,0,0,0,true,YV
+2020,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,10,0,8,0,18,18,962,83,84,2681520,0,7015,0,false,YV
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,1,6,5,275133,0,0,0,true,YV
+2020,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,11,0,0,0,12,12,95,6,5,536745,0,2004,0,false,YV
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,11,14,27,715706,0,0,0,true,YV
+2020,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,12,0,0,0,12,12,226,14,36,1390249,0,3182,0,false,YV
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,47,123,31,915698,0,0,0,true,YV
+2020,12,4,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,1,0,2,0,3,3,170,132,41,1769553,0,0,0,false,YV
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,0,0,0,0,0,0,73,,,837668,,,0,true,YV
+2021,3,1,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,5,0,0,0,6,6,359,,,1625143,,,0,false,YV
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,1,0,6,0,7,7,434,,,1281476,,,0,true,YV
+2021,6,2,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,31,0,8,0,40,40,808,,,2494135,,,0,false,YV
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,0,1,0,4,0,5,5,466,,,1530582,,,0,true,YV
+2021,9,3,,,,,,YV,20378,Mesa Airlines Inc.,YV,Mesa Airlines Inc.,1,20,0,5,0,26,26,873,,,2721574,,,1938,false,YV
+2018,3,1,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,1,15,0,6,0,22,22,2416,142,58,3210770,741,14906,0,false,OH
+2018,6,2,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,1,19,0,12,0,32,32,2554,117,32,3485505,0,14012,0,false,OH
+2018,9,3,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,0,24,0,18,0,42,42,2006,66,54,3404018,0,15948,0,false,OH
+2018,12,4,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,5,70,0,138,0,213,213,2356,154,54,3421745,675,69897,0,false,OH
+2019,3,1,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,1,75,0,184,7,267,260,3166,142,122,3412630,110,67141,0,false,OH
+2019,6,2,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,3,117,0,367,0,487,487,4264,202,191,3905385,2330,133013,0,false,OH
+2019,9,3,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,7,152,0,180,0,339,339,3027,156,205,3810183,3237,143846,0,false,OH
+2019,12,4,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,3,86,0,370,0,459,459,2683,82,410,3816412,1028,87291,0,false,OH
+2020,3,1,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,3,83,0,118,0,204,204,1291,77,131,3039515,854,92679,0,false,OH
+2020,6,2,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,0,39,0,0,0,39,39,226,8,3,852181,0,11549,0,false,OH
+2020,9,3,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,5,67,0,1,0,73,73,625,29,11,1961845,611,24359,0,false,OH
+2020,12,4,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,0,6,0,13,0,19,19,360,25,42,2083641,788,6707,0,false,OH
+2021,3,1,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,0,8,0,0,0,8,8,599,,,1922953,,,0,false,OH
+2021,6,2,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,9,62,4,40,0,115,111,1342,,,3420512,,,0,false,OH
+2021,9,3,,,,,,OH,20397,PSA Airlines Inc.,OH,PSA Airlines Inc.,2,73,1,93,0,169,168,1830,,,3513875,,,2076,false,OH
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,745,1375,1192,588586,0,0,0,true,YX
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,895,569,1073,1536052,0,0,0,true,YX
+2018,3,1,,,,,,YX,20452,Republic Airline,YX,Republic Airline,0,24,0,8,0,32,32,2613,2140,2194,4050777,0,31807,0,false,YX
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,2,0,2,0,1238,1634,1723,810241,0,0,0,true,YX
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,2,0,1,0,3,3,1087,667,1516,1827387,0,0,0,true,YX
+2018,6,2,,,,,,YX,20452,Republic Airline,YX,Republic Airline,0,18,0,12,0,30,28,3876,2560,2983,4890213,0,31878,0,false,YX
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2219,1766,1890,774603,0,0,0,true,YX
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1485,695,1385,1734779,0,0,0,true,YX
+2018,9,3,,,,,,YX,20452,Republic Airline,YX,Republic Airline,0,29,0,2,0,31,31,4954,2725,4228,4619387,0,22071,0,false,YX
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1751,1867,1338,855098,0,0,0,true,YX
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1017,713,549,1645882,0,0,0,true,YX
+2018,12,4,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,88,0,14,0,103,103,4275,2934,2167,4548762,0,90411,0,false,YX
+2019,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1126,1538,1237,735011,0,0,0,true,YX
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,1,0,0,0,1,1,872,561,423,1500034,0,0,0,true,YX
+2019,3,1,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,67,0,12,0,80,80,3713,2224,1718,4183267,0,66823,0,false,YX
+2019,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2386,2377,1869,972309,0,0,0,true,YX
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1485,346,738,1722170,0,0,0,true,YX
+2019,6,2,,,,,,YX,20452,Republic Airline,YX,Republic Airline,6,117,0,39,0,162,162,6321,3004,2698,5010539,1930,84064,0,false,YX
+2019,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2310,2575,2052,936427,0,0,0,true,YX
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,1477,552,743,1718300,0,0,0,true,YX
+2019,9,3,,,,,,YX,20452,Republic Airline,YX,Republic Airline,2,108,0,109,0,219,219,5378,3231,2868,4900415,660,84743,0,false,YX
+2019,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2398,2655,1668,1000890,0,0,0,true,YX
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,1,0,0,0,1,1,709,291,524,1701831,0,0,0,true,YX
+2019,12,4,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,77,0,42,0,120,120,3532,2742,1688,3218312,0,77484,0,false,YX
+2020,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,874,2430,1204,828294,0,0,0,true,YX
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,2,0,0,0,2,2,430,150,412,1252404,0,0,0,true,YX
+2020,3,1,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,57,0,27,0,85,85,1101,1009,642,3098354,0,57607,0,false,YX
+2020,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,11,104,14,40796,0,0,0,true,YX
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,13,0,105,199257,0,0,0,true,YX
+2020,6,2,,,,,,YX,20452,Republic Airline,YX,Republic Airline,2,17,0,2,0,21,21,81,105,119,592187,0,5907,0,false,YX
+2020,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2,346,97,197973,0,0,0,true,YX
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,5,0,53,699373,0,0,0,true,YX
+2020,9,3,,,,,,YX,20452,Republic Airline,YX,Republic Airline,0,49,0,13,0,62,62,303,372,160,1865200,0,27608,0,false,YX
+2020,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,25,962,210,404238,0,0,0,true,YX
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,14,56,166,856347,0,0,0,true,YX
+2020,12,4,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,2,0,18,0,21,21,217,1019,377,2613252,0,3409,0,false,YX
+2021,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,152,,,805127,,,82100,true,YX
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,93,,,842741,,,0,true,YX
+2021,3,1,,,,,,YX,20452,Republic Airline,YX,Republic Airline,3,28,0,0,0,31,31,766,,,3171190,,,82100,false,YX
+2021,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,920,,,1509387,,,598410,true,YX
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,417,,,1195078,,,0,true,YX
+2021,6,2,,,,,,YX,20452,Republic Airline,YX,Republic Airline,4,83,0,24,0,111,111,2855,,,5160977,,,598410,false,YX
+2021,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,0,0,0,0,0,0,2907,,,1466462,,,2461067,true,YX
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,YX,20452,Republic Airline,YX,Republic Airline,0,6,0,4,0,10,10,897,,,1523184,,,0,true,YX
+2021,9,3,,,,,,YX,20452,Republic Airline,YX,Republic Airline,1,111,0,63,3,178,178,5164,,,5525714,,,2468387,false,YX
+2010,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,64,266,4,11,1,346,338,11301,7934,1976,6006681,8802,96034,800,false,OO
+2011,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,69,371,4,5,4,453,445,14697,5606,1538,5714175,7143,130613,0,false,OO
+2011,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,55,269,4,0,8,336,324,11295,6384,1633,6210623,5477,95390,0,false,OO
+2011,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,77,358,8,6,33,482,442,12506,8920,2641,6624658,16706,191803,1200,false,OO
+2011,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,60,331,4,4,7,406,392,10520,5545,2190,6009979,23996,255294,0,false,OO
+2012,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,145,790,17,11,9,972,932,11901,4050,1809,5942158,77404,584554,13518,false,OO
+2012,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,199,1255,82,87,7,1630,1535,10932,4556,775,6637699,105792,729869,43003,false,OO
+2012,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,172,1247,38,92,28,1577,1471,10281,6236,796,6868429,105927,797701,30590,false,OO
+2012,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,111,1484,67,133,16,1811,1628,11119,6405,1338,6419001,85752,923142,34143,false,OO
+2013,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,96,1508,67,143,29,1843,1711,10542,4276,1451,6314061,68265,958616,35332,false,OO
+2013,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,145,1017,83,101,90,1436,1252,8049,5277,1432,6875131,91390,677668,0,false,OO
+2013,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,160,1053,41,48,26,1328,1252,7137,5173,1262,6933277,79798,760003,0,false,OO
+2013,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,219,1722,97,82,41,2161,2048,10214,4002,1319,6395843,118733,1294969,0,false,OO
+2014,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,160,1745,66,637,22,2629,2540,11956,3684,1272,6149038,55620,1800011,0,false,OO
+2014,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,210,1362,51,188,25,1836,1754,10717,5633,1121,6861891,72698,1152893,0,false,OO
+2014,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,83,1041,37,193,19,1373,1289,8493,7207,1156,6752821,23742,765989,0,false,OO
+2014,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,64,913,39,305,11,1332,1231,11280,4538,1054,6656843,18254,567210,2600,false,OO
+2015,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,83,1185,45,297,20,1630,1496,14041,3970,1166,6458573,22661,726888,730,false,OO
+2015,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,29,875,46,777,12,1739,1606,13941,4572,1337,7403792,5797,633954,0,false,OO
+2015,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,29,657,13,213,12,924,866,12951,5889,1633,7710341,11040,503652,0,false,OO
+2015,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,30,554,13,177,12,786,640,10896,4973,2027,6990054,12436,427568,0,false,OO
+2016,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,28,500,22,154,5,709,596,9537,4007,1948,6858709,10372,385672,1300,false,OO
+2016,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,30,500,23,148,13,714,632,10391,4892,1656,7755643,13859,363153,0,false,OO
+2016,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,24,584,11,124,11,754,734,10868,7562,1562,7961031,10582,394304,0,,
+2016,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,43,540,37,126,12,758,709,10680,5513,1576,7411535,20415,350807,0,false,OO
+2017,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,30,479,25,81,7,622,595,11543,3581,1955,7201623,14526,502729,0,false,OO
+2017,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,11,146,8,51,1,217,205,8061,4928,2841,8351684,4302,134789,0,false,OO
+2017,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,6,68,0,2,2,78,74,7741,7054,3528,8963047,2663,42242,0,false,OO
+2017,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,2,48,1,15,2,68,62,7800,4841,3049,8776536,388,48689,0,false,OO
+2018,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,1,1,0,0,2,1,3600,5398,1715,3090524,0,1350,0,true,OO
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,9,0,0,4,13,9,2966,758,114,3123298,0,4050,0,true,OO
+2018,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,29,1,54,4,88,64,7816,3944,5449,8060076,0,51105,0,false,OO
+2018,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,1,1,2,0,3611,6089,1937,3520084,0,0,0,true,OO
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,2,0,0,0,2,2,2253,1278,120,3557763,0,0,0,true,OO
+2018,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,112,0,92,2,206,114,7413,4367,5884,9125575,0,27991,0,false,OO
+2018,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,2903,8222,2590,3788704,0,0,0,true,OO
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,5,0,0,0,5,5,3016,2268,79,3770661,0,1177,0,true,OO
+2018,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,70,0,22,3,95,92,7264,5034,4450,9676146,0,47029,0,false,OO
+2018,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,2256,8727,2285,3708194,0,0,0,true,OO
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,4,0,0,0,4,4,2243,849,90,3439399,0,1016,0,true,OO
+2018,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,56,0,104,0,160,160,5977,2803,2904,9210026,0,62112,0,false,OO
+2019,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,2,0,2,0,767,7169,2737,3461197,0,0,0,true,OO
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,2,1,0,0,3,3,4591,910,174,3105679,0,752,0,true,OO
+2019,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,2,80,1,150,0,233,231,7163,8284,2961,8697930,0,78922,0,false,OO
+2019,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,11591,9106,2987,4120933,0,0,0,true,OO
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,2,0,0,0,2,2,3510,1163,102,3716699,0,921,0,true,OO
+2019,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,1,84,0,124,4,213,209,17228,10697,3268,10320910,675,76057,0,false,OO
+2019,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,9562,9128,2178,4115434,0,0,0,true,OO
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,1,0,0,0,1,1,3739,1032,100,3824514,0,1140,0,true,OO
+2019,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,1,64,0,136,2,203,201,14794,10377,2327,10472196,100,114613,0,false,OO
+2019,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,9507,9286,2137,3896257,0,0,0,true,OO
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,2752,652,130,3710262,0,0,0,true,OO
+2019,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,3,37,0,76,0,116,116,13524,10087,2298,10085483,0,66798,0,false,OO
+2020,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,1,0,4,0,5,1,6042,7176,1524,3430561,0,392,0,true,OO
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,1,0,0,0,1,2,1,2834,223,129,2919221,0,0,0,true,OO
+2020,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,4,55,0,151,1,211,206,9991,7525,1942,8355310,1360,134266,0,false,OO
+2020,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,247,2764,172,436381,0,0,0,true,OO
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,25,24,13,615459,0,0,0,true,OO
+2020,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,4,28,0,0,4,36,32,464,2813,190,1642807,0,6471,0,false,OO
+2020,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,425,4243,779,1355165,0,0,0,true,OO
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,380,29,102,1952763,0,0,0,true,OO
+2020,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,1,30,0,2,0,33,33,1069,4290,906,4650686,0,10777,0,false,OO
+2020,12,4,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,371,5590,926,1304622,0,0,0,true,OO
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,211,249,101,2407499,0,0,0,true,OO
+2020,12,4,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,5,0,0,0,5,5,720,5855,1061,5122330,0,3148,0,false,OO
+2021,3,1,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,969,,,1670694,,,614600,true,OO
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,758,,,2210832,,,0,true,OO
+2021,3,1,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,1,25,0,0,0,26,26,2295,,,5427962,,,614600,false,OO
+2021,6,2,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,1123,,,2991760,,,721849,true,OO
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,5,0,0,0,5,5,1308,,,3334302,,,0,true,OO
+2021,6,2,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,84,0,2,0,86,86,3592,,,8943583,,,721849,false,OO
+2021,9,3,DL,19790,Delta Air Lines Inc.,DL,Delta Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,3566,,,3643751,,,2445185,true,OO
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,0,0,0,0,0,0,1965,,,4051483,,,0,true,OO
+2021,9,3,,,,,,OO,20304,SkyWest Airlines Inc.,OO,SkyWest Airlines Inc.,0,31,0,6,0,37,37,6743,,,10489689,,,2446525,false,OO
+2010,12,4,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,931,0,115,1,157,1204,931,11122,0,2356,13192128,399937,0,0,false,US
+2010,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,728,484,0,0,850,2062,1212,16548,0,0,27178950,327959,219471,0,false,WN
+2011,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,760,787,0,0,620,2167,1547,16228,0,0,25637423,360544,394029,0,false,WN
+2011,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,757,683,0,0,662,2102,1440,15391,0,0,28919972,359121,343588,0,false,WN
+2011,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,524,320,0,0,739,1583,844,14335,0,0,28539135,275991,163491,0,false,WN
+2011,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,447,305,0,0,612,1364,752,11201,0,0,27712179,371310,222999,0,false,WN
+2012,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,802,356,0,0,806,1964,1158,14755,0,0,26029507,645399,298244,0,false,WN
+2012,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1284,528,0,0,1278,3090,1812,21474,0,0,29290547,1044307,453781,0,false,WN
+2012,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,867,363,0,0,1111,2341,1230,19272,0,0,29334383,682792,303985,0,false,WN
+2012,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,788,370,0,0,937,2095,1158,13851,0,0,27876734,692490,345494,0,false,WN
+2013,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1486,662,0,0,1037,3185,2148,17307,0,0,26269242,1346156,624418,0,false,WN
+2013,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,2077,1172,0,0,1289,4538,3249,26487,0,0,30575862,1665020,946298,0,false,WN
+2013,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,991,465,0,0,1094,2550,1456,22614,0,0,29421835,844964,386798,0,false,WN
+2013,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,647,216,0,0,1085,1948,863,14512,0,0,29378897,548943,187944,0,false,WN
+2014,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1444,840,0,0,1091,3375,2284,17750,0,0,28019628,1239138,782741,0,false,WN
+2014,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1612,710,0,0,1283,3605,2322,26341,0,0,22614856,1385643,629808,0,false,WN
+2014,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1308,500,0,0,1389,3197,1808,24822,0,0,33271343,1108338,417833,0,false,WN
+2014,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,624,227,0,0,1013,1864,851,13126,0,0,32903774,546400,187589,0,false,WN
+2015,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1496,647,0,0,1183,3326,2143,20641,0,0,31993058,1339153,580043,0,false,WN
+2015,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,2096,822,0,0,1518,4436,2918,29084,0,0,37496853,1810981,725435,0,false,WN
+2015,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,2241,776,0,0,1396,4413,3017,27315,0,0,37603390,1954266,657812,0,false,WN
+2015,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1502,626,0,0,1305,3433,2128,19473,0,0,36839451,1347420,541328,0,false,WN
+2016,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1483,417,0,0,1216,3116,1900,18278,0,0,34393320,1338902,378987,0,false,WN
+2016,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,2045,753,0,0,1411,4209,2798,26987,0,0,39198316,1797853,697735,0,false,WN
+2016,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,2158,1132,0,0,1292,4582,3290,24247,0,0,38561412,1794329,990799,0,,
+2016,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1511,462,0,0,1099,3072,1973,19116,0,0,38502306,1334335,373531,0,false,WN
+2017,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1173,483,0,0,881,2537,1656,16205,0,0,35246083,1081485,466054,0,false,WN
+2017,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,1095,756,0,0,791,2642,1851,11976,0,0,40991267,1019235,708543,0,false,WN
+2017,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,393,356,0,0,750,1499,749,3908,0,0,39751638,329743,278310,0,false,WN
+2017,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,273,483,0,0,845,1601,756,4393,0,0,39969392,237823,497462,0,false,WN
+2018,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,312,357,0,0,0,669,669,4325,0,0,37042370,271583,283290,0,false,WN
+2018,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,109,267,0,0,0,376,376,6039,0,0,42329176,111223,246495,0,false,WN
+2018,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,273,694,0,0,0,967,967,6570,0,0,40839016,251415,624266,0,false,WN
+2018,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,116,295,0,0,0,411,411,4688,0,0,41306125,122092,294781,0,false,WN
+2019,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,334,1260,0,0,0,1594,1594,9996,0,0,37409141,287062,1100908,0,false,WN
+2019,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,233,698,0,0,0,931,931,12368,0,0,42176361,220672,672653,0,false,WN
+2019,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,122,192,0,0,0,314,314,4806,0,0,40777514,100383,165387,0,false,WN
+2019,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,116,153,0,0,0,269,269,4339,0,0,40839000,89474,151097,0,false,WN
+2020,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,29,83,0,0,0,112,112,2355,0,0,29539107,24575,86174,0,false,WN
+2020,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,48,62,0,0,0,110,110,1108,0,0,7058890,39514,59904,0,false,WN
+2020,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,25,123,0,0,0,148,148,937,,,15080946,15640,90103,0,false,WN
+2020,12,4,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,13,15,0,0,0,28,28,487,,,15891567,9497,9433,0,false,WN
+2021,3,1,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,72,120,0,0,0,192,192,1439,,,17846213,,,0,false,WN
+2021,6,2,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,291,1023,0,0,0,1314,1314,9008,,,32534837,,,0,false,WN
+2021,9,3,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,WN,19393,Southwest Airlines Co.,WN,Southwest Airlines Co.,265,942,0,0,0,1207,1207,10242,,,36276768,,,0,false,WN
+2015,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,1,80,0,33,0,114,81,1441,0,119,3728874,524,34065,0,false,NK
+2015,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,3,190,0,431,0,624,193,1966,0,125,4208617,3012,128027,0,false,NK
+2015,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,67,0,142,0,209,67,1124,0,59,4441767,0,36995,0,false,NK
+2015,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,123,0,112,0,235,123,1139,0,122,4410192,0,81269,0,false,NK
+2016,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,1,131,1,350,0,483,132,1312,0,147,4704094,448,88696,0,false,NK
+2016,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,4,228,0,336,0,568,232,1856,0,133,5242171,1853,131961,0,false,NK
+2016,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,1,180,0,166,272510,181,181,1411,0,48,5053081,492,96091,0,,
+2016,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,125,2,69,0,196,125,1167,0,97,5052694,0,86945,0,false,NK
+2017,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,7,446,0,302,0,755,349,1735,0,108,5084347,3051,237957,0,false,NK
+2017,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,6,514,0,999,0,1519,366,3392,0,162,5838917,2354,247407,0,false,NK
+2017,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,2,359,0,874,0,1235,177,983,0,159,5956218,445,88631,0,false,NK
+2017,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,21,658,0,465,0,1144,331,4198,0,222,5804607,11802,198745,0,false,NK
+2018,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,9,736,0,129,0,874,369,5477,0,304,6180877,5934,245967,0,false,NK
+2018,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,413,0,35,0,448,217,4852,0,217,7061549,0,142390,0,false,NK
+2018,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,3,160,1,0,0,164,163,5718,0,297,7328762,1416,67801,0,false,NK
+2018,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,9,34,0,0,0,43,43,5417,0,273,6897416,2874,24758,0,false,NK
+2019,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,5,21,0,20,0,46,26,6768,0,257,7265473,1923,14242,0,false,NK
+2019,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,5,139,0,5,0,149,144,5642,0,156,8335320,2001,104348,0,false,NK
+2019,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,43,1,20,0,64,43,4656,0,230,8390933,0,28137,0,false,NK
+2019,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,6,85,1,29,0,121,91,5575,0,319,8276219,3436,66572,0,false,NK
+2020,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,1,30,2,34,0,67,31,3592,0,320,7195275,298,18814,0,false,NK
+2020,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,2,0,0,0,2,2,80,0,160,871869,0,728,0,false,NK
+2020,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,0,0,0,0,0,0,227,0,208,4483592,0,0,0,false,NK
+2020,12,4,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,0,12,0,87,0,99,12,691,0,39,5010558,0,4778,0,false,NK
+2021,3,1,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,1,34,0,76,0,111,35,1683,,,5236309,,,0,false,NK
+2021,6,2,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,3,27,0,50,5,85,30,3131,,,7963642,,,0,false,NK
+2021,9,3,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,NK,20416,Spirit Air Lines,NK,Spirit Air Lines,2,48,0,34,0,84,50,1766,,,7797518,,,0,false,NK
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,6,0,0,0,6,6,930,0,0,574761,0,3987,0,true,AX
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,850,0,0,629121,0,0,0,true,AX
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,1,0,0,0,1,0,961,1,0,651222,0,0,0,true,AX
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,696,1,0,679057,0,0,0,true,AX
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,992,0,0,689523,0,0,0,true,AX
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,866,0,0,775025,0,0,0,true,AX
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,4,0,0,0,4,4,1319,1,0,796102,0,0,0,true,AX
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,1,0,0,0,1,1,716,0,0,757328,0,1000,0,true,AX
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,464,0,0,585826,0,0,0,true,AX
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,AX,20237,Trans States Airlines,AX,Trans States Airlines,0,0,0,0,0,0,0,0,0,0,111,0,0,0,true,AX
+2010,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,307,811,0,63,0,1181,1181,16152,27693,8550,11805553,95847,391605,7433,false,UA
+2011,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,241,828,0,124,0,1193,1193,18903,25127,7242,10504227,86652,369933,10889,false,UA
+2011,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,161,624,0,224,0,1009,1009,20817,32661,8621,11791428,64550,345483,10324,false,UA
+2011,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,337,841,0,278,0,1456,1456,20197,29810,14738,12287697,181257,561880,27964,false,UA
+2011,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,165,610,0,134,3,912,912,13413,16892,10147,10601398,124410,559211,12000,false,UA
+2012,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,167,2589,59,171,98,3084,2853,21120,11652,8158,17850152,87919,1545480,30399,false,UA
+2012,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,204,2792,79,1206,169,4450,4151,22500,9228,2852,21099463,81078,2104776,95183,false,UA
+2012,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,137,2085,144,1553,95,4014,3767,22443,13866,2903,21082126,118500,1657551,84382,false,UA
+2012,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,13,1805,45,914,69,2846,2600,13198,6660,2985,18696707,52076,1553151,41206,false,UA
+2013,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,10,1896,79,542,65,2592,2395,14093,8585,3187,18143463,35499,1637309,64527,false,UA
+2013,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,39,1028,38,701,50,1856,1747,12781,6989,3577,19942776,29304,973137,0,false,UA
+2013,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,51,1043,21,762,89,1966,1817,13768,10341,3147,20156960,20839,1032390,0,false,UA
+2013,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,96,1585,95,750,75,2601,2457,17074,5307,3107,18969272,52316,1724751,0,false,UA
+2014,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,82,2582,106,1549,76,4395,4214,21469,4526,3157,17894200,48866,2829406,0,false,UA
+2014,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,68,1090,105,847,61,2171,2080,16498,5348,3220,20144390,40945,1229441,0,false,UA
+2014,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,34,729,43,695,29,1530,1466,14419,8763,2230,20332343,12698,819264,0,false,UA
+2014,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,24,555,83,281,39,982,909,12582,4855,2872,18946348,15670,510890,0,false,UA
+2015,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,42,1217,122,360,76,1817,1710,17373,5939,2537,18105638,28415,1143851,0,false,UA
+2015,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,38,877,97,600,35,1647,1581,22068,6826,3108,21166446,26044,891511,0,false,UA
+2015,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,52,655,38,578,55,1378,1306,23206,10478,2456,21879356,18721,706768,0,false,UA
+2015,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,38,766,30,614,27,1475,1403,18743,5703,2482,20930474,24980,847372,0,false,UA
+2016,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,19,379,26,489,16,929,903,14380,5777,2337,18965779,15683,458894,0,false,UA
+2016,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,25,417,52,350,27,871,824,16939,8370,2613,22035418,13572,440014,0,false,UA
+2016,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,26,464,37,518,29,1074,1031,15880,12562,2746,23436935,10346,593006,0,,
+2016,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,22,545,19,296,9,891,866,15696,5463,2865,22398395,6894,489146,0,false,UA
+2017,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,44,630,33,189,4,900,859,15917,3831,2298,20559648,22494,553290,900,false,UA
+2017,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,45,805,41,164,9,1064,1035,10931,6205,2353,24401584,38223,808521,1350,false,UA
+2017,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,1,50,4,35,13,103,88,11726,9511,2001,25069533,0,32425,581,false,UA
+2017,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,25,0,14,5,44,38,8483,2820,1768,23766600,0,19812,2400,false,UA
+2018,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,11,0,16,0,27,27,8214,3274,1808,21314280,0,4027,1111,false,UA
+2018,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,8,2,3,4,17,12,8615,4222,1956,25966562,0,7239,0,false,UA
+2018,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,15,0,8,3,26,22,11339,6781,1618,27080182,0,10952,0,false,UA
+2018,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,1,7,0,2,13,23,10,7556,2781,1838,25234539,0,3462,0,false,UA
+2019,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,7,0,0,10,17,7,8856,2254,1901,22660404,0,0,0,false,UA
+2019,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,1,6,0,12,9,28,19,11394,4058,1923,27015815,0,3088,0,false,UA
+2019,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,5,0,0,2,7,5,9110,5501,1593,26963748,0,516,0,false,UA
+2019,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,10,0,0,3,13,10,5668,3187,1819,25141731,0,0,0,false,UA
+2020,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,0,0,0,7,7,0,2842,1894,1275,18412040,0,0,0,false,UA
+2020,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,0,0,0,0,0,0,8,24,72,1333318,0,0,0,false,UA
+2020,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,8,0,0,0,8,8,76,143,587,5211611,0,8100,0,false,UA
+2020,12,4,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,5,0,0,0,5,5,289,581,881,8860807,0,6436,0,false,UA
+2021,3,1,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,0,0,0,0,0,0,591,,,8723919,,,0,false,UA
+2021,6,2,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,1,0,4,0,5,5,1341,,,14619155,,,0,false,UA
+2021,9,3,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,UA,19977,United Air Lines Inc.,UA,United Air Lines Inc.,0,6,0,0,0,6,6,2864,,,20131527,,,0,false,UA
+2011,3,1,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,992,0,73,0,112,1177,992,11360,0,2136,12705868,480799,0,0,false,US
+2011,6,2,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,1299,0,157,7,127,1590,1299,11524,0,3366,14011454,619353,0,0,false,US
+2011,9,3,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,892,0,76,6,146,1120,892,8767,0,3890,13743223,384252,0,0,false,US
+2011,12,4,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,996,0,69,5,86,1156,996,8325,0,2872,13334767,792310,0,0,false,US
+2012,3,1,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,832,0,52,10,80,974,832,7475,0,2261,13514441,714486,0,0,false,US
+2012,6,2,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,927,0,46,0,100,1073,927,6791,0,3002,14144925,779145,0,0,false,US
+2012,9,3,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,808,0,61,1,119,989,808,7100,0,4280,14000602,635726,0,0,false,US
+2012,12,4,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,625,0,38,0,56,719,625,6398,0,2602,13577101,540853,0,0,false,US
+2013,3,1,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,896,0,58,6,46,1006,896,6399,0,2216,13761795,779747,0,0,false,US
+2013,6,2,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,773,0,91,7,114,985,773,8011,0,3262,14993178,599843,0,0,false,US
+2013,9,3,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,559,0,86,5,106,756,559,6816,0,4088,14851237,461618,0,0,false,US
+2013,12,4,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,643,0,67,10,64,784,643,6045,0,2237,14228483,566823,0,0,false,US
+2014,3,1,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,252,635,119,31,88,1125,887,6837,2512,0,14051796,113265,717252,0,false,US
+2014,6,2,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,679,765,80,3,81,1608,1444,8810,1852,0,15449001,284831,835914,0,false,US
+2014,9,3,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,75,359,0,297,64,795,731,5500,3178,0,14994856,11841,342664,0,false,US
+2014,12,4,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,63,365,0,300,27,755,728,4625,2149,0,14187328,13688,325554,0,false,US
+2015,3,1,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,118,704,0,341,62,1225,1163,5554,3307,73,15061853,32163,658690,0,false,US
+2015,6,2,,,,,,US,20355,US Airways Inc.,US,US Airways Inc.,91,731,0,304,30,1156,1126,6323,2622,44,16073671,18792,695300,0,false,US
+2012,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,2,0,0,0,10,12,3,14,0,0,1402246,2256,700,7651,false,VX
+2012,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,0,0,0,0,4,4,0,3,1,1,1600351,0,0,825,false,VX
+2012,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,5,4,0,0,2,11,9,2,1,0,1663716,1000,2600,500,false,VX
+2012,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,12,0,3,0,3,18,12,30,19,31,1499063,6662,401,6853,false,VX
+2013,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,10,0,1,0,0,11,10,119,17,4,1319210,4229,2900,35639,false,VX
+2013,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,12,0,0,3,0,12,12,68,7,0,1708688,8080,0,26836,false,VX
+2013,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,1,0,1,0,0,2,1,60,8,1,1661469,250,0,17708,false,VX
+2013,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,1,0,0,0,0,1,1,104,6,1,1555207,400,0,27816,false,VX
+2014,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,22,3,0,0,0,25,25,236,12,2,1459461,16091,4078,81732,false,VX
+2014,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,11,0,0,0,0,11,11,137,2,0,1703282,9664,0,39850,false,VX
+2014,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,5,0,0,0,0,5,5,235,9,0,1677222,8445,0,67022,false,VX
+2014,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,16,0,4,0,0,16,15,302,23,2,1598058,15760,0,111530,false,VX
+2015,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,5,0,0,0,0,5,5,286,6,0,1510065,4784,0,89522,false,VX
+2015,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,10,5,0,0,0,15,15,669,11,0,1772262,11210,3321,241103,false,VX
+2015,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,12,2,0,0,3,17,14,279,17,3,1813533,10334,566,80416,false,VX
+2015,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,43,0,0,0,0,43,43,488,36,8,1832945,50048,200,269956,false,VX
+2016,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,30,0,0,0,0,30,30,427,38,5,1739517,29852,3114,191437,false,VX
+2016,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,16,0,0,0,0,16,16,389,13,0,2050950,18232,0,153228,false,VX
+2016,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,31,0,0,0,0,31,31,948,109,1,2137471,24803,0,409781,,
+2016,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,15,0,1,0,1,17,16,611,29,2,2017391,15199,0,271828,false,VX
+2017,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,51,0,0,0,0,51,51,908,50,2,1803849,45980,0,463549,false,VX
+2017,6,2,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,94,8,7,0,2,111,103,643,24,6,2100967,81069,18356,346145,false,VX
+2017,9,3,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,3,0,0,0,0,3,3,170,35,0,2185213,3838,0,900073,false,VX
+2017,12,4,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,61,2,8,0,0,71,71,213,29,0,2193909,52338,0,114201,false,VX
+2018,3,1,VX,21171,Virgin America,VX,Virgin America,VX,21171,Virgin America,VX,Virgin America,18,0,0,4,0,22,18,89,30,1,2045185,16098,0,41000,false,VX
+2011,3,1,,,,,,OW,,,,,9,7,0,61,0,77,77,428,0,0,526952,1307,2400,0,false,OW
+2019,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,6,348,0,1448,7,1809,1802,14914,575,352,13094377,110,372222,0,true,AA
+2019,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,113,0,1,2,116,113,814,158,8,2502296,0,93250,0,true,AS
+2019,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,6,0,0,52776,0,0,0,true,HA
+2019,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,22,464,0,1434,9,1929,1920,16503,834,696,15183390,7735,457223,0,true,AA
+2019,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,117,0,0,5,122,117,1047,586,3,2749500,0,115527,0,true,AS
+2019,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,4,0,0,57004,0,0,0,true,HA
+2019,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,23,586,0,982,0,1591,1591,11634,588,413,15114574,8483,580273,0,true,AA
+2019,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,57,0,0,3,60,57,700,183,1,2826987,0,54747,0,true,AS
+2019,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,3,0,0,55769,0,0,0,true,HA
+2019,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,14,348,0,1216,0,1578,1578,9417,337,517,14825816,2264,458308,0,true,AA
+2019,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,49,0,0,5,54,49,906,123,2,2837052,0,37006,0,true,AS
+2019,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,12,0,0,50602,0,0,0,true,HA
+2020,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,8,254,0,785,0,1047,1047,6272,269,507,11606872,2889,415160,0,true,AA
+2020,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,42,0,0,3,45,42,429,77,4,2200742,0,24169,0,true,AS
+2020,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,7,0,0,41713,0,0,0,true,HA
+2020,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,12,105,0,7,0,124,124,801,39,20,2886418,0,34051,0,true,AA
+2020,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,41,0,0,4,45,41,113,2,0,640409,0,24484,0,true,AS
+2020,6,2,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,7,0,0,5921,0,0,0,true,HA
+2020,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,15,255,0,85,0,355,355,2319,103,57,6810260,1000,111076,0,true,AA
+2020,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,0,0,0,4,4,0,0,0,1,1529125,0,0,0,true,AS
+2020,9,3,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,0,0,0,10866,0,0,0,true,HA
+2020,12,4,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,3,28,0,47,0,78,78,1395,65,91,7755943,788,29602,0,true,AA
+2020,12,4,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,1,0,0,0,1,1,7,0,0,1359127,0,226,0,true,AS
+2020,12,4,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,0,0,0,7641,0,0,0,true,HA
+2021,3,1,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,6,83,0,15,0,104,104,3354,,,8034815,,,0,true,AA
+2021,3,1,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,18,0,0,0,18,18,152,,,1604818,,,0,true,AS
+2021,3,1,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,HA,19690,Hawaiian Airlines Inc.,HA,Hawaiian Airlines Inc.,0,0,0,0,0,0,0,0,,,1502,,,0,true,HA
+2021,6,2,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,18,318,5,139,0,480,475,6169,,,13239499,,,0,true,AA
+2021,6,2,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,77,0,0,0,77,77,1129,,,2650265,,,0,true,AS
+2021,9,3,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,AA,19805,American Airlines Inc.,AA,American Airlines Inc.,6,308,1,187,6,508,507,6286,,,13805973,,,24946,true,AA
+2021,9,3,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,AS,19930,Alaska Airlines Inc.,AS,Alaska Airlines Inc.,0,63,0,0,0,63,63,752,,,2845055,,,1196,true,AS
