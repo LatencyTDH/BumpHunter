@@ -152,6 +152,6 @@ describe('Cascade Boost scoring', () => {
     const result = await scoreFlights('ATL', 'LGA', '2026-04-14');
     const flight = result.flights[0];
     const cascade = flight.factorsDetailed.find(f => f.name === 'Cascade Boost');
-    expect(cascade?.score).toBe(15);
+    expect(cascade?.score).toBe(13);
   });
 });
