@@ -1,20 +1,168 @@
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+
+# BumpHunter
+
+**Find overbooked flights. Get paid to give up your seat.**
+
+A flight overbooking strategy app that identifies voluntary denied boarding (VDB) compensation opportunities using real-time weather data, DOT statistics, and historical airline patterns.
+
+[![Live Weather](https://img.shields.io/badge/data-aviationweather.gov-blue)](https://aviationweather.gov)
+[![BTS Data](https://img.shields.io/badge/data-DOT%20BTS-green)](https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb)](https://react.dev/)
+
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## What Is This?
 
-View your app in AI Studio: https://ai.studio/apps/016dc5f6-10eb-420d-be11-07ae24434108
+Airlines routinely oversell flights — they book more passengers than seats, betting some won't show up. When everyone shows up, they need **volunteers** to take a later flight in exchange for compensation (often $500–$1,500+ in travel vouchers or cash).
 
-## Run Locally
+**BumpHunter** turns this into a strategy game. It analyzes real data to predict which flights are most likely to be oversold, so you can book those flights intentionally and volunteer to get bumped — pocketing the compensation.
 
-**Prerequisites:**  Node.js
+## Features
 
+### 🎯 Command Center
+Real-time dashboard showing live weather disruptions across major US hubs (ATL, DFW, EWR, ORD, DEN, LAS, LGA, JFK, MCO, CLT). Weather data pulled directly from **aviationweather.gov** METAR reports — thunderstorms, low visibility, and high winds all create cascading delays that lead to oversold flights.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### ✈️ Flight Scanner
+Search any route and date to find flights ranked by **bump probability**. The scoring algorithm combines 8 real data factors (see below) to identify your best opportunities. Results show airline, aircraft type, capacity, departure time, and a detailed breakdown of why each flight scored the way it did.
+
+### 📊 Historical Analysis
+Real denied boarding statistics from the **DOT Bureau of Transportation Statistics**:
+- **By Carrier** — VDB rates, IDB rates, load factors, and average compensation for every major US airline
+- **Quarterly Trends** — How denied boardings track across seasons (summer peaks, holiday surges)
+- **Top Oversold Routes** — The specific city pairs with the highest oversale rates
+
+### 📖 The Playbook
+Step-by-step execution guide covering the full bump-hunting lifecycle: strategic booking, check-in bidding, gate agent approach, and compensation negotiation tactics.
+
+## Scoring Algorithm
+
+Each flight receives a **bump probability score (0-98%)** based on 8 weighted factors:
+
+| Factor | Max Points | Data Source |
+|--------|-----------|-------------|
+| Carrier denied boarding rate | 15 | DOT BTS Consumer Report |
+| Route load factor | 20 | BTS T-100 Domestic Segment |
+| Day of week pattern | 15 | Historical analysis |
+| Time of day (bank position) | 15 | Schedule analysis |
+| Aircraft type & capacity | 20 | Fleet data |
+| Weather disruptions | 25 | aviationweather.gov METAR |
+| Season / holiday period | 10 | Calendar |
+| Fortress hub dynamics | 5 | Hub concentration analysis |
+
+**Base score: 25** → factors are additive → **capped at 98%**
+
+### What Makes a Flight Score High?
+
+- **Regional jets** (CRJ-900, E175) with only 76 seats oversell easily → +20 pts
+- **Last-bank departures** (after 6 PM) catch all the day's misconnections → +15 pts
+- **Thunderstorms at origin** cause ground stops and rebooking waves → +25 pts
+- **Monday/Thursday/Friday** are peak business travel days → +15 pts
+- **Delta at ATL**, **American at DFW/CLT**, **United at EWR/ORD/DEN** — fortress hubs with less competition → +5 pts
+
+## Data Sources
+
+All data is **free** — no paid API keys required:
+
+| Source | What It Provides | Cost |
+|--------|-----------------|------|
+| [aviationweather.gov](https://aviationweather.gov) | Real-time METAR weather reports for all US airports | Free, no key |
+| [DOT BTS](https://www.bts.gov) | Denied boarding rates, load factors, oversale statistics | Free (bundled) |
+| Schedule Database | Realistic flight schedules for 100+ major US routes | Built-in |
+
+The backend caches weather data aggressively (15-min TTL) and uses SQLite for the cache layer to stay well within free-tier rate limits.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript, Tailwind CSS 4, Framer Motion, Lucide icons |
+| Backend | Express 4, Node.js, TypeScript (tsx) |
+| Database | better-sqlite3 (cache layer) |
+| Data | aviationweather.gov API, bundled DOT BTS statistics |
+| Build | Vite 6, concurrently |
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** 18+ (tested with 22 and 25)
+- npm
+
+### Install & Run
+
+```bash
+git clone https://github.com/LatencyTDH/BumpHunter.git
+cd BumpHunter
+npm install
+npm run dev
+```
+
+This starts both the API server (port 3001) and Vite dev server (port 3000). Open **http://localhost:3000**.
+
+### Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start both API + frontend (recommended) |
+| `npm run dev:server` | Start only the Express API server |
+| `npm run dev:client` | Start only the Vite frontend |
+| `npm run build` | Production build |
+| `npm run lint` | TypeScript type check |
+
+### Optional: Gemini AI
+
+If you want AI-powered analysis, add your Gemini API key:
+
+```bash
+cp .env.example .env.local
+# Edit .env.local and set GEMINI_API_KEY
+```
+
+## API Endpoints
+
+The Express backend exposes these endpoints (proxied through Vite in dev):
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/health` | Health check |
+| `GET /api/weather/alerts?hubs=ATL,EWR` | Live weather disruptions from METAR data |
+| `GET /api/weather/metar?airports=ATL` | Raw METAR observations |
+| `GET /api/flights/search?origin=ATL&dest=LGA&date=2026-03-01` | Flight search with bump scoring |
+| `GET /api/stats/carriers` | Carrier denied boarding statistics |
+| `GET /api/stats/trends` | Quarterly denied boarding trends |
+| `GET /api/stats/routes` | Top oversold routes |
+| `GET /api/stats/summary` | Dashboard summary data |
+
+## Project Structure
+
+```
+bumphunter/
+├── server/
+│   ├── index.ts        # Express API server & routes
+│   ├── data.ts         # BTS statistics, schedules, aircraft DB
+│   ├── weather.ts      # aviationweather.gov METAR service
+│   ├── scoring.ts      # Bump probability scoring algorithm
+│   └── cache.ts        # SQLite cache layer
+├── src/
+│   ├── App.tsx         # React app with all UI components
+│   ├── api.ts          # Frontend API client
+│   ├── main.tsx        # React entry point
+│   └── index.css       # Tailwind CSS imports
+├── index.html
+├── vite.config.ts
+├── package.json
+└── tsconfig.json
+```
+
+## Legal Note
+
+Voluntary denied boarding (VDB) is a completely legal and airline-sanctioned practice. Airlines are required by DOT regulations to ask for volunteers before involuntarily denying boarding. BumpHunter simply helps you identify when volunteering is most likely to be needed — and most likely to be lucrative.
+
+## License
+
+MIT
