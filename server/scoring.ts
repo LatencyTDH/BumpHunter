@@ -1,6 +1,4 @@
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+// Note: holidays.ts handles loading holidays_events.json
 import {
   CARRIER_STATS,
   AIRCRAFT_TYPES,
@@ -22,124 +20,6 @@ import {
   type CompensationEstimate,
 } from './compensation.js';
 import { getFR24ScheduleForRoute } from './fr24.js';
-
-// =============================================================================
-// Holiday / Event Calendar — static data loaded once at startup
-// =============================================================================
-
-const __hdir = dirname(fileURLToPath(import.meta.url));
-const __holidaysPath = join(__hdir, '..', 'data', 'holidays_events.json');
-
-type HolidayFixed = {
-  name: string;
-  date: string;
-  travel_window_before: number;
-  travel_window_after: number;
-  intensity: number;
-};
-type HolidayRange = {
-  name: string;
-  date_range: [string, string];
-  intensity: number;
-};
-type EventEntry = {
-  name: string;
-  month: number;
-  airport: string;
-  intensity: number;
-  note?: string;
-};
-type HolidaysData = {
-  holidays: (HolidayFixed | HolidayRange)[];
-  events: EventEntry[];
-};
-
-const holidaysData: HolidaysData = JSON.parse(readFileSync(__holidaysPath, 'utf-8'));
-
-function _parseMonthDay(mmdd: string, year: number): Date {
-  const [m, d] = mmdd.split('-').map(Number);
-  return new Date(year, m - 1, d);
-}
-
-function _toDateOnly(d: Date): number {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-}
-
-/**
- * Holiday / Event Calendar scoring (0-15 pts).
- *
- * Checks whether a flight date falls within a holiday travel window or
- * a major-event month. Returns the single highest-scoring match (no stacking).
- */
-export function holidayEventScore(
-  flightDate: Date,
-  origin?: string,
-  dest?: string,
-): { score: number; factor: string | null } {
-  const year = flightDate.getFullYear();
-  const month = flightDate.getMonth() + 1;
-  const fd = _toDateOnly(flightDate);
-
-  let bestScore = 0;
-  let bestFactor: string | null = null;
-
-  for (const h of holidaysData.holidays) {
-    if ('date_range' in h) {
-      // Range-based entry (spring break, summer peak)
-      const rangeStart = _toDateOnly(_parseMonthDay(h.date_range[0], year));
-      const rangeEnd = _toDateOnly(_parseMonthDay(h.date_range[1], year));
-
-      if (fd >= rangeStart && fd <= rangeEnd) {
-        const score = Math.min(15, h.intensity);
-        if (score > bestScore) {
-          bestScore = score;
-          bestFactor = `${h.name} travel window`;
-        }
-      }
-    } else {
-      // Fixed ("MM-DD") or year-specific ("YYYY-MM-DD") holiday
-      let holidayDate: Date;
-      if (h.date.length > 5) {
-        const [hy, hm, hd] = h.date.split('-').map(Number);
-        if (hy !== year) continue; // wrong year for a moving holiday
-        holidayDate = new Date(hy, hm - 1, hd);
-      } else {
-        holidayDate = _parseMonthDay(h.date, year);
-      }
-
-      const windowStart = new Date(holidayDate);
-      windowStart.setDate(windowStart.getDate() - h.travel_window_before);
-      const windowEnd = new Date(holidayDate);
-      windowEnd.setDate(windowEnd.getDate() + h.travel_window_after);
-
-      const wsEpoch = _toDateOnly(windowStart);
-      const weEpoch = _toDateOnly(windowEnd);
-
-      if (fd >= wsEpoch && fd <= weEpoch) {
-        const score = Math.min(15, h.intensity);
-        if (score > bestScore) {
-          bestScore = score;
-          const displayName = h.name.replace(/\s+\d{4}$/, '');
-          bestFactor = `${displayName} travel week (DOT peak period)`;
-        }
-      }
-    }
-  }
-
-  // Events — only match when airport is specified (skip "TBD" placeholders)
-  for (const e of holidaysData.events) {
-    if (e.airport === 'TBD') continue;
-    if (month === e.month && (origin === e.airport || dest === e.airport)) {
-      const score = Math.min(15, e.intensity);
-      if (score > bestScore) {
-        bestScore = score;
-        bestFactor = `${e.name} week — ${e.airport} hub demand`;
-      }
-    }
-  }
-
-  return { score: bestScore, factor: bestFactor };
-}
 
 // =============================================================================
 // Bump Opportunity Index — Honest Scoring (0-100)
@@ -620,17 +500,9 @@ function computeBumpScore(params: {
 
   // Factor 3: Timing & Demand (0-15 pts)
   // Merges day-of-week signal with holiday/event calendar.
-  // max(dayOfWeekScore / 2, holidayScore) — holidays override weak day signals,
-  // but a strong travel-day still contributes when no holiday applies.
-  const f3dow = scoreDayOfWeek(dayOfWeek);
-  const f3hol = holidayEventScore(params.date, origin, dest);
-  const f3DowHalf = Math.round(f3dow.score / 2);
-  const f3: { score: number; factor: string | null } =
-    f3hol.score >= f3DowHalf
-      ? { score: f3hol.score, factor: f3hol.factor }
-      : { score: f3DowHalf, factor: f3dow.factor };
-  if (f3.factor) factors.push(f3.factor);
-  factorsDetailed.push({ name: 'Timing & Demand', score: f3.score, maxScore: 15, description: f3.factor || 'Midweek (lower demand)' });
+  const f3 = scoreTimingAndDemand(dayOfWeek, params.date);
+  factors.push(...f3.factors);
+  factorsDetailed.push({ name: 'Timing & Demand', score: f3.score, maxScore: 15, description: f3.factors.length > 0 ? f3.factors.join(' · ') : 'Midweek (lower demand)' });
 
   // Factor 4: Time of Day (0-10 pts)
   const f4 = scoreTimeOfDay(depTime);
