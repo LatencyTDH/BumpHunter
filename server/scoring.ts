@@ -20,7 +20,7 @@ import {
   isLastFlightOfDay,
   type CompensationEstimate,
 } from './compensation.js';
-import { getFR24ScheduleForRoute } from './fr24.js';
+import { getFR24ScheduleForRoute, getFR24ScheduleDepartures } from './fr24.js';
 import { getRouteReliability, type RouteReliability } from './otp.js';
 
 // =============================================================================
@@ -600,6 +600,21 @@ function resolveAircraft(origin: string, dest: string, carrier: string, isRegion
   return AIRCRAFT_TYPES[key] || AIRCRAFT_TYPES['B737'];
 }
 
+function parseFlightNumber(fn: string): { carrier: string; num: string } | null {
+  const match = fn.match(/^([A-Z]{2})(\d+)$/);
+  if (!match) return null;
+  return { carrier: match[1], num: match[2] };
+}
+
+function getCarrierFullName(iataCode: string): string {
+  const names: Record<string, string> = {
+    'DL': 'Delta Air Lines', 'AA': 'American Airlines', 'UA': 'United Airlines',
+    'WN': 'Southwest Airlines', 'B6': 'JetBlue Airways', 'NK': 'Spirit Airlines',
+    'F9': 'Frontier Airlines', 'AS': 'Alaska Airlines',
+  };
+  return names[iataCode] || iataCode;
+}
+
 // =============================================================================
 // Main scoring function — combines all 7 factors
 // =============================================================================
@@ -852,6 +867,211 @@ export async function scoreFlights(
     totalDepartures: routeResult.totalDepartures,
     verifiedCount: routeResult.verifiedCount,
     dataSources: routeResult.dataSources,
+    message,
+    btsDataPeriod: BTS_DATA_PERIOD,
+    btsDataWarning: BTS_DATA_WARNING,
+  };
+}
+
+// =============================================================================
+// Origin-only search — score all scheduled departures from an origin
+// =============================================================================
+
+export async function scoreOriginDepartures(origin: string, dateStr: string): Promise<ScoreResult> {
+  const originUpper = origin.toUpperCase();
+  const date = dateStr ? new Date(`${dateStr}T12:00:00`) : new Date();
+  const dayOfWeek = date.getDay();
+
+  const [originWx, originFAA] = await Promise.all([
+    getWeatherSeverity(originUpper),
+    getAirportStatus(originUpper).catch(() => null),
+  ]);
+
+  let schedule;
+  try {
+    schedule = await getFR24ScheduleDepartures(originUpper, dateStr);
+  } catch (err) {
+    return {
+      flights: [],
+      rateLimited: false,
+      openskyRateLimited: false,
+      error: String(err),
+      totalDepartures: 0,
+      verifiedCount: 0,
+      dataSources: [],
+      message: 'FR24 schedule data unavailable for this origin.',
+      btsDataPeriod: BTS_DATA_PERIOD,
+      btsDataWarning: BTS_DATA_WARNING,
+    };
+  }
+
+  if (schedule.error) {
+    return {
+      flights: [],
+      rateLimited: false,
+      openskyRateLimited: false,
+      error: schedule.error,
+      totalDepartures: 0,
+      verifiedCount: 0,
+      dataSources: [],
+      message: 'FR24 schedule data unavailable for this origin.',
+      btsDataPeriod: BTS_DATA_PERIOD,
+      btsDataWarning: BTS_DATA_WARNING,
+    };
+  }
+
+  const destWx = { score: 0, reason: null };
+  const destFAA = null;
+
+  const seenFlightNumbers = new Set<string>();
+  const routeDepTimes: Record<string, string[]> = {};
+  const scheduleFlights: Array<{
+    destination: string;
+    carrierCode: string;
+    carrierName: string;
+    flightNumber: string;
+    callsign: string;
+    departureTime: string;
+    departureTimestamp: number;
+    isRegional: boolean;
+    fr24AircraftCode: string | null;
+    trackingUrl: string;
+    operatingCarrierCode: string;
+    airline: string;
+    aircraftName: string;
+    registration: string;
+    status: string;
+    codeshares: string[];
+  }> = [];
+
+  for (const sf of schedule.flights) {
+    const parsed = parseFlightNumber(sf.flightNumber);
+    if (!parsed) continue;
+
+    const { carrier, num } = parsed;
+    if (seenFlightNumbers.has(sf.flightNumber)) continue;
+    seenFlightNumbers.add(sf.flightNumber);
+
+    const destUpper = sf.destination.toUpperCase();
+    if (!routeDepTimes[destUpper]) routeDepTimes[destUpper] = [];
+    routeDepTimes[destUpper].push(sf.depTime);
+
+    const isRegional = sf.airlineIata !== '' && sf.airlineIata !== carrier;
+    const carrierName = isRegional && sf.airline
+      ? `${sf.airline} (${getCarrierFullName(carrier)})`
+      : (sf.airline || getCarrierFullName(carrier));
+
+    const callsign = sf.callsign || `${sf.airlineIcao}${num}` || '';
+
+    scheduleFlights.push({
+      destination: destUpper,
+      carrierCode: carrier,
+      carrierName,
+      flightNumber: `${carrier} ${num}`,
+      callsign: callsign.toUpperCase(),
+      departureTime: sf.depTime,
+      departureTimestamp: sf.departureTimestamp,
+      isRegional,
+      fr24AircraftCode: sf.aircraftCode || null,
+      trackingUrl: `https://www.flightaware.com/live/flight/${callsign || carrier + num}`,
+      operatingCarrierCode: sf.airlineIata || carrier,
+      airline: sf.airline,
+      aircraftName: sf.aircraftName,
+      registration: sf.registration,
+      status: sf.isLive ? 'In Air' : (sf.status || 'Scheduled'),
+      codeshares: sf.codeshares || [],
+    });
+  }
+
+  const flights: ScoredFlight[] = [];
+
+  for (const sf of scheduleFlights) {
+    const destUpper = sf.destination;
+    const routeTimes = routeDepTimes[destUpper] || [];
+    const durationMin = estimateDuration(originUpper, destUpper);
+    const aircraft = resolveAircraft(originUpper, destUpper, sf.carrierCode, sf.isRegional, sf.fr24AircraftCode);
+    const arrTime = addMinutes(sf.departureTime, durationMin);
+
+    const { score, factors, factorsDetailed, carrierDbRate } = computeBumpScore({
+      marketingCarrier: sf.carrierCode,
+      operatingCarrier: sf.operatingCarrierCode,
+      depTime: sf.departureTime,
+      aircraft,
+      origin: originUpper,
+      dest: destUpper,
+      date,
+      dayOfWeek,
+      originWx,
+      destWx,
+      originFAA,
+      destFAA,
+      routeReliability: null, // Skip per-route BTS in flex search (too many destinations)
+      routeFrequency: routeTimes.length || 1,
+    });
+
+    const compensation = calculateCompensation(
+      originUpper, destUpper, sf.departureTime, routeTimes, durationMin,
+    );
+
+    let finalScore = score;
+    if (compensation.lastFlightOfDay) {
+      const lastFlightBonus = 8;
+      finalScore = Math.min(100, score + lastFlightBonus);
+      factors.push('🎰 Last flight of day — 400% rule if bumped ($1,550 max)');
+      factorsDetailed.push({
+        name: 'Last Flight of Day',
+        score: lastFlightBonus,
+        maxScore: 8,
+        description: 'No more flights today on this route — bumped passengers rebook tomorrow (400% rule)',
+      });
+    }
+
+    flights.push({
+      id: `${sf.callsign || sf.flightNumber}-${dateStr}`,
+      airline: sf.carrierName,
+      carrier: sf.carrierCode,
+      flightNumber: sf.flightNumber,
+      callsign: sf.callsign,
+      departure: originUpper,
+      arrival: destUpper,
+      depTime: sf.departureTime,
+      arrTime,
+      aircraft: sf.aircraftName || aircraft.name,
+      aircraftCode: sf.fr24AircraftCode || aircraft.iataCode,
+      capacity: aircraft.capacity,
+      isRegional: sf.isRegional || aircraft.isRegional,
+      bumpScore: finalScore,
+      factors,
+      factorsDetailed,
+      carrierDbRate,
+      dataSource: 'fr24-schedule',
+      verified: true,
+      verificationSource: 'fr24-schedule',
+      trackingUrl: sf.trackingUrl,
+      status: sf.status || 'Scheduled',
+      registration: sf.registration || '',
+      codeshares: sf.codeshares || [],
+      aircraftFullName: sf.aircraftName || '',
+      lastFlightOfDay: compensation.lastFlightOfDay,
+      compensation,
+    });
+  }
+
+  flights.sort((a, b) => b.bumpScore - a.bumpScore);
+
+  const topFlights = flights.slice(0, 20);
+  const message = flights.length > 0
+    ? `Showing top 20 bump opportunities from ${originUpper} (schedule-based).`
+    : `No scheduled departures found for ${originUpper} on ${dateStr}.`;
+
+  return {
+    flights: topFlights,
+    rateLimited: false,
+    openskyRateLimited: false,
+    error: schedule.error,
+    totalDepartures: flights.length,
+    verifiedCount: flights.length,
+    dataSources: ['FlightRadar24 (schedule)'],
     message,
     btsDataPeriod: BTS_DATA_PERIOD,
     btsDataWarning: BTS_DATA_WARNING,

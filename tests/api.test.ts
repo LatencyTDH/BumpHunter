@@ -49,20 +49,20 @@ describe('API Endpoints', () => {
     expect(body.timestamp).toBeDefined();
   });
 
-  it('GET /api/flights/search requires origin, dest, date params', async () => {
+  it('GET /api/flights/search requires origin and date params', async () => {
     // Missing all params
     const res1 = await fetch(`${BASE}/api/flights/search`);
     expect(res1.status).toBe(400);
     const body1 = await res1.json();
     expect(body1.error).toContain('required');
 
-    // Missing dest and date
+    // Missing date only
     const res2 = await fetch(`${BASE}/api/flights/search?origin=ATL`);
     expect(res2.status).toBe(400);
 
-    // Missing date only
-    const res3 = await fetch(`${BASE}/api/flights/search?origin=ATL&dest=LGA`);
-    expect(res3.status).toBe(400);
+    // Origin + date (no dest) should succeed
+    const res3 = await fetch(`${BASE}/api/flights/search?origin=ATL&date=2026-04-14`);
+    expect(res3.status).toBe(200);
 
     // All params provided should succeed
     const res4 = await fetch(`${BASE}/api/flights/search?origin=ATL&dest=LGA&date=2026-04-14`);
