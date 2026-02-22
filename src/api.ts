@@ -113,6 +113,13 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 // --- Types matching server responses ---
 
+export type FactorDetail = {
+  name: string;
+  score: number;
+  maxScore: number;
+  description: string;
+};
+
 export type Flight = {
   id: string;
   airline: string;
@@ -129,6 +136,7 @@ export type Flight = {
   isRegional: boolean;
   bumpScore: number;
   factors: string[];
+  factorsDetailed: FactorDetail[];
   carrierDbRate: number;
   dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
@@ -139,6 +147,19 @@ export type Flight = {
   registration: string;     // "N848DN"
   codeshares: string[];     // ["AF6825", "KE7079"]
   aircraftFullName: string; // "Airbus A321-211"
+  // Last-flight-of-day + DOT compensation
+  lastFlightOfDay: boolean;
+  compensation: {
+    lastFlightOfDay: boolean;
+    nextFlightDepTime: string | null;
+    rebookingDelayHours: number;
+    tier: 'none' | '200pct' | '400pct';
+    tierLabel: string;
+    maxCompensation: number;
+    estimatedCompensation: number;
+    compensationDisplay: string;
+    explanation: string;
+  };
 };
 
 export type WeatherAlert = {
@@ -249,7 +270,27 @@ type TopRoutesResponse = {
   dataNote: string;
 };
 
+// --- FAA Status types ---
+
+export type FAAStatus = {
+  airport: string;
+  delay: boolean;
+  delayType?: 'GDP' | 'GS' | 'CLOSURE' | 'DELAY';
+  reason?: string;
+  avgDelay?: string;
+  source?: string;
+  timestamp?: string;
+};
+
 // --- API calls ---
+
+export async function getFAAStatus(airport: string): Promise<FAAStatus> {
+  return apiFetch(`/faa/status?airport=${encodeURIComponent(airport)}`);
+}
+
+export async function getFAAStatusSafe(airport: string): Promise<ApiResult<FAAStatus>> {
+  return apiFetchSafe(`/faa/status?airport=${encodeURIComponent(airport)}`);
+}
 
 export async function searchFlights(origin: string, dest: string, date: string): Promise<FlightSearchResponse> {
   return apiFetch(`/flights/search?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}`);
