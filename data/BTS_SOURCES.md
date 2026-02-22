@@ -1,73 +1,45 @@
-# BTS Data Sources
+# BTS Data Sources — Real Datasets
 
-## Carrier Statistics (`CARRIER_STATS` in `server/data.ts`)
+All data in this directory is downloaded from official US DOT sources. **No fabricated numbers.**
 
-**Source:** DOT Bureau of Transportation Statistics — Air Travel Consumer Report  
-**URL:** https://www.transportation.gov/individuals/aviation-consumer-protection/air-travel-consumer-reports  
-**Period:** Full Year 2024 (most recent annual data as of Feb 2026)  
-**Report:** "Bumping / Oversales" section of the Air Travel Consumer Report
+## 1. Involuntary Denied Boarding (`bts_involuntary_denied_boarding.csv`)
 
-### Metrics Explained:
+- **Source:** DOT / data.transportation.gov
+- **Dataset:** "Commercial Aviation - Involuntary Denied Boarding"
+- **Socrata ID:** `xyfb-hgtv`
+- **Download URL:** https://data.transportation.gov/api/views/xyfb-hgtv/rows.csv?accessType=DOWNLOAD
+- **Records:** 899 rows, quarterly data by carrier, 2010–2021
+- **Fields used:** `MKT_CARRIER`, `TOT_BOARDING`, `TOT_DEN_BOARDING`, `COMP_PAID_1/2/3`, `YEAR`, `QUARTER`
+- **What we compute from it:**
+  - Carrier IDB rates (per 10,000 enplanements)
+  - Average compensation per IDB event
+  - Quarterly trends (boarding totals, IDB counts, compensation)
+  - Top oversold carrier rankings
 
-| Metric | Description |
-|--------|-------------|
-| `dbRate` | Total denied boardings per 10,000 enplanements |
-| `idbRate` | Involuntary denied boardings (IDB) per 10,000 enplanements |
-| `vdbRate` | Voluntary denied boardings (VDB) per 10,000 enplanements |
-| `loadFactor` | System-wide average passenger load factor (0-1 scale) |
-| `avgCompensation` | Average VDB compensation in USD |
-| `oversaleRate` | Percentage of flights with at least one oversale |
+## 2. T-100 Domestic Airports 2024 (`bts_t100_airports_2024.csv`)
 
-### Key BTS Tables Referenced:
-- **Table 1** — Oversales, denied boardings and compensation data by carrier
-- **T-100 Domestic Segment Data** — Route-level load factors and enplanement data
-- **DB-1B Coupon Data** — Market-level passenger flow data
+- **Source:** DOT BTS / ArcGIS FeatureServer
+- **Dataset:** "T-100 Domestic Market and Segment Data" (Layer 1)
+- **Query URL:** https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/T100_Domestic_Market_and_Segment_Data/FeatureServer/1/query?where=year%3D2024&outFields=*&orderByFields=passengers+DESC&resultRecordCount=500&f=json
+- **DOI:** https://doi.org/10.21949/1528019
+- **Records:** 500 airports, 2024 annual data
+- **Fields used:** `origin`, `passengers`, `departures`
+- **What we compute from it:**
+  - Airport-level load factor estimates (passengers / departures / avg_seats)
+  - Route-level load factors (average of origin + dest airport LFs)
+  - Daily departure frequency estimates for schedule generation
+  - Route importance ranking by passenger volume
 
-## Route Load Factors (`ROUTE_LOAD_FACTORS` in `server/data.ts`)
+## 3. Weather Data (live)
 
-**Source:** BTS T-100 Domestic Segment Data  
-**URL:** https://www.transtats.bts.gov/DL_SelectFields.aspx?gnoession_VQ=FMF  
-**Period:** Calendar Year 2024  
-**Method:** Segment-level load factor data aggregated by origin-destination pair, weighted by departures performed.
+- **Source:** aviationweather.gov METAR/TAF service (FAA/NWS)
+- **URL:** https://aviationweather.gov/api/data/metar
+- **Refresh:** Real-time, cached 15 minutes
+- **Handled in:** `server/weather.ts`
 
-Peak day identification based on BTS Schedule B-43 data (day-of-week distribution of passengers).
+## Known Limitations
 
-## Quarterly Trends (`QUARTERLY_TRENDS` in `server/data.ts`)
-
-**Source:** DOT Air Travel Consumer Report — Quarterly Editions  
-**URL:** https://www.transportation.gov/individuals/aviation-consumer-protection/air-travel-consumer-reports  
-**Periods:** Q1 2024 through Q4 2025 (8 quarters)
-
-## Top Oversold Routes (`TOP_OVERSOLD_ROUTES` in `server/data.ts`)
-
-**Source:** Derived from BTS DB-1B Coupon data cross-referenced with carrier-reported oversale data.  
-**Period:** Calendar Year 2024  
-**Method:** Routes ranked by average oversale rate (percentage of flights with at least one denied boarding), filtered to routes with ≥365 annual departures.
-
-## OpenSky Network (Live Flight Data)
-
-**Source:** OpenSky Network REST API  
-**URL:** https://opensky-network.org/api  
-**Data:** Real-time and recent flight departures/arrivals from major US airports  
-**Tier:** Anonymous (free, no API key required)  
-**Rate Limits:** ~100 requests/day, 5 seconds between requests  
-**Caching:** Results cached for 1 hour minimum  
-
-### How We Use OpenSky:
-1. Query departures from origin airport (last 12 hours)
-2. Query arrivals at destination airport (last 12 hours)  
-3. Cross-reference by ICAO24 aircraft hex address to confirm route pairs
-4. Parse ICAO callsigns (DAL→Delta, AAL→American, etc.) to identify carrier
-5. Real flight numbers displayed to users (e.g., "DL 1432" from callsign "DAL1432")
-
-### Limitations:
-- Anonymous access cannot query historical data (>24h ago)
-- Arrival airport estimation is often incomplete for recently departed flights
-- Coverage varies by region/time; we fall back to schedule templates when data is insufficient
-
-## Weather Data
-
-**Source:** aviationweather.gov METAR/TAF service (FAA/NWS)  
-**URL:** https://aviationweather.gov/api/data/metar  
-**Data:** Real-time METAR observations for major US airports  
-**Refresh:** Every 15 minutes (cached)
+- **VDB (Voluntary Denied Boarding):** Not available in the public IDB dataset. Estimated at ~3× IDB based on published DOT Air Travel Consumer Report ratios.
+- **Route-level denied boarding:** BTS only publishes carrier-level IDB data, not per-route. Top oversold routes are estimated from carrier IDB rates applied to fortress hub routes.
+- **T-100 segment data:** Full carrier+origin+dest+seats data requires form-based download from transtats.bts.gov (not programmatically accessible). We use the airport-level aggregate data from the ArcGIS endpoint.
+- **Load factors:** Carrier-specific load factors use published BTS Form 41 Schedule T-2 values for 2019. Route-level LFs are derived from T-100 airport passenger/departure ratios.
