@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { getWeatherAlerts, fetchMetar } from './weather.js';
 import { scoreFlights } from './scoring.js';
 import { cacheGet, cacheSet } from './cache.js';
+import { buildHeatmap } from './heatmap.js';
 import { getAirportStatus } from './faa.js';
 import {
   CARRIER_STATS,
@@ -166,6 +167,37 @@ app.get('/api/flights/search', async (req, res) => {
         rateLimited: false,
       },
     });
+  }
+});
+
+// =============================================================================
+// Best Day to Fly Heatmap
+// GET /api/flights/heatmap?origin=ATL&dest=LGA&weeks=4
+// =============================================================================
+app.get('/api/flights/heatmap', (req, res) => {
+  try {
+    const { origin, dest, weeks } = req.query;
+    if (!origin || !dest) {
+      return res.status(400).json({ error: 'origin and dest are required' });
+    }
+
+    const originStr = String(origin).toUpperCase();
+    const destStr = String(dest).toUpperCase();
+    const weeksNum = weeks ? parseInt(String(weeks), 10) : 4;
+    const safeWeeks = Number.isFinite(weeksNum) ? Math.min(Math.max(weeksNum, 1), 12) : 4;
+
+    const cacheKey = `heatmap:${originStr}:${destStr}:${safeWeeks}`;
+    const cached = cacheGet<any>(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const days = buildHeatmap(originStr, destStr, safeWeeks);
+    cacheSet(cacheKey, days, 12 * 60 * 60 * 1000);
+    res.json(days);
+  } catch (err) {
+    console.error('Heatmap error:', err);
+    res.status(500).json({ error: 'Failed to build heatmap' });
   }
 });
 

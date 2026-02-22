@@ -69,6 +69,16 @@ describe('API Endpoints', () => {
     expect(res4.status).toBe(200);
   });
 
+  it('GET /api/flights/heatmap returns day entries', async () => {
+    const res = await fetch(`${BASE}/api/flights/heatmap?origin=ATL&dest=LGA&weeks=2`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBe(14);
+    expect(body[0]).toHaveProperty('date');
+    expect(body[0]).toHaveProperty('predictedScore');
+  });
+
   it('GET /api/stats/carriers returns array of carriers', async () => {
     const res = await fetch(`${BASE}/api/stats/carriers`);
     expect(res.status).toBe(200);

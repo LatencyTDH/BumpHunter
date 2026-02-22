@@ -120,6 +120,12 @@ export type FactorDetail = {
   description: string;
 };
 
+export type HeatmapDay = {
+  date: string;
+  predictedScore: number;
+  factors: FactorDetail[];
+};
+
 export type Flight = {
   id: string;
   airline: string;
@@ -296,6 +302,10 @@ export async function searchFlights(origin: string, dest: string, date: string):
   return apiFetch(`/flights/search?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}`);
 }
 
+export async function getHeatmap(origin: string, dest: string, weeks = 4): Promise<HeatmapDay[]> {
+  return apiFetch(`/flights/heatmap?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&weeks=${weeks}`);
+}
+
 export async function getWeatherAlerts(hubs?: string[]): Promise<WeatherAlertsResponse> {
   const params = hubs ? `?hubs=${hubs.join(',')}` : '';
   return apiFetch(`/weather/alerts${params}`);
@@ -321,6 +331,10 @@ export async function getTopRoutes(): Promise<TopRoutesResponse> {
 
 export async function searchFlightsSafe(origin: string, dest: string, date: string): Promise<ApiResult<FlightSearchResponse>> {
   return apiFetchSafe(`/flights/search?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}`);
+}
+
+export async function getHeatmapSafe(origin: string, dest: string, weeks = 4): Promise<ApiResult<HeatmapDay[]>> {
+  return apiFetchSafe(`/flights/heatmap?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&weeks=${weeks}`);
 }
 
 export async function getWeatherAlertsSafe(hubs?: string[]): Promise<ApiResult<WeatherAlertsResponse>> {
