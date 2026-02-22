@@ -6,6 +6,7 @@ import {
   SLOT_CONTROLLED,
   BTS_DATA_PERIOD,
   BTS_DATA_WARNING,
+  ALL_HUBS,
   getOperatingCarrierStats,
   type AircraftType,
 } from './data.js';
@@ -30,13 +31,14 @@ import { getRouteReliability, type RouteReliability } from './otp.js';
 // (industry avg 0.28/10k, DOT ATCR 2025).
 //
 // The score ranks flights by relative likelihood of VDB opportunity based on:
-//   1. Carrier VDB rate (27 pts) — strongest predictor, uses OPERATING carrier
-//   2. Aircraft size (18 pts) — smaller = tighter margins
-//   3. Timing & Demand (13 pts) — day of week + holiday/event calendar
-//   4. Time of day (9 pts) — peak departure windows
-//   5. Weather disruptions (13 pts) — real METAR data
-//   6. Route reliability (10 pts) — BTS on-time delay rate
-//   7. Route type (10 pts) — hub/slot-controlled dynamics
+//   1. Carrier VDB rate (22 pts) — strongest predictor, uses OPERATING carrier
+//   2. Aircraft size (15 pts) — smaller = tighter margins
+//   3. Timing & Demand (10 pts) — day of week + holiday/event calendar
+//   4. Time of day (7 pts) — peak departure windows
+//   5. Weather disruptions (11 pts) — real METAR data
+//   6. Route reliability (8 pts) — BTS on-time delay rate
+//   7. Cascade boost (13 pts) — downstream disruptions after hub weather
+//   8. Route type (10 pts) — hub/slot-controlled dynamics
 //
 // Data: DOT Air Travel Consumer Report, Jan-Sep 2025 (latest available)
 // Key insight: uses OPERATING carrier rates, not marketing carrier.
@@ -95,13 +97,14 @@ export type ScoreResult = {
 };
 
 const SCORE_WEIGHTS = {
-  carrier: 27,
-  aircraft: 18,
-  timing: 13,
-  timeOfDay: 9,
-  weather: 13,
+  carrier: 22,
+  aircraft: 15,
+  timing: 10,
+  timeOfDay: 7,
+  weather: 11,
+  reliability: 8,
+  cascade: 13,
   route: 10,
-  reliability: 10,
 };
 
 const RAW_MAX = {
@@ -418,6 +421,75 @@ function scoreRouteReliability(
 }
 
 // =============================================================================
+// Factor 7: Cascade Boost (0-15 pts)
+//
+// When moderate/severe weather hits a hub, downstream flights 2–8 hours later
+// become oversold as passengers rebook. Single-daily-frequency routes get the
+// maximum boost (no alternative flights).
+// =============================================================================
+
+function scoreCascadeBoost(params: {
+  origin: string;
+  dest: string;
+  depTime: string;
+  date: Date;
+  originWx: { score: number; reason: string | null };
+  destWx: { score: number; reason: string | null };
+  routeFrequency: number;
+}): { score: number; factor: string | null; description: string } {
+  const { origin, dest, depTime, date, originWx, destWx, routeFrequency } = params;
+  const now = new Date();
+
+  const isSameDay = now.getFullYear() === date.getFullYear()
+    && now.getMonth() === date.getMonth()
+    && now.getDate() === date.getDate();
+
+  if (!isSameDay) {
+    return { score: 0, factor: null, description: 'Not same-day weather window' };
+  }
+
+  const isOriginHub = ALL_HUBS.includes(origin);
+  const isDestHub = ALL_HUBS.includes(dest);
+  const originSeverity = isOriginHub ? originWx.score : 0;
+  const destSeverity = isDestHub ? destWx.score : 0;
+  const severity = Math.max(originSeverity, destSeverity);
+
+  if (severity < 15) {
+    return { score: 0, factor: null, description: 'No moderate/severe hub weather' };
+  }
+
+  const depMinutes = getTimeMinutes(depTime);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const diffMinutes = depMinutes - nowMinutes;
+
+  if (diffMinutes < 120 || diffMinutes > 480) {
+    return { score: 0, factor: null, description: 'Outside cascade window' };
+  }
+
+  const singleDaily = routeFrequency <= 1;
+  let score = severity >= 25 ? 12 : 8;
+
+  if (singleDaily) {
+    score = 15;
+  } else {
+    if (diffMinutes >= 360) score += 2;
+    else if (diffMinutes >= 240) score += 1;
+    score = Math.min(15, score);
+  }
+
+  const hub = originSeverity >= destSeverity ? origin : dest;
+  const severityLabel = severity >= 25 ? 'severe' : 'moderate';
+  const hours = Math.round(diffMinutes / 60);
+
+  const factor = `Cascade boost: ${severityLabel} weather at ${hub} hub (${hours}h downstream)`;
+  const description = singleDaily
+    ? `Single daily route — no same-day rebooking alternatives`
+    : `Departs ${hours}h after ${hub} disruption (${severityLabel})`;
+
+  return { score, factor, description };
+}
+
+// =============================================================================
 // Factor 7: Route Type (0-10 pts)
 //
 // Hub-to-hub routes with high demand score higher.
@@ -546,8 +618,9 @@ function computeBumpScore(params: {
   originFAA: FAAStatus | null;
   destFAA: FAAStatus | null;
   routeReliability: RouteReliability | null;
+  routeFrequency: number;
 }): { score: number; factors: string[]; factorsDetailed: FactorDetail[]; carrierDbRate: number } {
-  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx, originFAA, destFAA, routeReliability } = params;
+  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx, originFAA, destFAA, routeReliability, routeFrequency } = params;
   const factors: string[] = [];
   const factorsDetailed: FactorDetail[] = [];
 
@@ -588,14 +661,20 @@ function computeBumpScore(params: {
   if (f6Raw.factor) factors.push(f6Raw.factor);
   factorsDetailed.push({ name: 'Route Reliability', score: f6Score, maxScore: SCORE_WEIGHTS.reliability, description: f6Raw.description });
 
-  // Factor 7: Route Type (0-10 pts)
-  const f7Raw = scoreRouteType(origin, dest, marketingCarrier);
-  const f7Score = scaleScore(f7Raw.score, RAW_MAX.route, SCORE_WEIGHTS.route);
+  // Factor 7: Cascade Boost (0-15 pts)
+  const f7Raw = scoreCascadeBoost({ origin, dest, depTime, date: params.date, originWx, destWx, routeFrequency });
+  const f7Score = scaleScore(f7Raw.score, 15, SCORE_WEIGHTS.cascade);
   if (f7Raw.factor) factors.push(f7Raw.factor);
-  factorsDetailed.push({ name: 'Route Type', score: f7Score, maxScore: SCORE_WEIGHTS.route, description: f7Raw.factor || `${origin} → ${dest}` });
+  factorsDetailed.push({ name: 'Cascade Boost', score: f7Score, maxScore: SCORE_WEIGHTS.cascade, description: f7Raw.description });
 
-  // Sum all factors (theoretical max = 100)
-  const rawScore = f1Score + f2Score + f3Score + f4Score + f5Score + f6Score + f7Score;
+  // Factor 8: Route Type (0-10 pts)
+  const f8Raw = scoreRouteType(origin, dest, marketingCarrier);
+  const f8Score = scaleScore(f8Raw.score, RAW_MAX.route, SCORE_WEIGHTS.route);
+  if (f8Raw.factor) factors.push(f8Raw.factor);
+  factorsDetailed.push({ name: 'Route Type', score: f8Score, maxScore: SCORE_WEIGHTS.route, description: f8Raw.factor || `${origin} → ${dest}` });
+
+  // Sum all factors (theoretical max = 96, with 4 pts rounding buffer to 100)
+  const rawScore = f1Score + f2Score + f3Score + f4Score + f5Score + f6Score + f7Score + f8Score;
   const score = Math.min(100, Math.max(5, rawScore));
 
   return { score, factors, factorsDetailed, carrierDbRate: f1Raw.dbRate };
@@ -676,6 +755,7 @@ export async function scoreFlights(
     // Best effort — schedule data is supplementary
   }
 
+  const routeFrequency = new Set(allRouteDepTimes).size;
   const durationMin = estimateDuration(originUpper, destUpper);
 
   // Score each real flight
@@ -702,6 +782,7 @@ export async function scoreFlights(
       originFAA,
       destFAA,
       routeReliability,
+      routeFrequency,
     });
 
     // Calculate DOT compensation estimate
