@@ -24,7 +24,7 @@ beforeAll(async () => {
     path.resolve('node_modules/.bin/tsx'),
     ['server/index.ts'],
     {
-      env: { ...process.env, API_PORT: String(TEST_PORT) },
+      env: { ...process.env, API_PORT: String(TEST_PORT), OTP_DISABLE: 'true' },
       stdio: 'pipe',
       cwd: process.cwd(),
     },
