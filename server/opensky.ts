@@ -245,6 +245,7 @@ export type RealFlight = {
 
   // Rich fields from FR24 Schedule API
   airline: string;            // "Delta Air Lines" (operator)
+  operatingCarrierCode: string; // IATA code of the OPERATING carrier (e.g. "YX" for Republic Airways)
   aircraftName: string;       // "Airbus A321-211"
   registration: string;       // "N848DN"
   status: string;             // "Estimated dep 07:48" / "In Air"
@@ -369,6 +370,7 @@ export async function getFlightsForRoute(
           fr24AircraftCode: sf.aircraftCode || null,
           trackingUrl: `https://www.flightaware.com/live/flight/${callsign || brandedCarrier + flightNum}`,
           airline: sf.airline,
+          operatingCarrierCode: sf.airlineIata || brandedCarrier,
           aircraftName: sf.aircraftName,
           registration: sf.registration,
           status: sf.isLive ? 'In Air' : (sf.status || 'Scheduled'),
@@ -444,6 +446,7 @@ export async function getFlightsForRoute(
           fr24AircraftCode: lf.aircraft || null,
           trackingUrl: `https://www.flightaware.com/live/flight/${rawCs}`,
           airline: getCarrierFullName(displayCarrier),
+          operatingCarrierCode: parsedCs.isRegional ? (CALLSIGN_MAP[parsedCs.icaoPrefix]?.iata || displayCarrier) : displayCarrier,
           aircraftName: '',
           registration: lf.registration || '',
           status: 'In Air',
@@ -538,6 +541,7 @@ export async function getFlightsForRoute(
               fr24AircraftCode: null,
               trackingUrl: `https://www.flightaware.com/live/flight/${rawCs}`,
               airline: getCarrierFullName(displayCarrier),
+              operatingCarrierCode: parsed.isRegional ? (CALLSIGN_MAP[parsed.icaoPrefix]?.iata || displayCarrier) : displayCarrier,
               aircraftName: '',
               registration: '',
               status: 'Departed',

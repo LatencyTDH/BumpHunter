@@ -129,7 +129,6 @@ export type Flight = {
   isRegional: boolean;
   bumpScore: number;
   factors: string[];
-  loadFactor: number;
   carrierDbRate: number;
   dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
@@ -214,6 +213,8 @@ export type FlightSearchMeta = {
   message: string | null;
   rateLimited: boolean;
   openskyRateLimited: boolean;
+  btsDataPeriod?: string;
+  btsDataWarning?: string;
   timestamp: string;
 };
 

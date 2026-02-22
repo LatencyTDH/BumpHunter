@@ -9,21 +9,23 @@ vi.mock('../server/weather.js', () => ({
 // Provide deterministic fake "real flight" data for scoring tests
 vi.mock('../server/opensky.js', () => ({
   getFlightsForRoute: vi.fn().mockImplementation(async (origin: string, dest: string, _dateStr: string) => {
-    // Return empty for unknown airports
     const knownAirports = ['ATL', 'LGA', 'CLT', 'LAX', 'DFW', 'ORD', 'EWR', 'DEN'];
     if (!knownAirports.includes(origin) || !knownAirports.includes(dest)) {
       return { flights: [], rateLimited: false, openskyRateLimited: false, error: `Unknown airport`, totalDepartures: 0, verifiedCount: 0, dataSources: [] };
     }
 
-    // Generate deterministic test flights based on route
     const flights: any[] = [];
+
+    // ATL→CLT: regional flights operated by SkyWest (OO)
+    // ATL→LAX: widebody Delta mainline
+    // Default: mix of DL mainline + AA mainline
     const carriers = origin === 'ATL' && dest === 'CLT'
-      ? [{ code: 'DL', name: 'Delta', regional: true }]
+      ? [{ code: 'DL', name: 'SkyWest Airlines (Delta)', regional: true, opCode: 'OO' }]
       : origin === 'ATL' && dest === 'LAX'
-      ? [{ code: 'DL', name: 'Delta', regional: false }]
+      ? [{ code: 'DL', name: 'Delta', regional: false, opCode: 'DL' }]
       : [
-          { code: 'DL', name: 'Delta', regional: false },
-          { code: 'AA', name: 'American', regional: false },
+          { code: 'DL', name: 'Delta', regional: false, opCode: 'DL' },
+          { code: 'AA', name: 'American', regional: false, opCode: 'AA' },
         ];
 
     const times = ['06:30', '08:00', '10:15', '12:30', '14:45', '17:00', '18:30', '20:00'];
@@ -46,6 +48,7 @@ vi.mock('../server/opensky.js', () => ({
           dataSource: 'fr24',
           fr24AircraftCode: carrier.regional ? 'E75S' : (dest === 'LAX' ? 'B763' : 'B738'),
           trackingUrl: `https://www.flightaware.com/live/flight/${icaoPrefix}${flightNum}`,
+          operatingCarrierCode: carrier.opCode,
         });
       }
     }
@@ -64,36 +67,32 @@ vi.mock('../server/opensky.js', () => ({
 
 import { scoreFlights } from '../server/scoring.js';
 
-describe('Scoring Algorithm', () => {
+describe('Scoring Algorithm — Bump Opportunity Index (2025 ATCR)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('regional jets score higher than widebodies on comparable flights', async () => {
-    // ATL→CLT uses regional jets (CRJ900/E175, 76 seats)
-    // ATL→LAX uses widebodies (B767, 211 seats)
-    // Use a Tuesday to minimize day-of-week noise
+    // ATL→CLT: regional jets operated by SkyWest (OO, 9.43/10k DB rate)
+    // ATL→LAX: widebodies by Delta mainline (DL, 5.68/10k)
     const regionalResult = await scoreFlights('ATL', 'CLT', '2026-04-14');
     const widebodyResult = await scoreFlights('ATL', 'LAX', '2026-04-14');
 
     expect(regionalResult.flights.length).toBeGreaterThan(0);
     expect(widebodyResult.flights.length).toBeGreaterThan(0);
 
-    // All CLT regional flights should be flagged
     const regionals = regionalResult.flights.filter(f => f.isRegional);
     expect(regionals.length).toBeGreaterThan(0);
     for (const f of regionals) {
       expect(f.factors.some(fac => fac.includes('Regional jet'))).toBe(true);
     }
 
-    // Widebody flights should NOT be regional
     const widebodies = widebodyResult.flights.filter(f => f.capacity > 200);
     expect(widebodies.length).toBeGreaterThan(0);
     for (const f of widebodies) {
       expect(f.isRegional).toBe(false);
     }
 
-    // Average regional score should exceed average widebody score
     const avgRegional = regionals.reduce((s, f) => s + f.bumpScore, 0) / regionals.length;
     const avgWidebody = widebodies.reduce((s, f) => s + f.bumpScore, 0) / widebodies.length;
     expect(avgRegional).toBeGreaterThan(avgWidebody);
@@ -133,10 +132,10 @@ describe('Scoring Algorithm', () => {
     expect(avgMonday).toBeGreaterThan(avgTuesday);
   });
 
-  it('score is capped at 98', async () => {
-    const result = await scoreFlights('ATL', 'LGA', '2026-04-13'); // Monday (peak)
+  it('score is capped at 100 and floored at 5', async () => {
+    const result = await scoreFlights('ATL', 'LGA', '2026-04-13');
     for (const f of result.flights) {
-      expect(f.bumpScore).toBeLessThanOrEqual(98);
+      expect(f.bumpScore).toBeLessThanOrEqual(100);
       expect(f.bumpScore).toBeGreaterThanOrEqual(5);
     }
   });
@@ -153,5 +152,64 @@ describe('Scoring Algorithm', () => {
       expect(['fr24', 'opensky']).toContain(f.dataSource);
       expect(f.callsign).toBeTruthy();
     }
+  });
+
+  it('includes DOT ATCR 2025 metadata in results', async () => {
+    const result = await scoreFlights('ATL', 'LGA', '2026-04-14');
+    expect(result.btsDataPeriod).toBeTruthy();
+    expect(result.btsDataWarning).toBeTruthy();
+    expect(result.btsDataPeriod).toContain('2025');
+  });
+
+  it('factors cite ATCR 2025 data source', async () => {
+    const result = await scoreFlights('ATL', 'LGA', '2026-04-14');
+    expect(result.flights.length).toBeGreaterThan(0);
+
+    // Factor tags should reference ATCR 2025
+    const hasATCRFactor = result.flights.some(f =>
+      f.factors.some(fac => fac.includes('ATCR 2025'))
+    );
+    expect(hasATCRFactor).toBe(true);
+  });
+
+  it('SkyWest-operated regional flights score very high on carrier factor', async () => {
+    // ATL→CLT mock uses SkyWest (OO) as operator — 9.43/10k DB rate
+    const result = await scoreFlights('ATL', 'CLT', '2026-04-14');
+    const flights = result.flights;
+    expect(flights.length).toBeGreaterThan(0);
+
+    // SkyWest flights should have VDB factor mentioning SkyWest
+    const hasSkyWestFactor = flights.some(f =>
+      f.factors.some(fac => fac.includes('SkyWest'))
+    );
+    expect(hasSkyWestFactor).toBe(true);
+
+    // DB rate should be SkyWest's ~9.43, not Delta's ~5.68
+    for (const f of flights) {
+      expect(f.carrierDbRate).toBeGreaterThan(8);
+    }
+  });
+
+  it('Delta mainline uses Delta DB rate (not a regional)', async () => {
+    // ATL→LAX mock uses DL mainline as operator
+    const result = await scoreFlights('ATL', 'LAX', '2026-04-14');
+    const dlFlights = result.flights.filter(f => f.carrier === 'DL');
+    expect(dlFlights.length).toBeGreaterThan(0);
+
+    // Delta's 2025 ATCR DB rate ≈ 5.68/10k (all VDB, zero IDB)
+    for (const f of dlFlights) {
+      expect(f.carrierDbRate).toBeGreaterThan(4);
+      expect(f.carrierDbRate).toBeLessThan(8);
+    }
+  });
+
+  it('Sunday scores higher than Wednesday for day-of-week factor', async () => {
+    // 2026-04-12 is Sunday, 2026-04-15 is Wednesday
+    const sundayResult = await scoreFlights('ATL', 'LGA', '2026-04-12');
+    const wednesdayResult = await scoreFlights('ATL', 'LGA', '2026-04-15');
+
+    const avgSunday = sundayResult.flights.reduce((s, f) => s + f.bumpScore, 0) / sundayResult.flights.length;
+    const avgWednesday = wednesdayResult.flights.reduce((s, f) => s + f.bumpScore, 0) / wednesdayResult.flights.length;
+    expect(avgSunday).toBeGreaterThan(avgWednesday);
   });
 });

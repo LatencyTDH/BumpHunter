@@ -1,7 +1,11 @@
 import {
   CARRIER_STATS,
-  ROUTE_LOAD_FACTORS,
   AIRCRAFT_TYPES,
+  CARRIER_HUBS,
+  SLOT_CONTROLLED,
+  BTS_DATA_PERIOD,
+  BTS_DATA_WARNING,
+  getOperatingCarrierStats,
   type AircraftType,
 } from './data.js';
 import { getWeatherSeverity } from './weather.js';
@@ -9,10 +13,23 @@ import { getFlightsForRoute, type RealFlight, type RouteSearchResult } from './o
 import { FR24_AIRCRAFT_MAP } from './fr24.js';
 
 // =============================================================================
-// Bump Probability Scoring Algorithm
+// Bump Opportunity Index — Honest Scoring (0-100)
 //
-// Scores REAL flights from FR24 + OpenSky + ADSBDB.
-// NO FAKE DATA. NO SCHEDULE TEMPLATES. NO FALLBACKS.
+// This is a RELATIVE INDEX, not a probability. A score of 78 does NOT mean
+// a 78% chance of being bumped. The actual IDB rate is ~0.028% per boarding
+// (industry avg 0.28/10k, DOT ATCR 2025).
+//
+// The score ranks flights by relative likelihood of VDB opportunity based on:
+//   1. Carrier VDB rate (30 pts) — strongest predictor, uses OPERATING carrier
+//   2. Aircraft size (20 pts) — smaller = tighter margins
+//   3. Day of week (15 pts) — empirical DOT patterns
+//   4. Time of day (10 pts) — peak departure windows
+//   5. Weather disruptions (15 pts) — real METAR data
+//   6. Route type (10 pts) — hub/slot-controlled dynamics
+//
+// Data: DOT Air Travel Consumer Report, Jan-Sep 2025 (latest available)
+// Key insight: uses OPERATING carrier rates, not marketing carrier.
+// AA 4533 operated by Republic Airways → scored at 9.70/10k, not AA's 3.46/10k.
 // =============================================================================
 
 export type ScoredFlight = {
@@ -20,7 +37,7 @@ export type ScoredFlight = {
   airline: string;
   carrier: string;
   flightNumber: string;
-  callsign: string;        // ICAO callsign (e.g. "DAL323")
+  callsign: string;
   departure: string;
   arrival: string;
   depTime: string;
@@ -31,17 +48,15 @@ export type ScoredFlight = {
   isRegional: boolean;
   bumpScore: number;
   factors: string[];
-  loadFactor: number;
   carrierDbRate: number;
   dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
   verificationSource: 'fr24-schedule' | 'fr24-live' | 'adsbdb' | 'opensky-estimate' | 'none';
   trackingUrl: string;
-  // Rich fields from FR24 Schedule API
-  status: string;           // "Scheduled", "In Air", "Estimated dep 07:48", etc.
-  registration: string;     // "N848DN"
-  codeshares: string[];     // ["AF6825", "KE7079"]
-  aircraftFullName: string; // "Airbus A321-211" (from schedule API)
+  status: string;
+  registration: string;
+  codeshares: string[];
+  aircraftFullName: string;
 };
 
 export type ScoreResult = {
@@ -53,7 +68,216 @@ export type ScoreResult = {
   verifiedCount: number;
   dataSources: string[];
   message: string | null;
+  btsDataPeriod: string;
+  btsDataWarning: string;
 };
+
+// =============================================================================
+// Factor 1: Carrier DB Rate (0-30 pts)
+//
+// Uses the OPERATING carrier's total DB rate (VDB + IDB) since VDB is the
+// opportunity. Normalized to a 0-30 scale.
+//
+// 2025 ATCR data shows massive spread:
+//   Republic YX: 9.70/10k (regional operator — goldmine)
+//   SkyWest OO:  9.43/10k (regional operator)
+//   Delta DL:    5.68/10k (all VDB, zero IDB — best VDB opportunity)
+//   Hawaiian HA: 0.09/10k (basically never bumps)
+//
+// The scoring weights total DB because VDB means the airline is actively
+// seeking volunteers — that's the money-making opportunity.
+// =============================================================================
+
+function scoreCarrierRate(
+  operatingCarrierCode: string,
+  marketingCarrierCode: string,
+): { score: number; factor: string; operatorName: string; dbRate: number } {
+  const { stats, isOperatorMatch } = getOperatingCarrierStats(operatingCarrierCode, marketingCarrierCode);
+
+  // Get all carrier DB rates for normalization
+  const allRates = Object.values(CARRIER_STATS).map(c => c.dbRate);
+  const maxRate = Math.max(...allRates);
+  const minRate = Math.min(...allRates);
+
+  // Linear scale: minRate → 5, maxRate → 28
+  const range = maxRate - minRate;
+  const normalized = range > 0
+    ? 5 + ((stats.dbRate - minRate) / range) * 23
+    : 15;
+
+  const score = Math.round(Math.min(30, Math.max(3, normalized)));
+
+  // Build honest factor tag
+  let factor: string;
+  if (isOperatorMatch && operatingCarrierCode !== marketingCarrierCode) {
+    // Operating carrier is different from marketing — show both
+    factor = `${stats.name} VDB: ${stats.vdbRate.toFixed(2)}/10k (DOT ATCR 2025)`;
+  } else {
+    factor = `${stats.name} DB: ${stats.dbRate.toFixed(2)}/10k (ATCR 2025)`;
+  }
+
+  return { score, factor, operatorName: stats.name, dbRate: stats.dbRate };
+}
+
+// =============================================================================
+// Factor 2: Aircraft Size (0-20 pts)
+//
+// Smaller aircraft = tighter booking margins = more likely oversold.
+// Regional jets (<100 seats): 18-20 pts
+// Narrow body (100-200 seats): 10-14 pts
+// Wide body (>200 seats): 3-6 pts
+// =============================================================================
+
+function scoreAircraftSize(aircraft: AircraftType): { score: number; factor: string | null } {
+  if (aircraft.isRegional || aircraft.capacity < 100) {
+    const score = aircraft.capacity <= 76 ? 20 : 18;
+    return { score, factor: `Regional jet (${aircraft.name}, ${aircraft.capacity} seats)` };
+  }
+  if (aircraft.capacity <= 140) {
+    return { score: 14, factor: `Small narrowbody (${aircraft.name}, ${aircraft.capacity} seats)` };
+  }
+  if (aircraft.capacity <= 180) {
+    return { score: 11, factor: null }; // standard narrowbody, no special tag
+  }
+  if (aircraft.capacity <= 200) {
+    return { score: 8, factor: null };
+  }
+  // Wide body (>200 seats)
+  const score = Math.max(3, 6 - Math.floor((aircraft.capacity - 200) / 50));
+  return { score, factor: `Wide body (${aircraft.name}, ${aircraft.capacity} seats)` };
+}
+
+// =============================================================================
+// Factor 3: Day of Week (0-15 pts)
+//
+// Based on DOT data showing which days historically have highest DB rates.
+// Sunday: 15 (highest — return travel)
+// Monday/Friday: 12 (business travel peaks)
+// Thursday: 10
+// Saturday: 7
+// Tuesday/Wednesday: 5
+// =============================================================================
+
+const DAY_SCORES: Record<number, { score: number; label: string }> = {
+  0: { score: 15, label: 'Sunday return travel' },
+  1: { score: 12, label: 'Monday business peak' },
+  2: { score: 5,  label: '' },
+  3: { score: 5,  label: '' },
+  4: { score: 10, label: 'Thursday pre-weekend travel' },
+  5: { score: 12, label: 'Friday departure peak' },
+  6: { score: 7,  label: 'Saturday leisure travel' },
+};
+
+function scoreDayOfWeek(dayOfWeek: number): { score: number; factor: string | null } {
+  const day = DAY_SCORES[dayOfWeek] ?? { score: 5, label: '' };
+  return { score: day.score, factor: day.label || null };
+}
+
+// =============================================================================
+// Factor 4: Time of Day (0-10 pts)
+//
+// Peak departure times have higher demand → more overbooking.
+// 6-9 AM: 9-10 (morning business rush)
+// 5-8 PM: 8-9 (evening rush)
+// 10 AM-4 PM: 5-6
+// Late night/early AM: 2-3
+// =============================================================================
+
+function scoreTimeOfDay(depTime: string): { score: number; factor: string | null } {
+  const [h, m] = depTime.split(':').map(Number);
+  const minutes = h * 60 + (m || 0);
+
+  if (minutes >= 360 && minutes < 540) {
+    // 6:00 - 8:59 AM
+    const score = minutes < 420 ? 9 : 10; // 7-9 AM is peak
+    return { score, factor: `Morning peak (${depTime})` };
+  }
+  if (minutes >= 1020 && minutes < 1200) {
+    // 5:00 - 7:59 PM
+    const score = minutes >= 1080 ? 9 : 8; // 6+ PM is peak
+    return { score, factor: `Evening rush (${depTime})` };
+  }
+  if (minutes >= 1200) {
+    // 8 PM+ (last bank)
+    return { score: 7, factor: `Last bank departure (${depTime})` };
+  }
+  if (minutes >= 540 && minutes < 960) {
+    // 9 AM - 3:59 PM
+    return { score: 5, factor: null };
+  }
+  // Early AM (before 6 AM) or very late
+  return { score: 2, factor: null };
+}
+
+// =============================================================================
+// Factor 5: Weather Disruptions (0-15 pts)
+//
+// From real METAR data via aviationweather.gov.
+// Severe (IFR/thunderstorm): 13-15
+// Moderate (snow, low visibility): 8-10
+// Clear: 0-2
+// =============================================================================
+
+function scoreWeather(
+  originWx: { score: number; reason: string | null },
+  destWx: { score: number; reason: string | null }
+): { score: number; factors: string[] } {
+  const factors: string[] = [];
+  let score = 0;
+
+  if (originWx.score > 0 && originWx.reason) {
+    const wxScore = Math.min(15, Math.round(originWx.score * 0.6));
+    score += wxScore;
+    factors.push(`Origin: ${originWx.reason}`);
+  }
+
+  if (destWx.score > 0 && destWx.reason) {
+    const wxScore = Math.min(8, Math.round(destWx.score * 0.3));
+    score += wxScore;
+    factors.push(`Dest: ${destWx.reason}`);
+  }
+
+  score = Math.min(15, score);
+  return { score, factors };
+}
+
+// =============================================================================
+// Factor 6: Route Type (0-10 pts)
+//
+// Hub-to-hub routes with high demand score higher.
+// Hub departure to slot-controlled airport (LGA/DCA/JFK): 8-10
+// Hub-to-hub: 6-8
+// Regular routes: 3-5
+// =============================================================================
+
+function scoreRouteType(
+  origin: string,
+  dest: string,
+  carrierCode: string
+): { score: number; factor: string | null } {
+  const carrierHubs = CARRIER_HUBS[carrierCode] || [];
+  const isCarrierHub = carrierHubs.includes(origin);
+  const isDestSlotControlled = SLOT_CONTROLLED.has(dest);
+  const isDestHub = Object.values(CARRIER_HUBS).some(hubs => hubs.includes(dest));
+
+  if (isCarrierHub && isDestSlotControlled) {
+    return { score: 10, factor: `${origin} hub → ${dest} (slot-controlled)` };
+  }
+  if (isCarrierHub && isDestHub) {
+    return { score: 7, factor: `Hub-to-hub route (${origin}→${dest})` };
+  }
+  if (isCarrierHub) {
+    return { score: 5, factor: null };
+  }
+  if (isDestSlotControlled) {
+    return { score: 6, factor: `→ ${dest} (slot-controlled)` };
+  }
+  return { score: 3, factor: null };
+}
+
+// =============================================================================
+// Utility functions
+// =============================================================================
 
 function getTimeMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -65,25 +289,6 @@ function addMinutes(time: string, mins: number): string {
   const h = Math.floor(total / 60) % 24;
   const m = total % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-function isHolidayPeriod(date: Date): boolean {
-  const month = date.getMonth();
-  const day = date.getDate();
-  if (month === 10 && day >= 20 && day <= 30) return true;
-  if (month === 11 && day >= 20) return true;
-  if (month === 0 && day <= 3) return true;
-  if (month === 4 && day >= 24) return true;
-  if (month === 6 && day >= 1 && day <= 7) return true;
-  if (month === 8 && day <= 7) return true;
-  if (month === 2 && day >= 10) return true;
-  if (month === 3 && day <= 15) return true;
-  return false;
-}
-
-function isSummerPeak(date: Date): boolean {
-  const month = date.getMonth();
-  return month >= 5 && month <= 7;
 }
 
 function estimateDuration(origin: string, dest: string): number {
@@ -116,7 +321,6 @@ function estimateDuration(origin: string, dest: string): number {
 }
 
 function resolveAircraft(origin: string, dest: string, carrier: string, isRegional: boolean, fr24Code: string | null): AircraftType {
-  // Try FR24 aircraft code first (real data)
   if (fr24Code) {
     const mapped = FR24_AIRCRAFT_MAP[fr24Code];
     if (mapped && AIRCRAFT_TYPES[mapped]) {
@@ -124,7 +328,6 @@ function resolveAircraft(origin: string, dest: string, carrier: string, isRegion
     }
   }
 
-  // Fallback to estimation by carrier/route
   if (isRegional) {
     return AIRCRAFT_TYPES['E175'] || AIRCRAFT_TYPES['CRJ900'];
   }
@@ -149,92 +352,54 @@ function resolveAircraft(origin: string, dest: string, carrier: string, isRegion
   return AIRCRAFT_TYPES[key] || AIRCRAFT_TYPES['B737'];
 }
 
+// =============================================================================
+// Main scoring function — combines all 6 factors
+// =============================================================================
+
 function computeBumpScore(params: {
-  carrier: string;
+  marketingCarrier: string;
+  operatingCarrier: string;
   depTime: string;
   aircraft: AircraftType;
   origin: string;
   dest: string;
   date: Date;
   dayOfWeek: number;
-  baseRouteLF: number;
-  isPeakDay: boolean;
-  isLeisureRoute: boolean;
   originWx: { score: number; reason: string | null };
   destWx: { score: number; reason: string | null };
-}): { score: number; factors: string[]; effectiveLF: number } {
-  const {
-    carrier: carrierCode, depTime, aircraft, origin, date, dayOfWeek,
-    baseRouteLF, isPeakDay, isLeisureRoute, originWx, destWx,
-  } = params;
-
-  const carrier = CARRIER_STATS[carrierCode];
-  if (!carrier) return { score: 25, factors: [], effectiveLF: baseRouteLF };
-
-  let score = 25;
+}): { score: number; factors: string[]; carrierDbRate: number } {
+  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx } = params;
   const factors: string[] = [];
 
-  // 1. Carrier Historical DB Rate (0-15 points)
-  const carrierScore = Math.min(15, Math.round(carrier.dbRate * 12));
-  score += carrierScore;
-  if (carrierScore >= 8) factors.push(`${carrier.name} high DB rate (${carrier.dbRate}/10k)`);
+  // Factor 1: Carrier DB Rate (0-30 pts) — uses OPERATING carrier
+  const f1 = scoreCarrierRate(operatingCarrier, marketingCarrier);
+  factors.push(f1.factor);
 
-  // 2. Route Load Factor (0-20 points)
-  let effectiveLF = baseRouteLF;
-  if (isPeakDay) effectiveLF = Math.min(0.98, effectiveLF + 0.04);
-  const lfScore = Math.max(0, Math.min(20, Math.round((effectiveLF - 0.80) * 133)));
-  score += lfScore;
-  if (effectiveLF >= 0.88) factors.push(`High load factor (${Math.round(effectiveLF * 100)}%)`);
+  // Factor 2: Aircraft Size (0-20 pts)
+  const f2 = scoreAircraftSize(aircraft);
+  if (f2.factor) factors.push(f2.factor);
 
-  // 3. Day of Week (0-15 points)
-  if (dayOfWeek === 1 || dayOfWeek === 4 || dayOfWeek === 5) {
-    score += 15; factors.push('Peak business travel day');
-  } else if (dayOfWeek === 0) {
-    score += 10; factors.push('Sunday return travel surge');
-  } else if (dayOfWeek === 6 && isLeisureRoute) {
-    score += 12; factors.push('Weekend leisure route demand');
-  } else {
-    score += 2;
-  }
+  // Factor 3: Day of Week (0-15 pts)
+  const f3 = scoreDayOfWeek(dayOfWeek);
+  if (f3.factor) factors.push(f3.factor);
 
-  // 4. Time of Day (0-15 points)
-  const depMinutes = getTimeMinutes(depTime);
-  if (depMinutes >= 1080) { score += 15; factors.push('Last bank of the day'); }
-  else if (depMinutes >= 960) { score += 12; factors.push('Late afternoon departure'); }
-  else if (depMinutes <= 480) { score += 10; factors.push('Early morning business rush'); }
-  else if (depMinutes <= 600) { score += 8; factors.push('Morning peak departure'); }
-  else { score += 3; }
+  // Factor 4: Time of Day (0-10 pts)
+  const f4 = scoreTimeOfDay(depTime);
+  if (f4.factor) factors.push(f4.factor);
 
-  // 5. Aircraft Type (0-20 points)
-  if (aircraft.isRegional) {
-    score += 20; factors.push(`Regional jet (${aircraft.name}, ${aircraft.capacity} seats)`);
-  } else if (aircraft.capacity <= 140) {
-    score += 12; factors.push(`Small narrowbody (${aircraft.name}, ${aircraft.capacity} seats)`);
-  } else if (aircraft.capacity <= 180) {
-    score += 8; factors.push(`Standard narrowbody (${aircraft.capacity} seats)`);
-  } else if (aircraft.capacity <= 200) {
-    score += 4;
-  }
+  // Factor 5: Weather (0-15 pts)
+  const f5 = scoreWeather(originWx, destWx);
+  factors.push(...f5.factors);
 
-  // 6. Weather Disruptions (0-25 points each)
-  if (originWx.score > 0 && originWx.reason) {
-    score += originWx.score; factors.push(`Origin: ${originWx.reason}`);
-  }
-  if (destWx.score > 0 && destWx.reason) {
-    score += Math.round(destWx.score * 0.6); factors.push(`Destination: ${destWx.reason}`);
-  }
+  // Factor 6: Route Type (0-10 pts)
+  const f6 = scoreRouteType(origin, dest, marketingCarrier);
+  if (f6.factor) factors.push(f6.factor);
 
-  // 7. Seasonal/Holiday (0-10 points)
-  if (isHolidayPeriod(date)) { score += 10; factors.push('Holiday travel period'); }
-  else if (isSummerPeak(date)) { score += 5; factors.push('Summer peak season'); }
+  // Sum all factors (theoretical max = 100)
+  const rawScore = f1.score + f2.score + f3.score + f4.score + f5.score + f6.score;
+  const score = Math.min(100, Math.max(5, rawScore));
 
-  // 8. Fortress Hub bonus
-  if (carrierCode === 'DL' && origin === 'ATL') { score += 5; factors.push('Delta fortress hub dynamics'); }
-  else if (carrierCode === 'AA' && (origin === 'DFW' || origin === 'CLT')) { score += 5; factors.push('American fortress hub dynamics'); }
-  else if (carrierCode === 'UA' && (origin === 'EWR' || origin === 'ORD' || origin === 'DEN')) { score += 5; factors.push('United fortress hub dynamics'); }
-
-  score = Math.min(98, Math.max(5, score));
-  return { score, factors, effectiveLF };
+  return { score, factors, carrierDbRate: f1.dbRate };
 }
 
 // =============================================================================
@@ -250,14 +415,6 @@ export async function scoreFlights(
   const destUpper = dest.toUpperCase();
   const date = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
   const dayOfWeek = date.getDay();
-
-  const routeLF = ROUTE_LOAD_FACTORS.find(
-    r => (r.origin === originUpper && r.dest === destUpper) ||
-         (r.origin === destUpper && r.dest === originUpper)
-  );
-  const baseRouteLF = routeLF?.loadFactor ?? 0.83;
-  const isPeakDay = routeLF?.peakDays.includes(dayOfWeek) ?? false;
-  const isLeisureRoute = routeLF?.isLeisure ?? false;
 
   const [originWx, destWx] = await Promise.all([
     getWeatherSeverity(originUpper),
@@ -276,6 +433,8 @@ export async function scoreFlights(
       error: `Flight data fetch failed: ${err}`,
       totalDepartures: 0, verifiedCount: 0, dataSources: [],
       message: 'Unable to fetch real-time flight data. Please try again later.',
+      btsDataPeriod: BTS_DATA_PERIOD,
+      btsDataWarning: BTS_DATA_WARNING,
     };
   }
 
@@ -294,6 +453,8 @@ export async function scoreFlights(
       totalDepartures: 0, verifiedCount: 0,
       dataSources: routeResult.dataSources,
       message,
+      btsDataPeriod: BTS_DATA_PERIOD,
+      btsDataWarning: BTS_DATA_WARNING,
     };
   }
 
@@ -305,15 +466,22 @@ export async function scoreFlights(
     const durationMin = estimateDuration(originUpper, destUpper);
     const arrTime = addMinutes(rf.departureTime, durationMin);
 
-    const { score, factors, effectiveLF } = computeBumpScore({
-      carrier: rf.carrierCode, depTime: rf.departureTime, aircraft,
-      origin: originUpper, dest: destUpper, date, dayOfWeek,
-      baseRouteLF, isPeakDay, isLeisureRoute, originWx, destWx,
+    // Use operating carrier for scoring (the airline that actually flies the plane)
+    const operatingCarrier = rf.operatingCarrierCode || rf.carrierCode;
+
+    const { score, factors, carrierDbRate } = computeBumpScore({
+      marketingCarrier: rf.carrierCode,
+      operatingCarrier,
+      depTime: rf.departureTime,
+      aircraft,
+      origin: originUpper,
+      dest: destUpper,
+      date,
+      dayOfWeek,
+      originWx,
+      destWx,
     });
 
-    const carrierStats = CARRIER_STATS[rf.carrierCode];
-
-    // Prefer the schedule API's full aircraft name when available
     const aircraftDisplayName = rf.aircraftName || aircraft.name;
 
     flights.push({
@@ -332,8 +500,7 @@ export async function scoreFlights(
       isRegional: rf.isRegional || aircraft.isRegional,
       bumpScore: score,
       factors,
-      loadFactor: effectiveLF,
-      carrierDbRate: carrierStats?.dbRate ?? 0.5,
+      carrierDbRate,
       dataSource: rf.dataSource,
       verified: rf.verified,
       verificationSource: rf.verificationSource,
@@ -347,7 +514,6 @@ export async function scoreFlights(
 
   flights.sort((a, b) => b.bumpScore - a.bumpScore);
 
-  // Build message about data sources
   let message: string | null = null;
   if (routeResult.openskyRateLimited && routeResult.dataSources.length > 0) {
     message = 'OpenSky Network is rate limited. Showing live flights from FlightRadar24.';
@@ -362,5 +528,7 @@ export async function scoreFlights(
     verifiedCount: routeResult.verifiedCount,
     dataSources: routeResult.dataSources,
     message,
+    btsDataPeriod: BTS_DATA_PERIOD,
+    btsDataWarning: BTS_DATA_WARNING,
   };
 }
