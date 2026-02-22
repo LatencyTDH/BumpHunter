@@ -615,6 +615,19 @@ function getCarrierFullName(iataCode: string): string {
   return names[iataCode] || iataCode;
 }
 
+/** Map IATA airline code → ICAO airline code (for FlightAware URLs). */
+function iataToIcao(iata: string): string {
+  const map: Record<string, string> = {
+    'DL': 'DAL', 'AA': 'AAL', 'UA': 'UAL', 'WN': 'SWA', 'B6': 'JBU',
+    'NK': 'NKS', 'F9': 'FFT', 'AS': 'ASA', 'HA': 'HAL', 'SY': 'SCX',
+    'G4': 'AAY', 'MX': 'MXA', 'QX': 'QXE', 'OH': 'COM', 'OO': 'SKW',
+    'YV': 'ASH', 'YX': 'RPA', '9E': 'FLG', 'MQ': 'EGF', 'PT': 'SWQ',
+    'KE': 'KAL', 'AM': 'AMX', 'AC': 'ACA', 'BA': 'BAW', 'LH': 'DLH',
+    'AF': 'AFR', 'EK': 'UAE', 'QR': 'QTR', 'JL': 'JAL', 'NH': 'ANA',
+  };
+  return map[iata] || iata;
+}
+
 // =============================================================================
 // Main scoring function — combines all 7 factors
 // =============================================================================
@@ -973,7 +986,7 @@ export async function scoreOriginDepartures(origin: string, dateStr: string): Pr
       departureTimestamp: sf.departureTimestamp,
       isRegional,
       fr24AircraftCode: sf.aircraftCode || null,
-      trackingUrl: `https://www.flightaware.com/live/flight/${callsign || carrier + num}`,
+      trackingUrl: `https://www.flightaware.com/live/flight/${callsign || iataToIcao(carrier) + num}`,
       operatingCarrierCode: sf.airlineIata || carrier,
       airline: sf.airline,
       aircraftName: sf.aircraftName,
