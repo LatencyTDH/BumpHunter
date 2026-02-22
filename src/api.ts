@@ -13,23 +13,18 @@ export type ApiResult<T> =
 // --- Retry & timeout configuration ---
 
 const MAX_RETRIES = 2;
-const RETRY_DELAYS = [1000, 2000]; // exponential backoff: 1s, 2s
-const REQUEST_TIMEOUT_MS = 10_000;
+const RETRY_DELAYS = [1000, 2000];
+const REQUEST_TIMEOUT_MS = 30_000; // Increased — FR24 feed can take a moment
 
 // --- Error message helpers ---
 
 function classifyError(err: unknown, status?: number): { error: string; status?: number } {
-  // Timeout (AbortController signal)
   if (err instanceof DOMException && err.name === 'AbortError') {
-    return { error: 'Request timed out. The data source may be slow.' };
+    return { error: 'Request timed out. The data sources may be slow — try again.' };
   }
-
-  // Network / server-not-running
   if (err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed'))) {
     return { error: 'Backend server is not running. Start it with: npm run dev' };
   }
-
-  // HTTP status-based errors
   if (status === 429) {
     return { error: 'Data source rate limit reached. Results are cached — try again in a few minutes.', status };
   }
@@ -39,8 +34,6 @@ function classifyError(err: unknown, status?: number): { error: string; status?:
   if (status !== undefined && !isOkStatus(status)) {
     return { error: `API error: ${status}`, status };
   }
-
-  // Fallback
   const msg = err instanceof Error ? err.message : String(err);
   return { error: msg };
 }
@@ -50,9 +43,8 @@ function isOkStatus(status: number): boolean {
 }
 
 function isRetryable(status?: number, err?: unknown): boolean {
-  // Retry on network errors, timeouts, 429, and 5xx
   if (err instanceof DOMException && err.name === 'AbortError') return true;
-  if (err instanceof TypeError) return true; // network errors
+  if (err instanceof TypeError) return true;
   if (status !== undefined && (status === 429 || status >= 500)) return true;
   return false;
 }
@@ -68,7 +60,6 @@ async function apiFetchSafe<T>(path: string, options?: RequestInit): Promise<Api
   let lastStatus: number | undefined;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    // Wait before retry (not before first attempt)
     if (attempt > 0) {
       await sleep(RETRY_DELAYS[attempt - 1] ?? RETRY_DELAYS[RETRY_DELAYS.length - 1]);
     }
@@ -87,7 +78,6 @@ async function apiFetchSafe<T>(path: string, options?: RequestInit): Promise<Api
       lastStatus = res.status;
 
       if (!res.ok) {
-        // If retryable and we have attempts left, continue the loop
         if (isRetryable(res.status) && attempt < MAX_RETRIES) {
           lastError = new Error(`HTTP ${res.status}`);
           continue;
@@ -110,17 +100,15 @@ async function apiFetchSafe<T>(path: string, options?: RequestInit): Promise<Api
     }
   }
 
-  // All retries exhausted
   return { ok: false, ...classifyError(lastError, lastStatus) };
 }
 
-// Original apiFetch — throws on error (backward compatible)
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const result = await apiFetchSafe<T>(path, options);
   if (!result.ok) {
-    throw new Error(result.error);
+    throw new Error((result as { ok: false; error: string }).error);
   }
-  return result.data;
+  return (result as { ok: true; data: T }).data;
 }
 
 // --- Types matching server responses ---
@@ -130,6 +118,7 @@ export type Flight = {
   airline: string;
   carrier: string;
   flightNumber: string;
+  callsign: string;
   departure: string;
   arrival: string;
   depTime: string;
@@ -142,6 +131,10 @@ export type Flight = {
   factors: string[];
   loadFactor: number;
   carrierDbRate: number;
+  dataSource: 'fr24' | 'opensky';
+  verified: boolean;
+  verificationSource: 'fr24' | 'adsbdb' | 'opensky-estimate' | 'none';
+  trackingUrl: string;
 };
 
 export type WeatherAlert = {
@@ -166,7 +159,9 @@ export type CarrierStats = {
   vdbRate: number;
   loadFactor: number;
   loadFactorPct: number;
-  avgCompensation: number;
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
+  compensationNote: string;
   oversaleRate: number;
 };
 
@@ -175,7 +170,8 @@ export type QuarterlyTrend = {
   totalEnplanements: number;
   voluntaryDB: number;
   involuntaryDB: number;
-  avgCompensation: number;
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
 };
 
 export type OversoldRoute = {
@@ -185,7 +181,8 @@ export type OversoldRoute = {
   carrierName: string;
   avgOversaleRate: number;
   avgBumps: number;
-  avgCompensation: number;
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
 };
 
 export type SummaryData = {
@@ -199,11 +196,25 @@ export type SummaryData = {
   alerts: WeatherAlert[];
 };
 
-// --- Response types (shared between throwing and safe variants) ---
+// --- Response types ---
 
-type FlightSearchResponse = {
+export type FlightSearchMeta = {
+  origin: string;
+  destination: string;
+  date: string;
+  totalFlights: number;
+  verifiedFlights: number;
+  dataSources: string[];
+  dataSource: 'live' | 'none';
+  message: string | null;
+  rateLimited: boolean;
+  openskyRateLimited: boolean;
+  timestamp: string;
+};
+
+export type FlightSearchResponse = {
   flights: Flight[];
-  meta: { origin: string; destination: string; date: string; totalFlights: number; dataSources: string[]; timestamp: string };
+  meta: FlightSearchMeta;
 };
 
 type WeatherAlertsResponse = {
@@ -217,19 +228,22 @@ type CarrierStatsResponse = {
   carriers: CarrierStats[];
   source: string;
   note: string;
+  dataNote: string;
 };
 
 type QuarterlyTrendsResponse = {
   trends: QuarterlyTrend[];
   source: string;
+  dataNote: string;
 };
 
 type TopRoutesResponse = {
   routes: OversoldRoute[];
   source: string;
+  dataNote: string;
 };
 
-// --- API calls (original — throw on error, backward compatible) ---
+// --- API calls ---
 
 export async function searchFlights(origin: string, dest: string, date: string): Promise<FlightSearchResponse> {
   return apiFetch(`/flights/search?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}`);
@@ -256,7 +270,7 @@ export async function getTopRoutes(): Promise<TopRoutesResponse> {
   return apiFetch('/stats/routes');
 }
 
-// --- Safe API calls (return ApiResult<T> — never throw) ---
+// --- Safe API calls ---
 
 export async function searchFlightsSafe(origin: string, dest: string, date: string): Promise<ApiResult<FlightSearchResponse>> {
   return apiFetchSafe(`/flights/search?origin=${encodeURIComponent(origin)}&dest=${encodeURIComponent(dest)}&date=${encodeURIComponent(date)}`);

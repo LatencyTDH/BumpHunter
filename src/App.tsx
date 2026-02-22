@@ -19,6 +19,10 @@ import {
   Activity,
   Database,
   Loader2,
+  ExternalLink,
+  Radio,
+  Info,
+  ShieldCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -34,6 +38,7 @@ import {
   type CarrierStats,
   type QuarterlyTrend,
   type OversoldRoute,
+  type FlightSearchMeta,
 } from './api';
 
 // --- Components ---
@@ -52,6 +57,81 @@ function DataSourceBadge({ sources }: { sources?: string[] }) {
       ))}
     </div>
   );
+}
+
+function VerificationBadge({ flight }: { flight: Flight }) {
+  if (flight.verified) {
+    const label = flight.verificationSource === 'fr24' ? 'Live · FR24' :
+                  flight.verificationSource === 'adsbdb' ? 'Verified · ADSBDB' :
+                  'Verified';
+    return (
+      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        {flight.dataSource === 'fr24' ? <Radio className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+        {label}
+      </span>
+    );
+  }
+  if (flight.verificationSource === 'opensky-estimate') {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+        <Info className="w-3 h-3" />
+        Estimated Route
+      </span>
+    );
+  }
+  return null;
+}
+
+function RateLimitBanner({ meta }: { meta: FlightSearchMeta }) {
+  if (meta.totalFlights > 0 && !meta.rateLimited && !meta.message) return null;
+
+  // No flights but not rate limited — just no flights on route
+  if (meta.totalFlights === 0 && !meta.rateLimited) {
+    return (
+      <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-start space-x-3">
+        <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="font-medium text-amber-300">No flights found</p>
+          <p className="text-sm text-amber-200/70 mt-1">
+            {meta.message || `No real-time flights found for ${meta.origin}→${meta.destination}. This route may not have active flights right now.`}
+          </p>
+          <p className="text-xs text-amber-200/50 mt-2">
+            BumpHunter only shows real, verified flights — never fabricated data.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Rate limited
+  if (meta.rateLimited) {
+    return (
+      <div className="p-4 rounded-xl border border-orange-500/20 bg-orange-500/5 flex items-start space-x-3">
+        <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="font-medium text-orange-300">⚠️ Real-time flight data temporarily unavailable</p>
+          <p className="text-sm text-orange-200/70 mt-1">
+            Our data sources (FlightRadar24 and OpenSky Network) are temporarily rate limited. Try again in a few minutes.
+          </p>
+          <p className="text-xs text-orange-200/50 mt-2">
+            BumpHunter never shows fake data. When real data isn't available, we tell you honestly.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Partial data (e.g. OpenSky rate limited but FR24 working)
+  if (meta.message && meta.openskyRateLimited && meta.totalFlights > 0) {
+    return (
+      <div className="p-3 rounded-lg border border-blue-500/20 bg-blue-500/5 flex items-center space-x-2">
+        <Info className="w-4 h-4 text-blue-400 flex-shrink-0" />
+        <p className="text-sm text-blue-300">{meta.message}</p>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function LoadingSpinner({ text }: { text?: string }) {
@@ -195,7 +275,7 @@ function Scanner() {
   const [date, setDate] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<Flight[]>([]);
-  const [dataSources, setDataSources] = useState<string[]>([]);
+  const [searchMeta, setSearchMeta] = useState<FlightSearchMeta | null>(null);
   const [monitoredHubs, setMonitoredHubs] = useState<string[]>(['ATL', 'EWR', 'DFW', 'ORD']);
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
@@ -227,13 +307,13 @@ function Scanner() {
     e.preventDefault();
     setIsSearching(true);
     setResults([]);
+    setSearchMeta(null);
     setSearchError(null);
-    setDataSources([]);
 
     try {
       const data = await searchFlights(origin, dest, date);
       setResults(data.flights);
-      setDataSources(data.meta.dataSources);
+      setSearchMeta(data.meta);
     } catch (err: any) {
       setSearchError(err.message || 'Search failed');
     } finally {
@@ -245,7 +325,7 @@ function Scanner() {
     <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-50">Flight Scanner</h1>
-        <p className="text-slate-400 mt-1">Identify flights with the highest probability of overbooking using real data.</p>
+        <p className="text-slate-400 mt-1">Real flights from FlightRadar24 &amp; OpenSky Network, scored for bump probability.</p>
       </header>
 
       {/* Live Network Disruptions */}
@@ -376,7 +456,7 @@ function Scanner() {
             ) : (
               <Search className="w-5 h-5 mr-2" />
             )}
-            {isSearching ? 'Analyzing Network...' : 'Scan Flights'}
+            {isSearching ? 'Scanning Live Data...' : 'Scan Flights'}
           </button>
         </div>
       </form>
@@ -392,87 +472,118 @@ function Scanner() {
         </div>
       )}
 
+      {/* Rate limit / no data banner */}
+      {searchMeta && <RateLimitBanner meta={searchMeta} />}
+
       <AnimatePresence>
-        {results.length > 0 && (
+        {(results.length > 0 || (searchMeta && !searchError)) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-50">Target Opportunities</h3>
-              <span className="text-sm text-slate-500">{results.length} flights found</span>
-            </div>
-
-            {results.map((flight) => (
-              <div key={flight.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center">
-                      <Plane className="w-6 h-6 text-indigo-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-bold text-slate-50">{flight.flightNumber}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">{flight.aircraft}</span>
-                        {flight.isRegional && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
-                        )}
-                      </div>
-                      <div className="text-sm text-slate-400 mt-1 flex items-center space-x-2">
-                        <span>{flight.departure} {flight.depTime}</span>
-                        <ChevronRight className="w-4 h-4" />
-                        <span>{flight.arrival} {flight.arrTime}</span>
-                        <span className="text-slate-600">|</span>
-                        <span className="text-xs">{flight.capacity} seats</span>
-                      </div>
-                    </div>
+            {results.length > 0 && (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-slate-50">Target Opportunities</h3>
+                  <div className="flex items-center space-x-3">
+                    {searchMeta && searchMeta.verifiedFlights > 0 && (
+                      <span className="text-xs text-emerald-400 flex items-center">
+                        <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+                        {searchMeta.verifiedFlights} verified
+                      </span>
+                    )}
+                    <span className="text-sm text-slate-500">{results.length} flight{results.length !== 1 ? 's' : ''} found</span>
                   </div>
-
-                  <div className="flex flex-col md:items-end">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-right">
-                        <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Probability</p>
-                        <p className={`text-2xl font-bold ${flight.bumpScore > 80 ? 'text-emerald-400' : flight.bumpScore > 60 ? 'text-amber-400' : 'text-slate-300'}`}>
-                          {flight.bumpScore}%
-                        </p>
-                      </div>
-                      <div className="w-16 h-16 relative">
-                        <svg className="w-full h-full" viewBox="0 0 36 36">
-                          <path
-                            className="text-slate-800"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                          />
-                          <path
-                            className={flight.bumpScore > 80 ? 'text-emerald-500' : flight.bumpScore > 60 ? 'text-amber-500' : 'text-indigo-500'}
-                            strokeDasharray={`${flight.bumpScore}, 100`}
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap gap-2">
-                  {flight.factors.map((factor, i) => (
-                    <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800">
-                      {factor}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+                {results.map((flight) => (
+                  <div key={flight.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-            <DataSourceBadge sources={dataSources} />
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center">
+                          <Plane className="w-6 h-6 text-indigo-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center flex-wrap gap-2">
+                            <span className="font-bold text-slate-50">{flight.flightNumber}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">{flight.aircraft}</span>
+                            {flight.isRegional && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
+                            )}
+                            <VerificationBadge flight={flight} />
+                          </div>
+                          <div className="text-sm text-slate-400 mt-1 flex items-center flex-wrap gap-x-2">
+                            <span>{flight.departure} {flight.depTime}</span>
+                            <ChevronRight className="w-4 h-4" />
+                            <span>{flight.arrival} {flight.arrTime}</span>
+                            <span className="text-slate-600">|</span>
+                            <span className="text-xs">{flight.capacity} seats</span>
+                            {flight.trackingUrl && (
+                              <>
+                                <span className="text-slate-600">|</span>
+                                <a
+                                  href={flight.trackingUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  FlightAware
+                                </a>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col md:items-end">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-right">
+                            <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Probability</p>
+                            <p className={`text-2xl font-bold ${flight.bumpScore > 80 ? 'text-emerald-400' : flight.bumpScore > 60 ? 'text-amber-400' : 'text-slate-300'}`}>
+                              {flight.bumpScore}%
+                            </p>
+                          </div>
+                          <div className="w-16 h-16 relative">
+                            <svg className="w-full h-full" viewBox="0 0 36 36">
+                              <path
+                                className="text-slate-800"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                              />
+                              <path
+                                className={flight.bumpScore > 80 ? 'text-emerald-500' : flight.bumpScore > 60 ? 'text-amber-500' : 'text-indigo-500'}
+                                strokeDasharray={`${flight.bumpScore}, 100`}
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap gap-2">
+                      {flight.factors.map((factor, i) => (
+                        <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800">
+                          {factor}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <DataSourceBadge sources={searchMeta?.dataSources} />
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -486,14 +597,15 @@ function HistoricalAnalysis() {
   const [routes, setRoutes] = useState<OversoldRoute[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<'carriers' | 'trends' | 'routes'>('carriers');
+  const [dataNote, setDataNote] = useState<string>('');
 
   useEffect(() => {
     Promise.all([
-      getCarrierStats().then(d => setCarriers(d.carriers)),
+      getCarrierStats().then(d => { setCarriers(d.carriers); setDataNote(d.dataNote || ''); }),
       getQuarterlyTrends().then(d => setTrends(d.trends)),
       getTopRoutes().then(d => setRoutes(d.routes)),
     ])
-      .catch(() => {}) // graceful failure
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -547,7 +659,7 @@ function HistoricalAnalysis() {
               </thead>
               <tbody className="divide-y divide-slate-800/50">
                 {carriers.map(c => (
-                  <tr key={c.code} className="hover:bg-slate-800/30 transition-colors">
+                  <tr key={c.code} className="hover:bg-slate-800/30 transition-colors group">
                     <td className="px-4 py-4 font-medium text-slate-200">{c.name} ({c.code})</td>
                     <td className="px-4 py-4 text-center">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -571,14 +683,22 @@ function HistoricalAnalysis() {
                         <span className="text-xs text-slate-300">{c.loadFactorPct}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-right font-medium text-emerald-400">${c.avgCompensation}</td>
+                    <td className="px-4 py-4 text-right">
+                      <span className="font-medium text-emerald-400" title={c.compensationNote || ''}>
+                        {c.avgCompensationDisplay}
+                      </span>
+                    </td>
                     <td className="px-4 py-4 text-center font-mono text-slate-300">{(c.oversaleRate * 100).toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-500 mt-4">Rates per 10,000 enplanements · Source: DOT Air Travel Consumer Report</p>
+          <div className="mt-4 space-y-1">
+            <p className="text-xs text-slate-500">Rates per 10,000 enplanements · Source: DOT Air Travel Consumer Report · Data: 2018-2019 (pre-COVID)</p>
+            {dataNote && <p className="text-xs text-slate-500">ℹ️ {dataNote}</p>}
+            <p className="text-xs text-slate-500">💡 Compensation marked with ~ uses DOT-published industry averages. BTS COMP_PAID fields only track IDB cash, not VDB vouchers.</p>
+          </div>
         </div>
       )}
 
@@ -611,7 +731,7 @@ function HistoricalAnalysis() {
                       <td className="px-4 py-4 text-center">
                         <span className="text-rose-400 font-medium">{t.involuntaryDB.toLocaleString()}</span>
                       </td>
-                      <td className="px-4 py-4 text-right font-medium text-emerald-400">${t.avgCompensation}</td>
+                      <td className="px-4 py-4 text-right font-medium text-emerald-400">{t.avgCompensationDisplay}</td>
                       <td className="px-4 py-4 text-center font-mono text-slate-300">{vdbPer10k}</td>
                     </tr>
                   );
@@ -619,7 +739,10 @@ function HistoricalAnalysis() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-500 mt-4">Source: DOT Bureau of Transportation Statistics</p>
+          <div className="mt-4 space-y-1">
+            <p className="text-xs text-slate-500">Source: DOT Bureau of Transportation Statistics · Latest available: Q3 2021</p>
+            <p className="text-xs text-slate-500">💡 Compensation marked "N/A" = BTS COMP_PAID fields report $0 (tracks IDB cash only, not VDB vouchers).</p>
+          </div>
         </div>
       )}
 
@@ -657,13 +780,16 @@ function HistoricalAnalysis() {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center font-mono text-slate-300">{r.avgBumps.toFixed(1)}</td>
-                    <td className="px-4 py-4 text-right font-medium text-emerald-400">${r.avgCompensation.toLocaleString()}</td>
+                    <td className="px-4 py-4 text-right font-medium text-emerald-400">{r.avgCompensationDisplay}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-500 mt-4">Source: DOT Bureau of Transportation Statistics analysis</p>
+          <div className="mt-4 space-y-1">
+            <p className="text-xs text-slate-500">Source: DOT Bureau of Transportation Statistics · Based on 2019 pre-COVID data</p>
+            <p className="text-xs text-slate-500">💡 Compensation with ~ prefix uses DOT-published industry averages where BTS data reports $0.</p>
+          </div>
         </div>
       )}
 
