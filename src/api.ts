@@ -118,9 +118,9 @@ async function apiFetchSafe<T>(path: string, options?: RequestInit): Promise<Api
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const result = await apiFetchSafe<T>(path, options);
   if (!result.ok) {
-    throw new Error(result.error);
+    throw new Error((result as { ok: false; error: string }).error);
   }
-  return result.data;
+  return (result as { ok: true; data: T }).data;
 }
 
 // --- Types matching server responses ---
