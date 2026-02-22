@@ -5,6 +5,11 @@ vi.mock('../server/weather.js', () => ({
   getWeatherSeverity: vi.fn().mockResolvedValue({ score: 0, reason: null }),
 }));
 
+// Mock FAA module to avoid network calls
+vi.mock('../server/faa.js', () => ({
+  getAirportStatus: vi.fn().mockResolvedValue({ airport: 'XXX', delay: false }),
+}));
+
 // Mock opensky (FR24 + OpenSky + ADSBDB) to avoid network calls
 // Provide deterministic fake "real flight" data for scoring tests
 vi.mock('../server/opensky.js', () => ({
@@ -66,6 +71,7 @@ vi.mock('../server/opensky.js', () => ({
 }));
 
 import { scoreFlights } from '../server/scoring.js';
+import { getHolidayScore } from '../server/holidays.js';
 
 describe('Scoring Algorithm — Bump Opportunity Index (2025 ATCR)', () => {
   beforeEach(() => {
@@ -211,5 +217,103 @@ describe('Scoring Algorithm — Bump Opportunity Index (2025 ATCR)', () => {
     const avgSunday = sundayResult.flights.reduce((s, f) => s + f.bumpScore, 0) / sundayResult.flights.length;
     const avgWednesday = wednesdayResult.flights.reduce((s, f) => s + f.bumpScore, 0) / wednesdayResult.flights.length;
     expect(avgSunday).toBeGreaterThan(avgWednesday);
+  });
+});
+
+// =============================================================================
+// Holiday / Event Calendar Scoring
+// =============================================================================
+
+describe('Holiday / Event Calendar Scoring', () => {
+  it('Thanksgiving Wednesday 2026 → high score (15)', () => {
+    // Thanksgiving 2026 = Nov 26. Wednesday before = Nov 25 (within 3-day window).
+    const date = new Date(2026, 10, 26); // Nov 26 2026 (Thanksgiving Day)
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(15);
+    expect(result.match?.name).toMatch(/Thanksgiving/i);
+  });
+
+  it('random Tuesday in February → low/zero score', () => {
+    // Feb 10, 2026 is a Tuesday — no holiday nearby
+    const date = new Date(2026, 1, 10);
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(0);
+    expect(result.match).toBeNull();
+  });
+
+  it('Christmas Eve → high score (14)', () => {
+    // Dec 24, 2026 — within 3-day window before Christmas (Dec 25)
+    const date = new Date(2026, 11, 24);
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(14);
+    expect(result.match?.name).toMatch(/Christmas/i);
+  });
+
+  it('Spring break date range → medium score (9)', () => {
+    // Mar 15, 2026 is within the early spring break range (Mar 8-22)
+    const date = new Date(2026, 2, 15);
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(8);
+    expect(result.match?.name).toMatch(/Spring Break/i);
+  });
+
+  it('Independence Day scores high', () => {
+    // Jul 3, 2026 — within 2-day window before Jul 4
+    const date = new Date(2026, 6, 3);
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(11);
+    expect(result.match?.name).toMatch(/Independence Day/i);
+  });
+
+  it('New Years Day scores high (any year)', () => {
+    const result = getHolidayScore(new Date(2030, 0, 1));
+    expect(result.score).toBe(12);
+    expect(result.match?.name).toMatch(/New Year/i);
+  });
+
+
+
+
+
+
+
+
+
+
+
+  it('overlapping holidays take the highest score', () => {
+    // Dec 26, 2026 — within Christmas window (+2 after) AND New Year's window
+    // (Dec 30+). Christmas intensity=14 should win if both match.
+    const date = new Date(2026, 11, 26);
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(14);
+    expect(result.match?.name).toMatch(/Christmas/i);
+  });
+
+  it('Thanksgiving 2025 works with year-specific date', () => {
+    // Thanksgiving 2025 = Nov 27. Day before = Nov 26.
+    const date = new Date(2025, 10, 27); // Actual Thanksgiving Day
+    const result = getHolidayScore(date);
+    expect(result.score).toBe(15);
+    expect(result.match?.name).toMatch(/Thanksgiving/i);
+  });
+
+  it('Thanksgiving holiday boosts full flight scoring', async () => {
+    // Nov 25, 2026 (Wed before Thanksgiving) vs a random Tuesday in February
+    const thanksgivingResult = await scoreFlights('ATL', 'LGA', '2026-11-25');
+    const februaryResult = await scoreFlights('ATL', 'LGA', '2026-02-10');
+
+    expect(thanksgivingResult.flights.length).toBeGreaterThan(0);
+    expect(februaryResult.flights.length).toBeGreaterThan(0);
+
+    const avgThanksgiving = thanksgivingResult.flights.reduce((s, f) => s + f.bumpScore, 0) / thanksgivingResult.flights.length;
+    const avgFebruary = februaryResult.flights.reduce((s, f) => s + f.bumpScore, 0) / februaryResult.flights.length;
+    expect(avgThanksgiving).toBeGreaterThan(avgFebruary);
+
+    // Thanksgiving flights should have holiday factor tag
+    const hasHolidayFactor = thanksgivingResult.flights.some(f =>
+      f.factors.some(fac => fac.includes('Thanksgiving'))
+    );
+    expect(hasHolidayFactor).toBe(true);
   });
 });

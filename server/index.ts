@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { getWeatherAlerts, fetchMetar } from './weather.js';
 import { scoreFlights } from './scoring.js';
 import { cacheGet, cacheSet } from './cache.js';
+import { getAirportStatus } from './faa.js';
 import {
   CARRIER_STATS,
   QUARTERLY_TRENDS,
@@ -66,6 +67,29 @@ app.get('/api/weather/metar', async (req, res) => {
   } catch (err) {
     console.error('METAR error:', err);
     res.status(500).json({ error: 'Failed to fetch METAR data', metars: [] });
+  }
+});
+
+// =============================================================================
+// FAA Airport Status
+// GET /api/faa/status?airport=ATL
+// =============================================================================
+app.get('/api/faa/status', async (req, res) => {
+  try {
+    const airport = req.query.airport ? String(req.query.airport).toUpperCase() : null;
+    if (!airport) {
+      return res.status(400).json({ error: 'airport query parameter is required' });
+    }
+
+    const status = await getAirportStatus(airport);
+    res.json({
+      ...status,
+      source: 'FAA NASSTATUS',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('FAA status error:', err);
+    res.status(500).json({ error: 'Failed to fetch FAA status', airport: req.query.airport, delay: false });
   }
 });
 
@@ -228,12 +252,13 @@ app.get('/api/stats/summary', async (_req, res) => {
 // =============================================================================
 app.listen(PORT, () => {
   console.log(`🛫 BumpHunter API running on http://localhost:${PORT}`);
-  console.log('   Data sources: FlightRadar24, OpenSky Network, ADSBDB, aviationweather.gov, DOT BTS');
+  console.log('   Data sources: FlightRadar24, OpenSky Network, ADSBDB, aviationweather.gov, FAA NASSTATUS, DOT BTS');
   console.log('   NO fake data. NO schedule templates. Real flights only.');
   console.log('   Endpoints:');
   console.log('     GET /api/health');
   console.log('     GET /api/weather/alerts');
   console.log('     GET /api/weather/metar');
+  console.log('     GET /api/faa/status');
   console.log('     GET /api/flights/search');
   console.log('     GET /api/stats/carriers');
   console.log('     GET /api/stats/trends');
