@@ -306,7 +306,7 @@ export async function getFlightsForRoute(
     }
   }
 
-  // Process departures
+  // Process departures — ONLY include flights whose destination matches
   const flights: RealFlight[] = [];
   const seenCallsigns = new Set<string>();
 
@@ -314,16 +314,25 @@ export async function getFlightsForRoute(
     const rawCs = (dep.callsign || '').trim();
     if (!rawCs || seenCallsigns.has(rawCs)) continue;
 
+    // PRIMARY FILTER: Only include flights whose estimated arrival airport
+    // matches our target destination. Without this, we'd show every departure
+    // from the origin regardless of where it's going.
+    const depArrivalAirport = (dep.estArrivalAirport || '').trim().toUpperCase();
+    
+    // Check via cross-reference (arrivals data) OR via OpenSky's own estimate
+    const confirmedViaArrivals = arrivedIcao24s.has(dep.icao24) &&
+      arrivalDepartureAirports.get(dep.icao24) === originIcao;
+    const matchesByEstimate = depArrivalAirport === destIcao;
+    
+    // Must match destination by at least one method
+    if (!confirmedViaArrivals && !matchesByEstimate) continue;
+
     const parsed = parseCallsign(rawCs);
     if (!parsed) continue;
 
     // Get the display carrier (branded mainline code)
     const displayCarrier = parsed.brandedAs;
     if (!SCORED_CARRIERS.has(displayCarrier)) continue; // Only include carriers we can score
-
-    // Check if this flight confirmed arrived at destination
-    const confirmed = arrivedIcao24s.has(dep.icao24) &&
-      arrivalDepartureAirports.get(dep.icao24) === originIcao;
 
     // Calculate departure time in local time (approximate)
     const depDate = new Date(dep.firstSeen * 1000);
@@ -346,7 +355,7 @@ export async function getFlightsForRoute(
       icao24: dep.icao24,
       departureTime: depTimeStr,
       departureTimestamp: dep.firstSeen,
-      confirmed,
+      confirmed: confirmedViaArrivals,
       isRegional: parsed.isRegional,
     });
   }
