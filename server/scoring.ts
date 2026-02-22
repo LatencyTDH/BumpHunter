@@ -961,7 +961,7 @@ export async function scoreOriginDepartures(origin: string, dateStr: string): Pr
       ? `${sf.airline} (${getCarrierFullName(carrier)})`
       : (sf.airline || getCarrierFullName(carrier));
 
-    const callsign = sf.callsign || `${sf.airlineIcao}${num}` || '';
+    const callsign = sf.callsign || (sf.airlineIcao ? `${sf.airlineIcao}${num}` : '');
 
     scheduleFlights.push({
       destination: destUpper,
