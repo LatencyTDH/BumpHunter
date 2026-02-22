@@ -706,7 +706,7 @@ export async function scoreFlights(
 ): Promise<ScoreResult> {
   const originUpper = origin.toUpperCase();
   const destUpper = dest.toUpperCase();
-  const date = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
+  const date = dateStr ? new Date(dateStr + 'T12:00:00-05:00') : new Date();
   const dayOfWeek = date.getDay();
 
   const [originWx, destWx, originFAA, destFAA, routeReliability] = await Promise.all([
@@ -879,7 +879,7 @@ export async function scoreFlights(
 
 export async function scoreOriginDepartures(origin: string, dateStr: string): Promise<ScoreResult> {
   const originUpper = origin.toUpperCase();
-  const date = dateStr ? new Date(`${dateStr}T12:00:00`) : new Date();
+  const date = dateStr ? new Date(`${dateStr}T12:00:00-05:00`) : new Date();
   const dayOfWeek = date.getDay();
 
   const [originWx, originFAA] = await Promise.all([

@@ -148,8 +148,11 @@ export function buildHeatmap(origin: string, dest: string, weeks = 4): HeatmapDa
   const carrierChoice = getCarrierForRoute(origin, dest);
   const carrierScore = scoreCarrierRate(carrierChoice.code, carrierChoice.name);
 
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
+  // Use noon Eastern to avoid DST date-boundary issues
+  const now = new Date();
+  const start = new Date(
+    now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) + 'T12:00:00-05:00'
+  );
 
   for (let i = 0; i < windowWeeks * 7; i++) {
     const date = new Date(start);
