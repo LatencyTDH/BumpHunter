@@ -61,12 +61,13 @@ function DataSourceBadge({ sources }: { sources?: string[] }) {
 
 function VerificationBadge({ flight }: { flight: Flight }) {
   if (flight.verified) {
-    const label = flight.verificationSource === 'fr24' ? 'Live · FR24' :
+    const label = flight.verificationSource === 'fr24-schedule' ? 'Scheduled · FR24' :
+                  flight.verificationSource === 'fr24-live' ? 'Live · FR24' :
                   flight.verificationSource === 'adsbdb' ? 'Verified · ADSBDB' :
                   'Verified';
     return (
       <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-        {flight.dataSource === 'fr24' ? <Radio className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+        {flight.dataSource === 'fr24-live' ? <Radio className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
         {label}
       </span>
     );
@@ -80,6 +81,28 @@ function VerificationBadge({ flight }: { flight: Flight }) {
     );
   }
   return null;
+}
+
+function FlightStatusBadge({ status }: { status: string }) {
+  if (!status) return null;
+  const lower = status.toLowerCase();
+  const isInAir = lower === 'in air' || lower.includes('airborne');
+  const isDelayed = lower.includes('delay');
+  const isLanded = lower.includes('landed');
+  const isCanceled = lower.includes('cancel');
+
+  let classes = 'bg-slate-800 text-slate-300';
+  if (isInAir) classes = 'bg-sky-500/10 text-sky-400 border border-sky-500/20';
+  else if (isDelayed) classes = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+  else if (isLanded) classes = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+  else if (isCanceled) classes = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${classes}`}>
+      {isInAir && <Radio className="w-3 h-3 animate-pulse" />}
+      {status}
+    </span>
+  );
 }
 
 function RateLimitBanner({ meta }: { meta: FlightSearchMeta }) {
@@ -325,7 +348,7 @@ function Scanner() {
     <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-50">Flight Scanner</h1>
-        <p className="text-slate-400 mt-1">Real flights from FlightRadar24 &amp; OpenSky Network, scored for bump probability.</p>
+        <p className="text-slate-400 mt-1">Real scheduled flights from FlightRadar24, scored for bump opportunity.</p>
       </header>
 
       {/* Live Network Disruptions */}
@@ -508,11 +531,17 @@ function Scanner() {
                         <div>
                           <div className="flex items-center flex-wrap gap-2">
                             <span className="font-bold text-slate-50">{flight.flightNumber}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">{flight.aircraft}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300" title={flight.aircraftFullName || flight.aircraft}>
+                              {flight.aircraft}
+                            </span>
+                            {flight.registration && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/50 text-slate-500 font-mono">{flight.registration}</span>
+                            )}
                             {flight.isRegional && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
                             )}
                             <VerificationBadge flight={flight} />
+                            <FlightStatusBadge status={flight.status} />
                           </div>
                           <div className="text-sm text-slate-400 mt-1 flex items-center flex-wrap gap-x-2">
                             <span>{flight.departure} {flight.depTime}</span>
@@ -536,15 +565,20 @@ function Scanner() {
                               </>
                             )}
                           </div>
+                          {flight.codeshares && flight.codeshares.length > 0 && (
+                            <div className="text-xs text-slate-500 mt-1">
+                              Codeshares: {flight.codeshares.join(', ')}
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex flex-col md:items-end">
                         <div className="flex items-center space-x-3">
                           <div className="text-right">
-                            <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Probability</p>
+                            <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Score</p>
                             <p className={`text-2xl font-bold ${flight.bumpScore > 80 ? 'text-emerald-400' : flight.bumpScore > 60 ? 'text-amber-400' : 'text-slate-300'}`}>
-                              {flight.bumpScore}%
+                              {flight.bumpScore}<span className="text-sm font-normal text-slate-500">/100</span>
                             </p>
                           </div>
                           <div className="w-16 h-16 relative">
@@ -567,6 +601,7 @@ function Scanner() {
                             </svg>
                           </div>
                         </div>
+                        <p className="text-xs text-slate-500 mt-1 max-w-[200px] text-right">Relative opportunity index — not a probability</p>
                       </div>
 
                     </div>
@@ -582,6 +617,19 @@ function Scanner() {
                 ))}
 
                 <DataSourceBadge sources={searchMeta?.dataSources} />
+
+                {/* Scoring methodology note + data freshness warning */}
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800/50">
+                    <Info className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-slate-500">
+                      <span className="text-slate-400 font-medium">Bump Score</span> is a relative opportunity index (0-100) based on BTS carrier statistics, aircraft type, timing, weather, and route demand. Higher = better chance of VDB opportunity. This is not a probability.
+                    </p>
+                  </div>
+                  {searchMeta?.btsDataWarning && (
+                    <p className="text-xs text-amber-500/70 px-1">{searchMeta.btsDataWarning}</p>
+                  )}
+                </div>
               </>
             )}
           </motion.div>
@@ -695,7 +743,7 @@ function HistoricalAnalysis() {
             </table>
           </div>
           <div className="mt-4 space-y-1">
-            <p className="text-xs text-slate-500">Rates per 10,000 enplanements · Source: DOT Air Travel Consumer Report · Data: 2018-2019 (pre-COVID)</p>
+            <p className="text-xs text-slate-500">Rates per 10,000 enplanements · Source: DOT Air Travel Consumer Report · Data: Jan–Sep 2025 (latest available)</p>
             {dataNote && <p className="text-xs text-slate-500">ℹ️ {dataNote}</p>}
             <p className="text-xs text-slate-500">💡 Compensation marked with ~ uses DOT-published industry averages. BTS COMP_PAID fields only track IDB cash, not VDB vouchers.</p>
           </div>
@@ -787,7 +835,7 @@ function HistoricalAnalysis() {
             </table>
           </div>
           <div className="mt-4 space-y-1">
-            <p className="text-xs text-slate-500">Source: DOT Bureau of Transportation Statistics · Based on 2019 pre-COVID data</p>
+            <p className="text-xs text-slate-500">Source: DOT Air Travel Consumer Report · Based on Jan–Sep 2025 data (latest available)</p>
             <p className="text-xs text-slate-500">💡 Compensation with ~ prefix uses DOT-published industry averages where BTS data reports $0.</p>
           </div>
         </div>

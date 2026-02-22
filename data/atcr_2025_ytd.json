@@ -1,0 +1,28 @@
+{
+  "source": "DOT Air Travel Consumer Report, November 2025",
+  "period": "January-September 2025",
+  "url": "https://www.transportation.gov/resources/individuals/aviation-consumer-protection/november-2025-air-travel-consumer-report",
+  "note": "Operating carrier data (not marketing network). IDB = Involuntary Denied Boardings. VDB = Voluntary Denied Boardings.",
+  "carriers": [
+    {"carrier": "DL", "name": "Delta Air Lines",    "vdb": 65280,  "idb": 0,    "enplaned": 115023200, "idb_rate_per_10k": 0.00, "rank": 1},
+    {"carrier": "G4", "name": "Allegiant Air",      "vdb": 563,    "idb": 0,    "enplaned": 14208165,  "idb_rate_per_10k": 0.00, "rank": 2},
+    {"carrier": "WN", "name": "Southwest Airlines",  "vdb": 9395,   "idb": 196,  "enplaned": 124886299, "idb_rate_per_10k": 0.02, "rank": 3},
+    {"carrier": "UA", "name": "United Airlines",     "vdb": 20162,  "idb": 149,  "enplaned": 94396453,  "idb_rate_per_10k": 0.02, "rank": 4},
+    {"carrier": "HA", "name": "Hawaiian Airlines",   "vdb": 468,    "idb": 23,   "enplaned": 8369464,   "idb_rate_per_10k": 0.03, "rank": 5},
+    {"carrier": "B6", "name": "JetBlue Airways",     "vdb": 2534,   "idb": 133,  "enplaned": 25327457,  "idb_rate_per_10k": 0.05, "rank": 6},
+    {"carrier": "AS", "name": "Alaska Airlines",     "vdb": 5847,   "idb": 153,  "enplaned": 25542248,  "idb_rate_per_10k": 0.06, "rank": 7},
+    {"carrier": "NK", "name": "Spirit Airlines",     "vdb": 6942,   "idb": 486,  "enplaned": 24041203,  "idb_rate_per_10k": 0.20, "rank": 8},
+    {"carrier": "OO", "name": "SkyWest Airlines",    "vdb": 30519,  "idb": 850,  "enplaned": 33288058,  "idb_rate_per_10k": 0.26, "rank": 9},
+    {"carrier": "AA", "name": "American Airlines",   "vdb": 33210,  "idb": 5497, "enplaned": 111745908, "idb_rate_per_10k": 0.49, "rank": 10},
+    {"carrier": "MQ", "name": "Envoy Air",           "vdb": 4705,   "idb": 1000, "enplaned": 13701205,  "idb_rate_per_10k": 0.73, "rank": 11},
+    {"carrier": "YX", "name": "Republic Airways",    "vdb": 13476,  "idb": 1392, "enplaned": 15335107,  "idb_rate_per_10k": 0.91, "rank": 12},
+    {"carrier": "OH", "name": "PSA Airlines",        "vdb": 5700,   "idb": 1314, "enplaned": 10465860,  "idb_rate_per_10k": 1.26, "rank": 13},
+    {"carrier": "F9", "name": "Frontier Airlines",   "vdb": 1541,   "idb": 6569, "enplaned": 23909073,  "idb_rate_per_10k": 2.75, "rank": 14}
+  ],
+  "totals": {
+    "vdb": 200342,
+    "idb": 17762,
+    "enplaned": 640239700,
+    "idb_rate_per_10k": 0.28
+  }
+}

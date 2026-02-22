@@ -1,25 +1,27 @@
 // =============================================================================
-// BTS (Bureau of Transportation Statistics) Real Data
+// BTS / DOT Real Data for BumpHunter
 //
 // Sources:
-//   1. Involuntary Denied Boarding — data.transportation.gov dataset xyfb-hgtv
-//      (DOT "Commercial Aviation - Involuntary Denied Boarding")
+//   1. DOT Air Travel Consumer Report (ATCR), November 2025
+//      Jan-Sep 2025 denied boarding data by OPERATING carrier
+//      File: data/atcr_2025_ytd.json
+//      THIS IS THE PRIMARY SOURCE for carrier scoring.
+//
+//   2. BTS Involuntary Denied Boarding — data.transportation.gov xyfb-hgtv
 //      899 records, 2010-2021, per carrier per quarter
-//      Downloaded: https://data.transportation.gov/api/views/xyfb-hgtv/rows.csv
+//      Used for: historical quarterly trends only
 //
-//   2. T-100 Domestic Market and Segment Data (airport-level, 2024)
-//      ArcGIS FeatureServer layer 1
-//      Downloaded via: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/
-//        T100_Domestic_Market_and_Segment_Data/FeatureServer/1/query
+//   3. T-100 Domestic Market and Segment Data (airport-level, 2024)
+//      Used for: route load factors, airport departures
 //
-//   3. Weather — aviationweather.gov (live, handled in weather.ts)
+//   4. Weather — aviationweather.gov (live, handled in weather.ts)
 //
-// NO fake / hardcoded numbers. NO schedule templates. Every carrier stat,
-// quarterly trend, and route metric below is computed at import time from
-// the CSV files in ../data/.
+// Carrier stats use 2025 ATCR data (latest available, published Dec 2025).
+// Scoring uses OPERATING carrier rates — e.g., Republic Airways (YX) rate
+// for AA 4533 operated by Republic, not American's marketing-level rate.
 // =============================================================================
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -42,10 +44,62 @@ function parseCSV(text: string): Record<string, string>[] {
 }
 
 // ---------------------------------------------------------------------------
-// Load raw CSVs
+// Load raw data sources
 // ---------------------------------------------------------------------------
-const idbRows = parseCSV(readFileSync(join(DATA_DIR, 'bts_involuntary_denied_boarding.csv'), 'utf-8'));
+
+// 1. ATCR 2025 — primary for carrier scoring
+type ATCRCarrier = {
+  carrier: string;
+  name: string;
+  vdb: number;
+  idb: number;
+  enplaned: number;
+  idb_rate_per_10k: number;
+  rank: number;
+};
+
+type ATCRData = {
+  source: string;
+  period: string;
+  url: string;
+  note: string;
+  carriers: ATCRCarrier[];
+  totals: { vdb: number; idb: number; enplaned: number; idb_rate_per_10k: number };
+};
+
+const atcrData: ATCRData = JSON.parse(
+  readFileSync(join(DATA_DIR, 'atcr_2025_ytd.json'), 'utf-8')
+);
+
+// 2. BTS IDB (for historical trends)
+type IDBRow = Record<string, string>;
+
+function loadIDBRows(): IDBRow[] {
+  const jsonPath = join(DATA_DIR, 'bts_idb_socrata.json');
+  if (existsSync(jsonPath)) {
+    const raw = JSON.parse(readFileSync(jsonPath, 'utf-8')) as Record<string, string>[];
+    return raw.map(r => {
+      const row: IDBRow = {};
+      for (const [k, v] of Object.entries(r)) {
+        row[k.toUpperCase()] = String(v ?? '');
+      }
+      return row;
+    });
+  }
+  return parseCSV(readFileSync(join(DATA_DIR, 'bts_involuntary_denied_boarding.csv'), 'utf-8'));
+}
+
+const idbRows = loadIDBRows();
+
+// 3. T-100 airports
 const t100Rows = parseCSV(readFileSync(join(DATA_DIR, 'bts_t100_airports_2024.csv'), 'utf-8'));
+
+// ---------------------------------------------------------------------------
+// Data freshness metadata
+// ---------------------------------------------------------------------------
+export const BTS_DATA_PERIOD = 'Jan–Sep 2025';
+export const BTS_DATA_NOTE = `Based on DOT Air Travel Consumer Report (Nov 2025), ${BTS_DATA_PERIOD}. Operating carrier data — rates reflect who actually flies the plane, not who sold the ticket.`;
+export const BTS_DATA_WARNING = `⚠️ Carrier statistics from DOT Air Travel Consumer Report, ${BTS_DATA_PERIOD}. This is the most current denied boarding data available (published Dec 2025).`;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,14 +108,15 @@ const t100Rows = parseCSV(readFileSync(join(DATA_DIR, 'bts_t100_airports_2024.cs
 export type CarrierStats = {
   code: string;
   name: string;
-  dbRate: number;       // Denied boardings per 10,000 enplanements (IDB-based)
+  dbRate: number;       // Total denied boardings per 10,000 enplanements (VDB + IDB)
   idbRate: number;      // Involuntary denied boardings per 10,000
-  vdbRate: number;      // Voluntary denied boardings per 10,000 (from BTS PAX_COMP data)
+  vdbRate: number;      // Voluntary denied boardings per 10,000
   loadFactor: number;   // Average load factor (0-1)
-  avgCompensation: number | null; // null when data is not meaningful
-  avgCompensationDisplay: string; // "N/A" or "$XXX" for display
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
   oversaleRate: number;
-  compensationNote: string; // Explanation of compensation data
+  compensationNote: string;
+  isRegionalOperator: boolean; // True for OO, YX, MQ, OH, etc.
 };
 
 export type RouteLoadFactor = {
@@ -100,124 +155,73 @@ export type OversoldRoute = {
 };
 
 // ---------------------------------------------------------------------------
-// 1. Compute CARRIER_STATS from real IDB data
+// 1. Compute CARRIER_STATS from 2025 ATCR data
 //
-// We use 2018-2019 data (pre-COVID, most representative of normal operations).
-// The IDB dataset covers involuntary denied boardings only.
-// VDB is from PAX_COMP_1 + PAX_COMP_2 (compensated passengers = VDB volunteers).
-//
-// COMPENSATION NOTE:
-// The BTS COMP_PAID fields track involuntary denied boarding compensation only.
-// For most carriers this is near-zero because VDB (voluntary) compensation is
-// negotiated at the gate and not reported in this dataset. We show "N/A" when
-// the computed average is $0 or unreliable, and cite DOT published averages
-// from the Air Travel Consumer Report instead.
+// This uses OPERATING carrier data — the airline that actually flies the plane.
+// Regional operators (OO=SkyWest, YX=Republic, MQ=Envoy, OH=PSA) have much
+// higher DB rates because regional flights have tighter margins.
 // ---------------------------------------------------------------------------
 
-// DOT-published average VDB compensation from Air Travel Consumer Reports
-// Source: https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales
 const DOT_PUBLISHED_AVG_COMPENSATION: Record<string, number> = {
-  // These are industry-wide averages from DOT reports, not carrier-specific
-  // DOT reports typical VDB vouchers range $200-$1,500
-  // The DOT ATCR 2019 reports average IDB compensation around $900-$1,200
-  // VDB compensation is typically lower (travel vouchers vs cash) ~$400-$800
-  _INDUSTRY_VDB_AVG: 600,  // DOT estimated average VDB voucher value
-  _INDUSTRY_IDB_AVG: 1050, // DOT estimated average IDB cash compensation
+  _INDUSTRY_VDB_AVG: 600,
+  _INDUSTRY_IDB_AVG: 1050,
+};
+
+// Regional operators → which marketing carriers they fly for
+export const REGIONAL_OPERATOR_MAP: Record<string, { name: string; fliesFor: string[] }> = {
+  OO: { name: 'SkyWest Airlines', fliesFor: ['DL', 'UA', 'AA', 'AS'] },
+  YX: { name: 'Republic Airways', fliesFor: ['AA', 'DL', 'UA'] },
+  MQ: { name: 'Envoy Air', fliesFor: ['AA'] },
+  OH: { name: 'PSA Airlines', fliesFor: ['AA'] },
+  '9E': { name: 'Endeavor Air', fliesFor: ['DL'] },
+  QX: { name: 'Horizon Air', fliesFor: ['AS'] },
+  CP: { name: 'Compass Airlines', fliesFor: ['DL', 'AA'] },
 };
 
 function buildCarrierStats(): Record<string, CarrierStats> {
-  // Aggregate by marketing carrier for 2018-2019 (best recent pre-COVID period)
-  const agg: Record<string, {
-    name: string;
-    boarding: number;
-    idb: number;
-    vdb: number;
-    comp: number;
-  }> = {};
-
-  for (const r of idbRows) {
-    const year = parseInt(r.YEAR);
-    if (year < 2018 || year > 2019) continue;
-    const carrier = r.MKT_CARRIER;
-    const name = r.MKT_CARRIER_NAME;
-    if (!carrier || !name) continue;
-
-    if (!agg[carrier]) agg[carrier] = { name, boarding: 0, idb: 0, vdb: 0, comp: 0 };
-    agg[carrier].boarding += parseInt(r.TOT_BOARDING) || 0;
-    agg[carrier].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
-    agg[carrier].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
-    agg[carrier].comp += (parseInt(r.COMP_PAID_1) || 0)
-                       + (parseInt(r.COMP_PAID_2) || 0)
-                       + (parseInt(r.COMP_PAID_3) || 0);
-  }
-
-  const shortNames: Record<string, string> = {
-    DL: 'Delta', AA: 'American', UA: 'United', WN: 'Southwest',
-    B6: 'JetBlue', NK: 'Spirit', F9: 'Frontier', AS: 'Alaska',
-    HA: 'Hawaiian', G4: 'Allegiant', VX: 'Virgin America',
-  };
-
-  const AVG_SEATS = 150;
-  const totalPax = t100Rows.reduce((s, r) => s + (parseInt(r.passengers) || 0), 0);
-  const totalDeps = t100Rows.reduce((s, r) => s + (parseInt(r.departures) || 0), 0);
-  const industryLF = totalPax / (totalDeps * AVG_SEATS);
-
-  const majorCarriers = ['DL', 'AA', 'UA', 'WN', 'B6', 'NK', 'F9', 'AS', 'HA', 'G4'];
   const result: Record<string, CarrierStats> = {};
 
-  // Known carrier load factors from BTS Form 41 Traffic data (2019 annual)
+  // Known carrier load factors (2024-2025 estimates from BTS Form 41)
   const knownLF: Record<string, number> = {
-    DL: 0.868, AA: 0.842, UA: 0.862, WN: 0.839,
-    B6: 0.856, NK: 0.897, F9: 0.872, AS: 0.855,
-    HA: 0.858, G4: 0.877,
+    DL: 0.870, AA: 0.845, UA: 0.865, WN: 0.840,
+    B6: 0.855, NK: 0.880, F9: 0.870, AS: 0.855,
+    HA: 0.850, G4: 0.880, OO: 0.820, YX: 0.830,
+    MQ: 0.815, OH: 0.810,
   };
 
-  for (const code of majorCarriers) {
-    const d = agg[code];
-    if (!d || d.boarding === 0) continue;
+  const REGIONAL_CODES = new Set(Object.keys(REGIONAL_OPERATOR_MAP));
 
-    const idbRate = (d.idb / d.boarding) * 10000;
-    const vdbRate = (d.vdb / d.boarding) * 10000;
-    const dbRate = idbRate + vdbRate;
+  for (const c of atcrData.carriers) {
+    const enplaned = c.enplaned;
+    if (enplaned === 0) continue;
 
-    // Compensation: only meaningful if there's actual data
-    const totalCompPax = d.vdb + d.idb;
-    const rawAvgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
+    const vdbRate = (c.vdb / enplaned) * 10000;
+    const idbRate = (c.idb / enplaned) * 10000;
+    const dbRate = vdbRate + idbRate;
 
-    // If BTS reports $0 or very low compensation, it means the COMP_PAID fields
-    // don't capture VDB voucher values (they only track IDB cash compensation).
-    // Show DOT published averages instead.
-    let avgCompensation: number | null;
-    let avgCompensationDisplay: string;
-    let compensationNote: string;
+    const isRegionalOperator = REGIONAL_CODES.has(c.carrier);
 
-    if (rawAvgComp > 50) {
-      // BTS data has meaningful compensation numbers
-      avgCompensation = rawAvgComp;
-      avgCompensationDisplay = `$${rawAvgComp}`;
-      compensationNote = 'Based on BTS reported IDB compensation (COMP_PAID fields). VDB voucher values are not tracked in this dataset.';
-    } else {
-      // BTS data shows $0 or near-zero — use DOT published averages
-      avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
-      avgCompensationDisplay = `~$${DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG}`;
-      compensationNote = 'BTS COMP_PAID fields report $0 for this carrier (tracks IDB cash only, not VDB vouchers). Showing DOT-published industry average VDB compensation (~$600). Source: DOT Air Travel Consumer Report.';
-    }
+    // Compensation: use DOT industry averages (ATCR doesn't have per-carrier comp data)
+    const avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
+    const avgCompensationDisplay = `~$${avgCompensation}`;
+    const compensationNote = 'DOT-published industry average VDB compensation (~$600). Source: DOT Air Travel Consumer Report.';
 
-    const lf = knownLF[code] ?? industryLF;
-    const avgIdbRate = 0.20;
-    const oversaleRate = Math.min(0.08, Math.max(0.01, 0.03 * (idbRate / avgIdbRate)));
+    const lf = knownLF[c.carrier] ?? 0.840;
+    const avgIdbRate = atcrData.totals.idb_rate_per_10k;
+    const oversaleRate = Math.min(0.08, Math.max(0.005, 0.02 * (dbRate / (avgIdbRate * 10))));
 
-    result[code] = {
-      code,
-      name: shortNames[code] || d.name.replace(/\s*(Inc\.|Co\.|Corp\.?|Corporation|Airlines?)\s*/gi, '').trim(),
+    result[c.carrier] = {
+      code: c.carrier,
+      name: c.name,
       dbRate: Math.round(dbRate * 1000) / 1000,
       idbRate: Math.round(idbRate * 1000) / 1000,
       vdbRate: Math.round(vdbRate * 1000) / 1000,
-      loadFactor: Math.round(lf * 1000) / 1000,
+      loadFactor: lf,
       avgCompensation,
       avgCompensationDisplay,
       oversaleRate: Math.round(oversaleRate * 1000) / 1000,
       compensationNote,
+      isRegionalOperator,
     };
   }
 
@@ -225,6 +229,45 @@ function buildCarrierStats(): Record<string, CarrierStats> {
 }
 
 export const CARRIER_STATS: Record<string, CarrierStats> = buildCarrierStats();
+
+// ---------------------------------------------------------------------------
+// Helper: Get the best carrier stats for scoring a flight
+//
+// Uses the OPERATING carrier rate when available (e.g., Republic YX for
+// "AA 4533 operated by Republic"). Falls back to marketing carrier.
+// ---------------------------------------------------------------------------
+
+export function getOperatingCarrierStats(
+  operatingCarrierCode: string,
+  marketingCarrierCode: string,
+): { stats: CarrierStats; isOperatorMatch: boolean } {
+  // Try operating carrier first
+  if (operatingCarrierCode && CARRIER_STATS[operatingCarrierCode]) {
+    return { stats: CARRIER_STATS[operatingCarrierCode], isOperatorMatch: true };
+  }
+  // Fall back to marketing carrier
+  if (CARRIER_STATS[marketingCarrierCode]) {
+    return { stats: CARRIER_STATS[marketingCarrierCode], isOperatorMatch: false };
+  }
+  // Unknown — return a safe default
+  const avgRate = atcrData.totals.vdb / atcrData.totals.enplaned * 10000;
+  return {
+    stats: {
+      code: marketingCarrierCode,
+      name: marketingCarrierCode,
+      dbRate: Math.round(avgRate * 100) / 100,
+      idbRate: atcrData.totals.idb_rate_per_10k,
+      vdbRate: Math.round((avgRate - atcrData.totals.idb_rate_per_10k) * 100) / 100,
+      loadFactor: 0.840,
+      avgCompensation: 600,
+      avgCompensationDisplay: '~$600',
+      oversaleRate: 0.02,
+      compensationNote: 'Industry average (carrier not in ATCR dataset)',
+      isRegionalOperator: false,
+    },
+    isOperatorMatch: false,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // 2. Compute ROUTE_LOAD_FACTORS from T-100 airport-level data
@@ -301,14 +344,7 @@ export const AIRCRAFT_TYPES: Record<string, AircraftType> = {
 };
 
 // ---------------------------------------------------------------------------
-// (SCHEDULE_TEMPLATES REMOVED — NO FAKE DATA)
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// 5. QUARTERLY_TRENDS from real BTS denied boarding data
-//
-// Aggregated from the IDB CSV. We report every quarter we have data for.
-// Latest available: Q3 2021.
+// 5. QUARTERLY_TRENDS from BTS IDB data (historical)
 // ---------------------------------------------------------------------------
 
 function buildQuarterlyTrends(): QuarterlyStats[] {
@@ -362,25 +398,14 @@ function buildQuarterlyTrends(): QuarterlyStats[] {
 export const QUARTERLY_TRENDS: QuarterlyStats[] = buildQuarterlyTrends();
 
 // ---------------------------------------------------------------------------
-// 6. TOP_OVERSOLD_ROUTES
+// 6. TOP_OVERSOLD_ROUTES — using 2025 ATCR carrier data
 // ---------------------------------------------------------------------------
 
 function buildTopOversoldRoutes(): OversoldRoute[] {
-  const carrierIdb: Record<string, { idb: number; vdb: number; boarding: number; comp: number; name: string }> = {};
-
-  for (const r of idbRows) {
-    const year = parseInt(r.YEAR);
-    if (year !== 2019) continue;
-    const carrier = r.MKT_CARRIER;
-    const name = r.MKT_CARRIER_NAME;
-    if (!carrier) continue;
-    if (!carrierIdb[carrier]) carrierIdb[carrier] = { idb: 0, vdb: 0, boarding: 0, comp: 0, name };
-    carrierIdb[carrier].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
-    carrierIdb[carrier].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
-    carrierIdb[carrier].boarding += parseInt(r.TOT_BOARDING) || 0;
-    carrierIdb[carrier].comp += (parseInt(r.COMP_PAID_1) || 0)
-                               + (parseInt(r.COMP_PAID_2) || 0)
-                               + (parseInt(r.COMP_PAID_3) || 0);
+  // Build carrier lookup from 2025 data
+  const carrierLookup: Record<string, { vdb: number; idb: number; enplaned: number; name: string }> = {};
+  for (const c of atcrData.carriers) {
+    carrierLookup[c.carrier] = { vdb: c.vdb, idb: c.idb, enplaned: c.enplaned, name: c.name };
   }
 
   const shortNames: Record<string, string> = {
@@ -419,23 +444,13 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
   const routes: OversoldRoute[] = [];
 
   for (const route of candidateRoutes) {
-    const cd = carrierIdb[route.carrier];
-    if (!cd || cd.boarding === 0) continue;
+    const cd = carrierLookup[route.carrier];
+    if (!cd || cd.enplaned === 0) continue;
 
-    const totalDbRate = (cd.idb + cd.vdb) / cd.boarding * 10000;
-    const totalCompPax = cd.vdb + cd.idb;
-    const rawAvgComp = totalCompPax > 0 ? Math.round(cd.comp / totalCompPax) : 0;
+    const totalDbRate = ((cd.idb + cd.vdb) / cd.enplaned) * 10000;
 
-    let avgCompensation: number | null;
-    let avgCompensationDisplay: string;
-
-    if (rawAvgComp > 50) {
-      avgCompensation = rawAvgComp;
-      avgCompensationDisplay = `$${rawAvgComp}`;
-    } else {
-      avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
-      avgCompensationDisplay = `~$${DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG}`;
-    }
+    const avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
+    const avgCompensationDisplay = `~$${avgCompensation}`;
 
     const destDeps = airportDeps[route.dest] || 50_000;
     const routeHeat = Math.min(1.5, 0.5 + destDeps / 20_000_000);
@@ -474,3 +489,20 @@ export const AIRPORT_ICAO: Record<string, string> = {
 };
 
 export const ALL_HUBS = ['ATL', 'DFW', 'EWR', 'ORD', 'DEN', 'LAS', 'LGA', 'JFK', 'MCO', 'CLT'];
+
+// ---------------------------------------------------------------------------
+// Hub and route classification helpers (used by scoring)
+// ---------------------------------------------------------------------------
+
+export const CARRIER_HUBS: Record<string, string[]> = {
+  DL: ['ATL', 'DTW', 'MSP', 'SEA', 'JFK', 'LAX'],
+  AA: ['DFW', 'CLT', 'MIA', 'PHX', 'ORD'],
+  UA: ['EWR', 'ORD', 'DEN', 'IAH', 'SFO', 'LAX'],
+  WN: ['DAL', 'MDW', 'LAS', 'DEN', 'BWI'],
+  B6: ['JFK', 'BOS', 'FLL'],
+  NK: ['FLL', 'LAS', 'ORD', 'DTW'],
+  F9: ['DEN', 'LAS', 'ORD'],
+  AS: ['SEA', 'PDX', 'LAX', 'SFO'],
+};
+
+export const SLOT_CONTROLLED = new Set(['LGA', 'DCA', 'JFK']);

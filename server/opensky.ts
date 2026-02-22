@@ -1,23 +1,30 @@
 // =============================================================================
-// OpenSky Network API Client + ADSBDB Route Verification + FR24 Integration
+// Flight Data Aggregator — FR24 Schedule + Live Feed + OpenSky + ADSBDB
 //
 // Data source hierarchy:
-//   1. FR24 feed — real-time flights currently in the air (always available)
-//   2. OpenSky departures — recent departures (when not rate limited)
-//   3. ADSBDB — route verification for OpenSky callsigns
+//   1. FR24 Airport Schedule API — SCHEDULED departures (primary, works 24/7)
+//   2. FR24 Live Feed — flights currently airborne (supplements with "In Air")
+//   3. OpenSky departures — tertiary fallback (when not rate limited)
+//   4. ADSBDB — route verification for OpenSky callsigns
 //
-// All three sources provide REAL flight data. NO fake data. EVER.
+// All sources provide REAL flight data. NO fake data. EVER.
 // =============================================================================
 
 import { cacheGet, cacheSet } from './cache.js';
 import { AIRPORT_ICAO } from './data.js';
-import { getFR24FlightsForRoute, FR24_AIRCRAFT_MAP, type FR24Flight } from './fr24.js';
+import {
+  getFR24ScheduleForRoute,
+  getFR24LiveFlightsForRoute,
+  FR24_AIRCRAFT_MAP,
+  type FR24ScheduleFlight,
+  type FR24LiveFlight,
+} from './fr24.js';
 
 const OPENSKY_BASE = 'https://opensky-network.org/api';
 const ADSBDB_BASE = 'https://api.adsbdb.com/v0';
 const DEPARTURE_CACHE_TTL = 60 * 60 * 1000; // 1 hour
-const ADSBDB_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours — routes rarely change
-const MIN_REQUEST_INTERVAL = 6000; // 6s between requests (buffer above 5s limit)
+const ADSBDB_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const MIN_REQUEST_INTERVAL = 6000; // 6s between OpenSky requests
 
 let lastRequestTime = 0;
 
@@ -41,8 +48,7 @@ export type OpenSkyDeparture = {
 };
 
 // =============================================================================
-// Callsign → Airline mapping
-// ICAO airline designators → IATA codes and names
+// Callsign → Airline mapping (ICAO designators)
 // =============================================================================
 
 const CALLSIGN_MAP: Record<string, { iata: string; name: string }> = {
@@ -54,7 +60,6 @@ const CALLSIGN_MAP: Record<string, { iata: string; name: string }> = {
   'NKS': { iata: 'NK', name: 'Spirit' },
   'FFT': { iata: 'F9', name: 'Frontier' },
   'ASA': { iata: 'AS', name: 'Alaska' },
-  // Regional operators
   'SKW': { iata: 'OO', name: 'SkyWest' },
   'EDV': { iata: 'EV', name: 'Endeavor Air' },
   'RPA': { iata: 'YX', name: 'Republic' },
@@ -69,27 +74,23 @@ const CALLSIGN_MAP: Record<string, { iata: string; name: string }> = {
   'UPS': { iata: '5X', name: 'UPS' },
 };
 
-// Regional operators that brand under mainline carriers
 const REGIONAL_BRANDING: Record<string, string> = {
   'EDV': 'DL', 'RPA': 'DL', 'SKW': 'DL',
   'ENY': 'AA', 'PSA': 'AA',
   'CPZ': 'UA', 'GJS': 'UA',
 };
 
-// Cargo/non-passenger prefixes to exclude
 const CARGO_PREFIXES = new Set(['FDX', 'UPS', 'GTI', 'ABX', 'ATN', 'CLX', 'QTR']);
-
-// IATA codes that have stats in our carrier database
 const SCORED_CARRIERS = new Set(['DL', 'AA', 'UA', 'WN', 'B6', 'NK', 'F9', 'AS']);
 
-// Build ICAO → IATA reverse map
+// ICAO ↔ IATA reverse map
 const ICAO_TO_IATA: Record<string, string> = {};
 for (const [iata, icao] of Object.entries(AIRPORT_ICAO)) {
   ICAO_TO_IATA[icao] = iata;
 }
 
 // =============================================================================
-// Rate limiter
+// Rate limiter (for OpenSky)
 // =============================================================================
 
 async function rateLimitedFetch(url: string): Promise<Response> {
@@ -99,7 +100,6 @@ async function rateLimitedFetch(url: string): Promise<Response> {
     await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - elapsed));
   }
   lastRequestTime = Date.now();
-
   return fetch(url, {
     headers: { 'Accept': 'application/json' },
     signal: AbortSignal.timeout(15000),
@@ -107,7 +107,7 @@ async function rateLimitedFetch(url: string): Promise<Response> {
 }
 
 // =============================================================================
-// Parse callsign into airline info
+// Parse ICAO callsign into airline info
 // =============================================================================
 
 export function parseCallsign(rawCallsign: string): {
@@ -127,12 +127,10 @@ export function parseCallsign(rawCallsign: string): {
   const [, prefix, num] = match;
   const mapping = CALLSIGN_MAP[prefix];
   if (!mapping) return null;
-
   if (CARGO_PREFIXES.has(prefix)) return null;
 
   const isRegional = !!REGIONAL_BRANDING[prefix];
   const brandedAs = REGIONAL_BRANDING[prefix] || mapping.iata;
-
   return { icaoPrefix: prefix, flightNum: num, iataCode: mapping.iata, carrierName: mapping.name, isRegional, brandedAs };
 }
 
@@ -140,11 +138,7 @@ export function parseCallsign(rawCallsign: string): {
 // ADSBDB Route Verification (cached 24h)
 // =============================================================================
 
-type AdsbdbRoute = {
-  origin: string;
-  destination: string;
-  verified: boolean;
-} | null;
+type AdsbdbRoute = { origin: string; destination: string; verified: boolean } | null;
 
 async function lookupRouteViaAdsbdb(callsign: string): Promise<AdsbdbRoute> {
   const cacheKey = `adsbdb:route:${callsign}`;
@@ -158,25 +152,15 @@ async function lookupRouteViaAdsbdb(callsign: string): Promise<AdsbdbRoute> {
       signal: AbortSignal.timeout(10000),
     });
 
-    if (!res.ok) {
-      cacheSet(cacheKey, null, 60 * 60 * 1000);
-      return null;
-    }
+    if (!res.ok) { cacheSet(cacheKey, null, 60 * 60 * 1000); return null; }
 
     const data = await res.json();
     const flightroute = data?.response?.flightroute;
-    if (!flightroute?.origin || !flightroute?.destination) {
-      cacheSet(cacheKey, null, 60 * 60 * 1000);
-      return null;
-    }
+    if (!flightroute?.origin || !flightroute?.destination) { cacheSet(cacheKey, null, 60 * 60 * 1000); return null; }
 
     const originIata = (flightroute.origin.iata_code || flightroute.origin.code || '').toUpperCase();
     const destIata = (flightroute.destination.iata_code || flightroute.destination.code || '').toUpperCase();
-
-    if (!originIata || !destIata) {
-      cacheSet(cacheKey, null, 60 * 60 * 1000);
-      return null;
-    }
+    if (!originIata || !destIata) { cacheSet(cacheKey, null, 60 * 60 * 1000); return null; }
 
     const route: AdsbdbRoute = { origin: originIata, destination: destIata, verified: true };
     cacheSet(cacheKey, route, ADSBDB_CACHE_TTL);
@@ -200,7 +184,7 @@ export type DepartureResult = {
 
 export async function fetchDepartures(
   airportIata: string,
-  hoursBack: number = 12
+  hoursBack: number = 12,
 ): Promise<DepartureResult> {
   const icao = AIRPORT_ICAO[airportIata.toUpperCase()];
   if (!icao) return { departures: [], rateLimited: false, error: `Unknown airport: ${airportIata}` };
@@ -224,7 +208,6 @@ export async function fetchDepartures(
       console.warn(`[OpenSky] Rate limited (429) for ${icao}`);
       return { departures: [], rateLimited: true, error: 'OpenSky rate limit reached' };
     }
-
     if (!res.ok) {
       const text = await res.text();
       console.warn(`[OpenSky] Failed: ${res.status} — ${text}`);
@@ -246,19 +229,28 @@ export async function fetchDepartures(
 // =============================================================================
 
 export type RealFlight = {
-  callsign: string;          // ICAO callsign (e.g. "DAL1432")
-  carrierCode: string;       // IATA: DL, AA, UA, etc.
-  carrierName: string;
-  flightNumber: string;      // Display: "DL 1432"
+  callsign: string;          // ICAO callsign (e.g. "DAL323")
+  carrierCode: string;       // IATA branded carrier: DL, AA, UA, etc.
+  carrierName: string;       // Display name (e.g. "Delta Air Lines")
+  flightNumber: string;      // Display: "DL 323"
   icao24: string;
   departureTime: string;     // HH:MM (ET)
   departureTimestamp: number; // Unix seconds
-  verified: boolean;         // Route verified
-  verificationSource: 'fr24' | 'adsbdb' | 'opensky-estimate' | 'none';
+  verified: boolean;
+  verificationSource: 'fr24-schedule' | 'fr24-live' | 'adsbdb' | 'opensky-estimate' | 'none';
   isRegional: boolean;
-  dataSource: 'fr24' | 'opensky';
-  fr24AircraftCode: string | null; // Raw aircraft type from FR24 (e.g. "B738")
-  trackingUrl: string;       // FlightAware tracking URL
+  dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
+  fr24AircraftCode: string | null;
+  trackingUrl: string;
+
+  // Rich fields from FR24 Schedule API
+  airline: string;            // "Delta Air Lines" (operator)
+  operatingCarrierCode: string; // IATA code of the OPERATING carrier (e.g. "YX" for Republic Airways)
+  aircraftName: string;       // "Airbus A321-211"
+  registration: string;       // "N848DN"
+  status: string;             // "Estimated dep 07:48" / "In Air"
+  isLive: boolean;            // Currently airborne
+  codeshares: string[];       // ["AF6825", "KE7079"]
 };
 
 export type RouteSearchResult = {
@@ -268,24 +260,32 @@ export type RouteSearchResult = {
   error: string | null;
   totalDepartures: number;
   verifiedCount: number;
-  dataSources: string[];     // Which sources contributed data
+  dataSources: string[];
 };
 
 // =============================================================================
-// Get real flights for a route — combining FR24 + OpenSky + ADSBDB
+// Extract branded IATA carrier code from a flight number like "DL323" or "AA4533"
+// =============================================================================
+
+function extractCarrierFromFlightNumber(fn: string): { iata: string; num: string } | null {
+  const m = fn.match(/^([A-Z]{2})(\d+)$/);
+  if (!m) return null;
+  return { iata: m[1], num: m[2] };
+}
+
+// =============================================================================
+// Main entry: get real flights for a route
 //
-// Strategy:
-// 1. FR24 feed for flights currently in the air (always works, has origin/dest)
-// 2. OpenSky for recent departures (may be rate limited)
-// 3. ADSBDB to verify OpenSky callsign routes
-// 4. Deduplicate by callsign, preferring FR24 (has verified route)
-// 5. NO fallbacks. NO fake data. If nothing available, return empty.
+// 1. FR24 Schedule API (PRIMARY) — scheduled departures, works 24/7
+// 2. FR24 Live Feed (SUPPLEMENT) — overlay "In Air" on scheduled flights,
+//    add any in-air flights not already in the schedule
+// 3. OpenSky (TERTIARY) — only if we got 0 from FR24 schedule
 // =============================================================================
 
 export async function getFlightsForRoute(
   origin: string,
   dest: string,
-  _dateStr: string
+  dateStr: string,
 ): Promise<RouteSearchResult> {
   const originUpper = origin.toUpperCase();
   const destUpper = dest.toUpperCase();
@@ -293,157 +293,274 @@ export async function getFlightsForRoute(
   const destIcao = AIRPORT_ICAO[destUpper];
 
   if (!originIcao || !destIcao) {
-    return { flights: [], rateLimited: false, openskyRateLimited: false, error: `Unknown airport: ${originUpper} or ${destUpper}`, totalDepartures: 0, verifiedCount: 0, dataSources: [] };
+    return {
+      flights: [], rateLimited: false, openskyRateLimited: false,
+      error: `Unknown airport: ${originUpper} or ${destUpper}`,
+      totalDepartures: 0, verifiedCount: 0, dataSources: [],
+    };
   }
 
-  // Check combined cache first
-  const routeCacheKey = `combined:route:${originUpper}:${destUpper}:v3`;
+  // Check combined cache
+  const routeCacheKey = `combined:route:${originUpper}:${destUpper}:${dateStr}:v4`;
   const cachedRoute = cacheGet<RouteSearchResult>(routeCacheKey);
   if (cachedRoute) {
-    console.log(`[Route] Cache hit for ${originUpper}→${destUpper}`);
+    console.log(`[Route] Cache hit for ${originUpper}→${destUpper} on ${dateStr}`);
     return cachedRoute;
   }
 
   const allFlights: RealFlight[] = [];
+  const seenFlightNumbers = new Set<string>(); // Dedupe by flight number (e.g. "DL323")
   const seenCallsigns = new Set<string>();
   let verifiedCount = 0;
   const dataSources: string[] = [];
   let openskyRateLimited = false;
 
-  // ======= SOURCE 1: FR24 (flights currently in the air) =======
+  // =========================================================================
+  // SOURCE 1: FR24 Schedule API (PRIMARY)
+  // =========================================================================
   try {
-    const fr24Result = await getFR24FlightsForRoute(originUpper, destUpper);
+    const scheduleResult = await getFR24ScheduleForRoute(originUpper, destUpper, dateStr);
 
-    if (fr24Result.flights.length > 0) {
-      dataSources.push('FlightRadar24 (live)');
+    if (scheduleResult.flights.length > 0) {
+      dataSources.push('FlightRadar24 (schedule)');
 
-      for (const f of fr24Result.flights) {
-        const rawCs = f.callsign;
-        if (!rawCs || seenCallsigns.has(rawCs)) continue;
-
-        const parsed = parseCallsign(rawCs);
+      for (const sf of scheduleResult.flights) {
+        // Extract branded carrier from flight number (e.g. "DL" from "DL323")
+        const parsed = extractCarrierFromFlightNumber(sf.flightNumber);
         if (!parsed) continue;
 
-        const displayCarrier = parsed.brandedAs;
+        const { iata: brandedCarrier, num: flightNum } = parsed;
+
+        // Only include carriers we can score
+        if (!SCORED_CARRIERS.has(brandedCarrier)) continue;
+
+        // Dedupe
+        if (seenFlightNumbers.has(sf.flightNumber)) continue;
+        seenFlightNumbers.add(sf.flightNumber);
+        if (sf.callsign) seenCallsigns.add(sf.callsign.toUpperCase());
+
+        // Is the operator different from the branded carrier? → regional
+        const isRegional = sf.airlineIata !== '' && sf.airlineIata !== brandedCarrier;
+
+        // Build carrier display name
+        let carrierName: string;
+        if (isRegional && sf.airline) {
+          carrierName = `${sf.airline} (${getCarrierFullName(brandedCarrier)})`;
+        } else {
+          carrierName = sf.airline || getCarrierFullName(brandedCarrier);
+        }
+
+        // Build callsign for FlightAware URL
+        const callsign = sf.callsign || sf.airlineIcao + flightNum || '';
+
+        verifiedCount++; // Schedule API gives us verified origin/destination
+
+        allFlights.push({
+          callsign: callsign.toUpperCase(),
+          carrierCode: brandedCarrier,
+          carrierName,
+          flightNumber: `${brandedCarrier} ${flightNum}`,
+          icao24: '',
+          departureTime: sf.depTime,
+          departureTimestamp: sf.departureTimestamp,
+          verified: true,
+          verificationSource: 'fr24-schedule',
+          isRegional,
+          dataSource: 'fr24-schedule',
+          fr24AircraftCode: sf.aircraftCode || null,
+          trackingUrl: `https://www.flightaware.com/live/flight/${callsign || brandedCarrier + flightNum}`,
+          airline: sf.airline,
+          operatingCarrierCode: sf.airlineIata || brandedCarrier,
+          aircraftName: sf.aircraftName,
+          registration: sf.registration,
+          status: sf.isLive ? 'In Air' : (sf.status || 'Scheduled'),
+          isLive: sf.isLive,
+          codeshares: sf.codeshares,
+        });
+      }
+
+      console.log(`[Route] FR24 Schedule contributed ${allFlights.length} flights for ${originUpper}→${destUpper}`);
+    }
+  } catch (err) {
+    console.warn(`[Route] FR24 Schedule failed:`, err);
+  }
+
+  // =========================================================================
+  // SOURCE 2: FR24 Live Feed (SUPPLEMENT — overlay "In Air" status)
+  // =========================================================================
+  try {
+    const liveResult = await getFR24LiveFlightsForRoute(originUpper, destUpper);
+
+    if (liveResult.flights.length > 0) {
+      for (const lf of liveResult.flights) {
+        const rawCs = lf.callsign;
+        if (!rawCs) continue;
+
+        // If this callsign matches a scheduled flight, mark it as "In Air"
+        const existingFlight = allFlights.find(
+          f => f.callsign === rawCs || f.callsign === rawCs.toUpperCase(),
+        );
+        if (existingFlight) {
+          existingFlight.status = 'In Air';
+          existingFlight.isLive = true;
+          existingFlight.icao24 = lf.icao24;
+          // Update registration from live feed if schedule didn't have it
+          if (!existingFlight.registration && lf.registration) {
+            existingFlight.registration = lf.registration;
+          }
+          continue;
+        }
+
+        // Not in schedule — add as a new live-only flight
+        if (seenCallsigns.has(rawCs)) continue;
+
+        const parsedCs = parseCallsign(rawCs);
+        if (!parsedCs) continue;
+
+        const displayCarrier = parsedCs.brandedAs;
         if (!SCORED_CARRIERS.has(displayCarrier)) continue;
 
         seenCallsigns.add(rawCs);
-        verifiedCount++; // FR24 provides verified origin/destination
+        verifiedCount++;
+
+        if (!dataSources.includes('FlightRadar24 (live)')) {
+          dataSources.push('FlightRadar24 (live)');
+        }
 
         allFlights.push({
           callsign: rawCs,
           carrierCode: displayCarrier,
-          carrierName: parsed.isRegional
-            ? `${CALLSIGN_MAP[parsed.icaoPrefix]?.name || parsed.carrierName} (${getCarrierFullName(displayCarrier)})`
+          carrierName: parsedCs.isRegional
+            ? `${CALLSIGN_MAP[parsedCs.icaoPrefix]?.name || parsedCs.carrierName} (${getCarrierFullName(displayCarrier)})`
             : getCarrierFullName(displayCarrier),
-          flightNumber: `${displayCarrier} ${parsed.flightNum}`,
-          icao24: f.icao24,
-          departureTime: estimateDepTimeFromFR24(),
+          flightNumber: `${displayCarrier} ${parsedCs.flightNum}`,
+          icao24: lf.icao24,
+          departureTime: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York',
+          }),
           departureTimestamp: Math.floor(Date.now() / 1000),
           verified: true,
-          verificationSource: 'fr24',
-          isRegional: parsed.isRegional,
-          dataSource: 'fr24',
-          fr24AircraftCode: f.aircraft || null,
+          verificationSource: 'fr24-live',
+          isRegional: parsedCs.isRegional,
+          dataSource: 'fr24-live',
+          fr24AircraftCode: lf.aircraft || null,
           trackingUrl: `https://www.flightaware.com/live/flight/${rawCs}`,
+          airline: getCarrierFullName(displayCarrier),
+          operatingCarrierCode: parsedCs.isRegional ? (CALLSIGN_MAP[parsedCs.icaoPrefix]?.iata || displayCarrier) : displayCarrier,
+          aircraftName: '',
+          registration: lf.registration || '',
+          status: 'In Air',
+          isLive: true,
+          codeshares: [],
         });
       }
 
-      console.log(`[Route] FR24 contributed ${fr24Result.flights.length} flights for ${originUpper}→${destUpper}`);
+      console.log(
+        `[Route] FR24 Live overlay: ${liveResult.flights.length} airborne ` +
+        `for ${originUpper}→${destUpper}`,
+      );
     }
   } catch (err) {
-    console.warn(`[Route] FR24 failed:`, err);
+    console.warn(`[Route] FR24 Live feed failed:`, err);
   }
 
-  // ======= SOURCE 2: OpenSky departures + ADSBDB verification =======
-  try {
-    const { departures, rateLimited, error } = await fetchDepartures(originUpper, 12);
-    openskyRateLimited = rateLimited;
+  // =========================================================================
+  // SOURCE 3: OpenSky (TERTIARY — only if schedule gave us 0 flights)
+  // =========================================================================
+  if (allFlights.length === 0) {
+    try {
+      const { departures, rateLimited, error } = await fetchDepartures(originUpper, 12);
+      openskyRateLimited = rateLimited;
 
-    if (!rateLimited && departures.length > 0) {
-      // Collect parseable candidates
-      const candidates: { dep: OpenSkyDeparture; parsed: NonNullable<ReturnType<typeof parseCallsign>>; rawCs: string }[] = [];
+      if (!rateLimited && departures.length > 0) {
+        const candidates: { dep: OpenSkyDeparture; parsed: NonNullable<ReturnType<typeof parseCallsign>>; rawCs: string }[] = [];
 
-      for (const dep of departures) {
-        const rawCs = (dep.callsign || '').trim();
-        if (!rawCs || seenCallsigns.has(rawCs)) continue;
+        for (const dep of departures) {
+          const rawCs = (dep.callsign || '').trim();
+          if (!rawCs || seenCallsigns.has(rawCs)) continue;
 
-        const parsed = parseCallsign(rawCs);
-        if (!parsed) continue;
+          const parsed = parseCallsign(rawCs);
+          if (!parsed) continue;
+          if (!SCORED_CARRIERS.has(parsed.brandedAs)) continue;
 
-        const displayCarrier = parsed.brandedAs;
-        if (!SCORED_CARRIERS.has(displayCarrier)) continue;
-
-        candidates.push({ dep, parsed, rawCs });
-      }
-
-      // Verify routes via ADSBDB in batches
-      const CONCURRENCY = 5;
-      for (let i = 0; i < candidates.length; i += CONCURRENCY) {
-        const batch = candidates.slice(i, i + CONCURRENCY);
-        const routeResults = await Promise.all(batch.map(c => lookupRouteViaAdsbdb(c.rawCs)));
-
-        for (let j = 0; j < batch.length; j++) {
-          const { dep, parsed, rawCs } = batch[j];
-          const route = routeResults[j];
-
-          let verified = false;
-          let verificationSource: 'adsbdb' | 'opensky-estimate' | 'none' = 'none';
-
-          if (route?.verified) {
-            if (route.destination === destUpper) {
-              verified = true;
-              verificationSource = 'adsbdb';
-              verifiedCount++;
-            } else {
-              continue; // Goes somewhere else
-            }
-          } else {
-            const depArr = (dep.estArrivalAirport || '').trim().toUpperCase();
-            if (depArr === destIcao) {
-              verificationSource = 'opensky-estimate';
-            } else {
-              continue; // Can't verify
-            }
-          }
-
-          seenCallsigns.add(rawCs);
-          const displayCarrier = parsed.brandedAs;
-
-          const depDate = new Date(dep.firstSeen * 1000);
-          const depTimeStr = depDate.toLocaleTimeString('en-US', {
-            hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York',
-          });
-
-          allFlights.push({
-            callsign: rawCs,
-            carrierCode: displayCarrier,
-            carrierName: parsed.isRegional
-              ? `${CALLSIGN_MAP[parsed.icaoPrefix]?.name || parsed.carrierName} (${getCarrierFullName(displayCarrier)})`
-              : getCarrierFullName(displayCarrier),
-            flightNumber: `${displayCarrier} ${parsed.flightNum}`,
-            icao24: dep.icao24,
-            departureTime: depTimeStr,
-            departureTimestamp: dep.firstSeen,
-            verified,
-            verificationSource,
-            isRegional: parsed.isRegional,
-            dataSource: 'opensky',
-            fr24AircraftCode: null,
-            trackingUrl: `https://www.flightaware.com/live/flight/${rawCs}`,
-          });
+          candidates.push({ dep, parsed, rawCs });
         }
-      }
 
-      if (!dataSources.includes('OpenSky Network')) {
-        dataSources.push('OpenSky Network');
+        // Verify routes via ADSBDB in batches
+        const CONCURRENCY = 5;
+        for (let i = 0; i < candidates.length; i += CONCURRENCY) {
+          const batch = candidates.slice(i, i + CONCURRENCY);
+          const routeResults = await Promise.all(batch.map(c => lookupRouteViaAdsbdb(c.rawCs)));
+
+          for (let j = 0; j < batch.length; j++) {
+            const { dep, parsed, rawCs } = batch[j];
+            const route = routeResults[j];
+
+            let verified = false;
+            let verificationSource: 'adsbdb' | 'opensky-estimate' | 'none' = 'none';
+
+            if (route?.verified) {
+              if (route.destination === destUpper) {
+                verified = true;
+                verificationSource = 'adsbdb';
+                verifiedCount++;
+              } else {
+                continue;
+              }
+            } else {
+              const depArr = (dep.estArrivalAirport || '').trim().toUpperCase();
+              if (depArr === destIcao) {
+                verificationSource = 'opensky-estimate';
+              } else {
+                continue;
+              }
+            }
+
+            seenCallsigns.add(rawCs);
+            const displayCarrier = parsed.brandedAs;
+
+            const depDate = new Date(dep.firstSeen * 1000);
+            const depTimeStr = depDate.toLocaleTimeString('en-US', {
+              hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York',
+            });
+
+            allFlights.push({
+              callsign: rawCs,
+              carrierCode: displayCarrier,
+              carrierName: parsed.isRegional
+                ? `${CALLSIGN_MAP[parsed.icaoPrefix]?.name || parsed.carrierName} (${getCarrierFullName(displayCarrier)})`
+                : getCarrierFullName(displayCarrier),
+              flightNumber: `${displayCarrier} ${parsed.flightNum}`,
+              icao24: dep.icao24,
+              departureTime: depTimeStr,
+              departureTimestamp: dep.firstSeen,
+              verified,
+              verificationSource,
+              isRegional: parsed.isRegional,
+              dataSource: 'opensky',
+              fr24AircraftCode: null,
+              trackingUrl: `https://www.flightaware.com/live/flight/${rawCs}`,
+              airline: getCarrierFullName(displayCarrier),
+              operatingCarrierCode: parsed.isRegional ? (CALLSIGN_MAP[parsed.icaoPrefix]?.iata || displayCarrier) : displayCarrier,
+              aircraftName: '',
+              registration: '',
+              status: 'Departed',
+              isLive: false,
+              codeshares: [],
+            });
+          }
+        }
+
+        if (allFlights.length > 0 && !dataSources.includes('OpenSky Network')) {
+          dataSources.push('OpenSky Network');
+        }
+        console.log(`[Route] OpenSky contributed ${allFlights.length} flights for ${originUpper}→${destUpper}`);
+      } else if (rateLimited) {
+        console.log(`[Route] OpenSky rate limited`);
       }
-      console.log(`[Route] OpenSky contributed additional flights for ${originUpper}→${destUpper}`);
-    } else if (rateLimited) {
-      console.log(`[Route] OpenSky rate limited — relying on FR24 data`);
+    } catch (err) {
+      console.warn(`[Route] OpenSky/ADSBDB failed:`, err);
     }
-  } catch (err) {
-    console.warn(`[Route] OpenSky/ADSBDB failed:`, err);
   }
 
   // Sort by departure time
@@ -453,14 +570,16 @@ export async function getFlightsForRoute(
     flights: allFlights,
     rateLimited: allFlights.length === 0 && openskyRateLimited,
     openskyRateLimited,
-    error: allFlights.length === 0 && openskyRateLimited ? 'All data sources unavailable or rate limited' : null,
+    error: allFlights.length === 0 && openskyRateLimited
+      ? 'All data sources unavailable or rate limited'
+      : null,
     totalDepartures: allFlights.length,
     verifiedCount,
     dataSources,
   };
 
-  // Cache for 5 minutes (FR24 data is fresh for ~5 min)
-  cacheSet(routeCacheKey, result, 5 * 60 * 1000);
+  // Cache for 15 minutes (schedule data is stable)
+  cacheSet(routeCacheKey, result, 15 * 60 * 1000);
   return result;
 }
 
@@ -468,20 +587,11 @@ export async function getFlightsForRoute(
 // Helpers
 // =============================================================================
 
-/** Estimate departure time for a flight currently in the air (FR24 doesn't give dep time) */
-function estimateDepTimeFromFR24(): string {
-  // FR24 flights are currently in the air, so they departed sometime recently.
-  // We don't know the exact departure time, so we mark it as "In Air"
-  const now = new Date();
-  return now.toLocaleTimeString('en-US', {
-    hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York',
-  });
-}
-
 function getCarrierFullName(iataCode: string): string {
   const names: Record<string, string> = {
-    'DL': 'Delta', 'AA': 'American', 'UA': 'United', 'WN': 'Southwest',
-    'B6': 'JetBlue', 'NK': 'Spirit', 'F9': 'Frontier', 'AS': 'Alaska',
+    'DL': 'Delta Air Lines', 'AA': 'American Airlines', 'UA': 'United Airlines',
+    'WN': 'Southwest Airlines', 'B6': 'JetBlue Airways', 'NK': 'Spirit Airlines',
+    'F9': 'Frontier Airlines', 'AS': 'Alaska Airlines',
   };
   return names[iataCode] || iataCode;
 }

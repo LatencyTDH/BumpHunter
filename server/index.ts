@@ -8,6 +8,9 @@ import {
   QUARTERLY_TRENDS,
   TOP_OVERSOLD_ROUTES,
   ALL_HUBS,
+  BTS_DATA_PERIOD,
+  BTS_DATA_NOTE,
+  BTS_DATA_WARNING,
 } from './data.js';
 
 dotenv.config({ path: '.env.local' });
@@ -118,6 +121,8 @@ app.get('/api/flights/search', async (req, res) => {
         message: scoreResult.message,
         rateLimited: scoreResult.rateLimited,
         openskyRateLimited: scoreResult.openskyRateLimited,
+        btsDataPeriod: scoreResult.btsDataPeriod,
+        btsDataWarning: scoreResult.btsDataWarning,
         timestamp: new Date().toISOString(),
       },
     };
@@ -154,9 +159,10 @@ app.get('/api/stats/carriers', (_req, res) => {
 
   res.json({
     carriers,
-    source: 'DOT Bureau of Transportation Statistics',
-    note: 'Rates are per 10,000 enplanements. Compensation data: BTS COMP_PAID fields track IDB cash compensation only; VDB voucher values use DOT-published industry averages (~$600). Latest data: Q3 2021.',
-    dataNote: 'VDB estimated from IDB using DOT-published ratios. Latest available: Q3 2021.',
+    source: 'DOT Air Travel Consumer Report (November 2025)',
+    note: `Rates are per 10,000 enplanements (${BTS_DATA_PERIOD}). Operating carrier data — who flies the plane, not who sold the ticket. VDB compensation uses DOT-published industry averages (~$600).`,
+    dataNote: BTS_DATA_NOTE,
+    dataWarning: BTS_DATA_WARNING,
   });
 });
 
@@ -167,8 +173,8 @@ app.get('/api/stats/carriers', (_req, res) => {
 app.get('/api/stats/trends', (_req, res) => {
   res.json({
     trends: QUARTERLY_TRENDS,
-    source: 'DOT Air Travel Consumer Report',
-    dataNote: 'Latest available: Q3 2021. Compensation marked N/A where BTS COMP_PAID fields report $0 (tracks IDB cash only, not VDB vouchers).',
+    source: 'DOT Air Travel Consumer Report / BTS',
+    dataNote: `Quarterly trends from BTS historical data (2019-2021). Current carrier rates from DOT ATCR ${BTS_DATA_PERIOD}.`,
   });
 });
 
@@ -180,7 +186,8 @@ app.get('/api/stats/routes', (_req, res) => {
   res.json({
     routes: TOP_OVERSOLD_ROUTES,
     source: 'DOT Bureau of Transportation Statistics',
-    dataNote: 'Based on 2019 pre-COVID data. Compensation uses DOT-published industry averages where BTS data reports $0.',
+    dataNote: `Based on ${BTS_DATA_PERIOD} data. Compensation uses DOT-published industry averages where BTS data reports $0.`,
+    dataWarning: BTS_DATA_WARNING,
   });
 });
 
