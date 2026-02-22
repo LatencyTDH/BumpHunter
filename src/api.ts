@@ -131,10 +131,15 @@ export type Flight = {
   factors: string[];
   loadFactor: number;
   carrierDbRate: number;
-  dataSource: 'fr24' | 'opensky';
+  dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
-  verificationSource: 'fr24' | 'adsbdb' | 'opensky-estimate' | 'none';
+  verificationSource: 'fr24-schedule' | 'fr24-live' | 'adsbdb' | 'opensky-estimate' | 'none';
   trackingUrl: string;
+  // Rich fields from FR24 Schedule API
+  status: string;           // "Scheduled", "In Air", "Estimated dep 07:48"
+  registration: string;     // "N848DN"
+  codeshares: string[];     // ["AF6825", "KE7079"]
+  aircraftFullName: string; // "Airbus A321-211"
 };
 
 export type WeatherAlert = {

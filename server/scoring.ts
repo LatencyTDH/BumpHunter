@@ -20,7 +20,7 @@ export type ScoredFlight = {
   airline: string;
   carrier: string;
   flightNumber: string;
-  callsign: string;        // ICAO callsign (e.g. "DAL1432")
+  callsign: string;        // ICAO callsign (e.g. "DAL323")
   departure: string;
   arrival: string;
   depTime: string;
@@ -33,10 +33,15 @@ export type ScoredFlight = {
   factors: string[];
   loadFactor: number;
   carrierDbRate: number;
-  dataSource: 'fr24' | 'opensky';
+  dataSource: 'fr24-schedule' | 'fr24-live' | 'opensky';
   verified: boolean;
-  verificationSource: 'fr24' | 'adsbdb' | 'opensky-estimate' | 'none';
+  verificationSource: 'fr24-schedule' | 'fr24-live' | 'adsbdb' | 'opensky-estimate' | 'none';
   trackingUrl: string;
+  // Rich fields from FR24 Schedule API
+  status: string;           // "Scheduled", "In Air", "Estimated dep 07:48", etc.
+  registration: string;     // "N848DN"
+  codeshares: string[];     // ["AF6825", "KE7079"]
+  aircraftFullName: string; // "Airbus A321-211" (from schedule API)
 };
 
 export type ScoreResult = {
@@ -308,8 +313,11 @@ export async function scoreFlights(
 
     const carrierStats = CARRIER_STATS[rf.carrierCode];
 
+    // Prefer the schedule API's full aircraft name when available
+    const aircraftDisplayName = rf.aircraftName || aircraft.name;
+
     flights.push({
-      id: `${rf.callsign}-${dateStr}`,
+      id: `${rf.callsign || rf.flightNumber}-${dateStr}`,
       airline: rf.carrierName,
       carrier: rf.carrierCode,
       flightNumber: rf.flightNumber,
@@ -318,8 +326,8 @@ export async function scoreFlights(
       arrival: destUpper,
       depTime: rf.departureTime,
       arrTime,
-      aircraft: aircraft.name,
-      aircraftCode: aircraft.iataCode,
+      aircraft: aircraftDisplayName,
+      aircraftCode: rf.fr24AircraftCode || aircraft.iataCode,
       capacity: aircraft.capacity,
       isRegional: rf.isRegional || aircraft.isRegional,
       bumpScore: score,
@@ -330,6 +338,10 @@ export async function scoreFlights(
       verified: rf.verified,
       verificationSource: rf.verificationSource,
       trackingUrl: rf.trackingUrl,
+      status: rf.status || 'Scheduled',
+      registration: rf.registration || '',
+      codeshares: rf.codeshares || [],
+      aircraftFullName: rf.aircraftName || '',
     });
   }
 
