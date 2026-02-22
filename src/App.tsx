@@ -1145,6 +1145,13 @@ function Playbook() {
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
+  const navItems = [
+    { id: 'dashboard', label: 'Command Center', icon: <TrendingUp className="w-5 h-5" /> },
+    { id: 'scanner', label: 'Flight Scanner', icon: <Search className="w-5 h-5" /> },
+    { id: 'history', label: 'Historical Analysis', icon: <History className="w-5 h-5" /> },
+    { id: 'playbook', label: 'The Playbook', icon: <BookOpen className="w-5 h-5" /> },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col md:flex-row">
       {/* Sidebar */}
@@ -1156,12 +1163,7 @@ export default function App() {
           </div>
 
           <nav className="space-y-2">
-            {[
-              { id: 'dashboard', label: 'Command Center', icon: <TrendingUp className="w-5 h-5" /> },
-              { id: 'scanner', label: 'Flight Scanner', icon: <Search className="w-5 h-5" /> },
-              { id: 'history', label: 'Historical Analysis', icon: <History className="w-5 h-5" /> },
-              { id: 'playbook', label: 'The Playbook', icon: <BookOpen className="w-5 h-5" /> },
-            ].map((item) => (
+            {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
@@ -1180,7 +1182,7 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+      <main className="flex-1 p-6 md:p-10 pb-24 md:pb-10 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
           {activeTab === 'scanner' && <Scanner />}
@@ -1188,6 +1190,26 @@ export default function App() {
           {activeTab === 'playbook' && <Playbook />}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-slate-900 border-t border-slate-800">
+        <div className="grid grid-cols-4">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors min-h-[56px] ${
+                activeTab === item.id
+                  ? 'text-indigo-300 bg-indigo-600/10'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {item.icon}
+              <span className="mt-1">{item.label.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
