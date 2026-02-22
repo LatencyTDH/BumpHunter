@@ -9,6 +9,7 @@ import {
   MapPin,
   ChevronRight,
   ChevronDown,
+  ChevronLeft,
   CheckCircle2,
   TrendingUp,
   ShieldAlert,
@@ -441,8 +442,8 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
         )}
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 min-w-[240px] snap-start flex-shrink-0 md:min-w-0 md:flex-shrink">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-400">Industry Avg VDB Payout</p>
@@ -458,7 +459,7 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 min-w-[240px] snap-start flex-shrink-0 md:min-w-0 md:flex-shrink">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-400">Active Weather Disruptions</p>
@@ -481,7 +482,7 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab('scanner')}>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 min-w-[240px] snap-start flex-shrink-0 md:min-w-0 md:flex-shrink cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab('scanner')}>
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-slate-400">Next Hunt</p>
@@ -765,10 +766,10 @@ function Scanner() {
         </button>
       </div>
 
-      <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Origin Hub</label>
+            <label className="block text-sm font-medium text-slate-400 mb-1">Origin</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
               <input
@@ -776,7 +777,7 @@ function Scanner() {
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
-                placeholder="e.g. ATL"
+                placeholder="ATL"
                 required
               />
             </div>
@@ -791,12 +792,12 @@ function Scanner() {
                 onChange={(e) => setDest(e.target.value)}
                 disabled={searchMode === 'flex'}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase disabled:opacity-60"
-                placeholder="e.g. LGA"
+                placeholder="LGA"
                 required={searchMode === 'route'}
               />
             </div>
           </div>
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -810,11 +811,11 @@ function Scanner() {
             </div>
           </div>
         </div>
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 md:mt-6">
           <button
             type="submit"
             disabled={isSearching}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center transition-colors disabled:opacity-50"
+            className="w-full md:w-auto md:float-right bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center transition-colors disabled:opacity-50"
           >
             {isSearching ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -859,7 +860,7 @@ function Scanner() {
           <span className="text-xs text-slate-500">Flight number + date</span>
         </div>
 
-        <form onSubmit={handleLookup} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form onSubmit={handleLookup} className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Flight Number</label>
             <input
@@ -867,7 +868,7 @@ function Scanner() {
               value={lookupFlightNumber}
               onChange={(e) => setLookupFlightNumber(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
-              placeholder="e.g. DL323"
+              placeholder="DL323"
               required
             />
           </div>
@@ -881,7 +882,7 @@ function Scanner() {
               required
             />
           </div>
-          <div className="flex items-end">
+          <div className="col-span-2 md:col-span-1 flex items-end">
             <button
               type="submit"
               disabled={lookupLoading}
@@ -1363,42 +1364,111 @@ function Playbook() {
 
 // --- Main App ---
 
+function SidebarTooltip({ label, collapsed }: { label: string; collapsed: boolean }) {
+  if (!collapsed) return null;
+  return (
+    <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md bg-slate-800 text-slate-200 text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-lg border border-slate-700">
+      {label}
+    </span>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('bh-sidebar-collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('bh-sidebar-collapsed', String(next)); } catch { /* noop */ }
+      return next;
+    });
+  };
 
   const navItems = [
-    { id: 'dashboard', label: 'Command Center', icon: <TrendingUp className="w-5 h-5" /> },
-    { id: 'scanner', label: 'Flight Scanner', icon: <Search className="w-5 h-5" /> },
-    { id: 'history', label: 'Historical Analysis', icon: <History className="w-5 h-5" /> },
-    { id: 'playbook', label: 'The Playbook', icon: <BookOpen className="w-5 h-5" /> },
+    { id: 'dashboard', label: 'Command Center', shortLabel: 'Home', icon: <TrendingUp className="w-5 h-5" /> },
+    { id: 'scanner', label: 'Flight Scanner', shortLabel: 'Scan', icon: <Search className="w-5 h-5" /> },
+    { id: 'history', label: 'Historical Analysis', shortLabel: 'History', icon: <History className="w-5 h-5" /> },
+    { id: 'playbook', label: 'The Playbook', shortLabel: 'Playbook', icon: <BookOpen className="w-5 h-5" /> },
   ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex-shrink-0">
-        <div className="p-6">
-          <div className="flex items-center space-x-2 text-indigo-400 mb-8">
-            <Plane className="w-8 h-8" />
-            <span className="text-xl font-bold tracking-tight text-slate-50">BumpHunter</span>
+      {/* Sidebar — desktop only */}
+      <aside
+        className={`hidden md:flex flex-col bg-slate-900 border-r border-slate-800 flex-shrink-0 transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-[68px]' : 'w-64'
+        }`}
+      >
+        {/* Logo area */}
+        <div className={`flex items-center h-16 border-b border-slate-800/60 ${sidebarCollapsed ? 'justify-center px-2' : 'px-5'}`}>
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2.5'}`}>
+            <Plane className="w-7 h-7 text-indigo-400 flex-shrink-0" />
+            {!sidebarCollapsed && (
+              <span className="text-lg font-bold tracking-tight text-slate-50 whitespace-nowrap overflow-hidden">BumpHunter</span>
+            )}
           </div>
+        </div>
 
-          <nav className="space-y-2">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === item.id
-                    ? 'bg-indigo-600/10 text-indigo-400 font-medium'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+        {/* Nav items */}
+        <nav className={`flex-1 py-4 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
+          <div className="space-y-1.5">
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`group relative w-full flex items-center rounded-lg transition-all duration-150 ${
+                    sidebarCollapsed
+                      ? 'justify-center px-0 py-3'
+                      : 'space-x-3 px-3.5 py-2.5'
+                  } ${
+                    isActive
+                      ? 'bg-indigo-500/10 text-indigo-400 font-medium'
+                      : 'text-slate-400 hover:bg-slate-800/70 hover:text-slate-200'
+                  }`}
+                >
+                  {/* Active indicator bar */}
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500" />
+                  )}
+                  <span className="flex-shrink-0">{item.icon}</span>
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">{item.label}</span>
+                  )}
+                  <SidebarTooltip label={item.label} collapsed={sidebarCollapsed} />
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Collapse toggle — bottom */}
+        <div className={`border-t border-slate-800/60 ${sidebarCollapsed ? 'px-2' : 'px-3'} py-3`}>
+          <button
+            onClick={toggleSidebar}
+            className={`w-full flex items-center rounded-lg py-2.5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/70 transition-all duration-150 ${
+              sidebarCollapsed ? 'justify-center px-0' : 'px-3.5 space-x-3'
+            }`}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronLeft className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">Collapse</span>
+              </>
+            )}
+          </button>
         </div>
       </aside>
 
@@ -1414,19 +1484,19 @@ export default function App() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-slate-900 border-t border-slate-800">
-        <div className="grid grid-cols-4">
+        <div className="flex overflow-x-auto scrollbar-hide">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors min-h-[56px] ${
+              className={`flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors min-h-[56px] min-w-[72px] flex-1 flex-shrink-0 ${
                 activeTab === item.id
                   ? 'text-indigo-300 bg-indigo-600/10'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {item.icon}
-              <span className="mt-1">{item.label.split(' ')[0]}</span>
+              <span className="mt-1 whitespace-nowrap">{item.shortLabel}</span>
             </button>
           ))}
         </div>
