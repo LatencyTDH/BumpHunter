@@ -578,8 +578,12 @@ export async function getFlightsForRoute(
     dataSources,
   };
 
-  // Cache for 15 minutes (schedule data is stable)
-  cacheSet(routeCacheKey, result, 15 * 60 * 1000);
+  // Cache for 15 minutes — but only cache results with actual flights.
+  // Empty results should not be cached so the next request retries fresh
+  // (avoids locking out users for 15 min after a transient API failure).
+  if (allFlights.length > 0) {
+    cacheSet(routeCacheKey, result, 15 * 60 * 1000);
+  }
   return result;
 }
 

@@ -176,7 +176,22 @@ export async function getFR24ScheduleDepartures(
   const allFlights: FR24ScheduleFlight[] = [];
 
   // Fetch first page to get totals
-  const firstPage = await fetchSchedulePage(code, timestamp, 1);
+  let firstPage = await fetchSchedulePage(code, timestamp, 1);
+
+  // FR24 Schedule API rejects dates >3 days out (HTTP 400).
+  // Fall back to today's real schedule — most routes operate daily,
+  // so today's departures are a reliable proxy for the requested date.
+  let effectiveTimestamp = timestamp;
+  if (!firstPage) {
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    if (todayStr !== dateStr) {
+      const todayObj = new Date(`${todayStr}T06:00:00-05:00`);
+      effectiveTimestamp = Math.floor(todayObj.getTime() / 1000);
+      console.log(`[FR24-Schedule] Future date ${dateStr} rejected — falling back to today (${todayStr}, ts=${effectiveTimestamp})`);
+      firstPage = await fetchSchedulePage(code, effectiveTimestamp, 1);
+    }
+  }
+
   if (!firstPage) {
     return { flights: [], totalFlights: 0, error: 'FR24 Schedule API unavailable' };
   }
@@ -196,7 +211,7 @@ export async function getFR24ScheduleDepartures(
 
   // Fetch remaining pages
   for (let page = 2; page <= totalPages; page++) {
-    const pageResult = await fetchSchedulePage(code, timestamp, page);
+    const pageResult = await fetchSchedulePage(code, effectiveTimestamp, page);
     if (!pageResult) break;
 
     let pageParsed = 0;
