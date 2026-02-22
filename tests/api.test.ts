@@ -79,6 +79,13 @@ describe('API Endpoints', () => {
     expect(body[0]).toHaveProperty('predictedScore');
   });
 
+  it('GET /api/flights/lookup requires flight and date', async () => {
+    const res1 = await fetch(`${BASE}/api/flights/lookup`);
+    expect(res1.status).toBe(400);
+    const res2 = await fetch(`${BASE}/api/flights/lookup?flight=DL323`);
+    expect(res2.status).toBe(400);
+  });
+
   it('GET /api/stats/carriers returns array of carriers', async () => {
     const res = await fetch(`${BASE}/api/stats/carriers`);
     expect(res.status).toBe(200);

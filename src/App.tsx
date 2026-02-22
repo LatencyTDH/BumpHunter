@@ -28,6 +28,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import {
   searchFlights,
+  lookupFlightSafe,
   getWeatherAlerts,
   getSummary,
   getCarrierStats,
@@ -43,6 +44,7 @@ import {
   type QuarterlyTrend,
   type OversoldRoute,
   type FlightSearchMeta,
+  type FlightLookupMeta,
   type FAAStatus,
   type HeatmapDay,
 } from './api';
@@ -308,6 +310,57 @@ function ScoreRing({ score, size = 56 }: { score: number; size?: number }) {
   );
 }
 
+// --- Flight lookup result card ---
+
+function LookupResultCard({ flight }: { flight: Flight }) {
+  return (
+    <div className="mt-4 bg-slate-950 border border-slate-800 rounded-xl p-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="font-semibold text-slate-50">{flight.flightNumber}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300" title={flight.aircraftFullName || flight.aircraft}>
+              {flight.aircraft}
+            </span>
+            {flight.isRegional && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
+            )}
+            <VerificationBadge flight={flight} />
+            <FlightStatusBadge status={flight.status} />
+          </div>
+          <div className="text-sm text-slate-400 mt-1 flex items-center flex-wrap gap-x-2">
+            <span>{flight.departure} {flight.depTime}</span>
+            <ChevronRight className="w-4 h-4" />
+            <span>{flight.arrival} {flight.arrTime}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Score</p>
+            <p className={`text-2xl font-bold ${getScoreTextColor(flight.bumpScore)}`}>
+              {flight.bumpScore}<span className="text-sm font-normal text-slate-500">/100</span>
+            </p>
+          </div>
+          <ScoreRing score={flight.bumpScore} size={48} />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {flight.factors.map((factor, i) => (
+          <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-slate-900 text-slate-400 border border-slate-800">
+            {factor}
+          </span>
+        ))}
+      </div>
+
+      {flight.factorsDetailed && flight.factorsDetailed.length > 0 && (
+        <ScoreBreakdown factors={flight.factorsDetailed} />
+      )}
+    </div>
+  );
+}
+
 // --- Score Breakdown Bars (collapsible) ---
 
 function ScoreBreakdown({ factors }: { factors: FactorDetail[] }) {
@@ -504,6 +557,12 @@ function Scanner() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [originFAAStatus, setOriginFAAStatus] = useState<FAAStatus | null>(null);
   const [destFAAStatus, setDestFAAStatus] = useState<FAAStatus | null>(null);
+  const [lookupFlightNumber, setLookupFlightNumber] = useState('');
+  const [lookupDate, setLookupDate] = useState('');
+  const [lookupResult, setLookupResult] = useState<Flight | null>(null);
+  const [lookupMeta, setLookupMeta] = useState<FlightLookupMeta | null>(null);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAlerts();
@@ -556,10 +615,12 @@ function Scanner() {
       setSearchMeta(data.meta);
       setOriginFAAStatus(originFAA);
       setDestFAAStatus(destFAA);
-      if (heatmapResult.ok) {
-        setHeatmap(heatmapResult.data);
-      } else {
-        setHeatmapError(heatmapResult.error);
+      if (heatmapResult && 'ok' in heatmapResult) {
+        if (heatmapResult.ok) {
+          setHeatmap(heatmapResult.data);
+        } else if (!heatmapResult.ok) {
+          setHeatmapError((heatmapResult as { ok: false; error: string }).error);
+        }
       }
     } catch (err: any) {
       setSearchError(err.message || 'Search failed');
@@ -567,6 +628,35 @@ function Scanner() {
     } finally {
       setIsSearching(false);
       setHeatmapLoading(false);
+    }
+  };
+
+  const handleLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLookupLoading(true);
+    setLookupError(null);
+    setLookupResult(null);
+    setLookupMeta(null);
+
+    if (!lookupFlightNumber || !lookupDate) {
+      setLookupError('Enter a flight number and date to look up.');
+      setLookupLoading(false);
+      return;
+    }
+
+    try {
+      const result = await lookupFlightSafe(lookupFlightNumber, lookupDate);
+      if (result.ok) {
+        setLookupResult(result.data.flight);
+        setLookupMeta(result.data.meta);
+        if (!result.data.flight) {
+          setLookupError(result.data.meta.message || 'Flight not found.');
+        }
+      } else if (!result.ok) {
+        setLookupError((result as { ok: false; error: string }).error);
+      }
+    } finally {
+      setLookupLoading(false);
     }
   };
 
@@ -759,6 +849,71 @@ function Scanner() {
           <DataSourceBadge sources={['DOT ATCR 2025', 'BTS quarterly trends', 'Holiday calendar']} />
         </div>
       )}
+
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-slate-50 flex items-center">
+            <Search className="w-4 h-4 mr-2 text-indigo-400" />
+            Reverse Flight Lookup
+          </h3>
+          <span className="text-xs text-slate-500">Flight number + date</span>
+        </div>
+
+        <form onSubmit={handleLookup} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1">Flight Number</label>
+            <input
+              type="text"
+              value={lookupFlightNumber}
+              onChange={(e) => setLookupFlightNumber(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
+              placeholder="e.g. DL323"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
+            <input
+              type="date"
+              value={lookupDate}
+              onChange={(e) => setLookupDate(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 [color-scheme:dark]"
+              required
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={lookupLoading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center transition-colors disabled:opacity-50"
+            >
+              {lookupLoading ? 'Looking up…' : 'Lookup Flight'}
+            </button>
+          </div>
+        </form>
+
+        {lookupLoading && (
+          <div className="mt-4">
+            <LoadingSpinner text="Searching schedules..." />
+          </div>
+        )}
+
+        {lookupError && (
+          <div className="mt-4 p-3 rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300">
+            {lookupError}
+          </div>
+        )}
+
+        {lookupResult && (
+          <LookupResultCard flight={lookupResult} />
+        )}
+
+        {lookupMeta?.message && !lookupResult && !lookupError && (
+          <div className="mt-4 text-sm text-slate-400">
+            {lookupMeta.message}
+          </div>
+        )}
+      </div>
 
       {searchError && (
         <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 flex items-start space-x-3">
