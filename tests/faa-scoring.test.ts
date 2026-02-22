@@ -10,6 +10,19 @@ vi.mock('../server/faa.js', () => ({
   getAirportStatus: vi.fn().mockResolvedValue({ airport: 'XXX', delay: false }),
 }));
 
+// Mock BTS on-time performance to avoid network calls
+vi.mock('../server/otp.js', () => ({
+  getRouteReliability: vi.fn().mockResolvedValue({
+    origin: 'ATL',
+    dest: 'LGA',
+    delayPct: 28.5,
+    totalFlights: 500,
+    periodLabel: 'Dec 2024–Nov 2025',
+    source: 'BTS On-Time (transtats.bts.gov)',
+    available: true,
+  }),
+}));
+
 // Mock FR24 schedule
 vi.mock('../server/fr24.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../server/fr24.js')>();

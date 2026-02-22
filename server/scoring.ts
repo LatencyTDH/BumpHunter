@@ -20,6 +20,7 @@ import {
   type CompensationEstimate,
 } from './compensation.js';
 import { getFR24ScheduleForRoute } from './fr24.js';
+import { getRouteReliability, type RouteReliability } from './otp.js';
 
 // =============================================================================
 // Bump Opportunity Index — Honest Scoring (0-100)
@@ -29,12 +30,13 @@ import { getFR24ScheduleForRoute } from './fr24.js';
 // (industry avg 0.28/10k, DOT ATCR 2025).
 //
 // The score ranks flights by relative likelihood of VDB opportunity based on:
-//   1. Carrier VDB rate (30 pts) — strongest predictor, uses OPERATING carrier
-//   2. Aircraft size (20 pts) — smaller = tighter margins
-//   3. Timing & Demand (15 pts) — day of week + holiday/event calendar
-//   4. Time of day (10 pts) — peak departure windows
-//   5. Weather disruptions (15 pts) — real METAR data
-//   6. Route type (10 pts) — hub/slot-controlled dynamics
+//   1. Carrier VDB rate (27 pts) — strongest predictor, uses OPERATING carrier
+//   2. Aircraft size (18 pts) — smaller = tighter margins
+//   3. Timing & Demand (13 pts) — day of week + holiday/event calendar
+//   4. Time of day (9 pts) — peak departure windows
+//   5. Weather disruptions (13 pts) — real METAR data
+//   6. Route reliability (10 pts) — BTS on-time delay rate
+//   7. Route type (10 pts) — hub/slot-controlled dynamics
 //
 // Data: DOT Air Travel Consumer Report, Jan-Sep 2025 (latest available)
 // Key insight: uses OPERATING carrier rates, not marketing carrier.
@@ -91,6 +93,31 @@ export type ScoreResult = {
   btsDataPeriod: string;
   btsDataWarning: string;
 };
+
+const SCORE_WEIGHTS = {
+  carrier: 27,
+  aircraft: 18,
+  timing: 13,
+  timeOfDay: 9,
+  weather: 13,
+  route: 10,
+  reliability: 10,
+};
+
+const RAW_MAX = {
+  carrier: 30,
+  aircraft: 20,
+  timing: 15,
+  timeOfDay: 10,
+  weather: 15,
+  route: 10,
+};
+
+function scaleScore(raw: number, rawMax: number, weightedMax: number): number {
+  if (rawMax <= 0) return 0;
+  const scaled = Math.round((raw / rawMax) * weightedMax);
+  return Math.max(0, Math.min(weightedMax, scaled));
+}
 
 // =============================================================================
 // Factor 1: Carrier DB Rate (0-30 pts)
@@ -356,7 +383,42 @@ function scoreWeatherAndDisruption(
 }
 
 // =============================================================================
-// Factor 6: Route Type (0-10 pts)
+// Factor 6: Route Reliability (0-10 pts)
+//
+// Uses BTS on-time performance for the route. Higher delay rates boost
+// bump opportunity scores, since disrupted routes create oversale pressure.
+// Routes with >25% delay rate get an 8–10 point boost.
+// =============================================================================
+
+function scoreRouteReliability(
+  reliability: RouteReliability | null
+): { score: number; factor: string | null; description: string } {
+  if (!reliability || reliability.delayPct === null) {
+    return {
+      score: 0,
+      factor: 'BTS on-time: unavailable',
+      description: 'BTS on-time data unavailable',
+    };
+  }
+
+  const delay = reliability.delayPct;
+  let score = 1;
+  if (delay >= 35) score = 10;
+  else if (delay >= 30) score = 9;
+  else if (delay >= 25) score = 8;
+  else if (delay >= 20) score = 6;
+  else if (delay >= 15) score = 4;
+  else if (delay >= 10) score = 2;
+
+  const factor = `BTS on-time: ${delay.toFixed(1)}% late (${reliability.periodLabel})`;
+  const sample = reliability.totalFlights ? `${reliability.totalFlights} flights` : 'sample unavailable';
+  const description = `Delay rate ${delay.toFixed(1)}% (${sample}, ${reliability.periodLabel})`;
+
+  return { score, factor, description };
+}
+
+// =============================================================================
+// Factor 7: Route Type (0-10 pts)
 //
 // Hub-to-hub routes with high demand score higher.
 // Hub departure to slot-controlled airport (LGA/DCA/JFK): 8-10
@@ -467,7 +529,7 @@ function resolveAircraft(origin: string, dest: string, carrier: string, isRegion
 }
 
 // =============================================================================
-// Main scoring function — combines all 6 factors
+// Main scoring function — combines all 7 factors
 // =============================================================================
 
 function computeBumpScore(params: {
@@ -483,47 +545,60 @@ function computeBumpScore(params: {
   destWx: { score: number; reason: string | null };
   originFAA: FAAStatus | null;
   destFAA: FAAStatus | null;
+  routeReliability: RouteReliability | null;
 }): { score: number; factors: string[]; factorsDetailed: FactorDetail[]; carrierDbRate: number } {
-  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx, originFAA, destFAA } = params;
+  const { marketingCarrier, operatingCarrier, depTime, aircraft, origin, dest, dayOfWeek, originWx, destWx, originFAA, destFAA, routeReliability } = params;
   const factors: string[] = [];
   const factorsDetailed: FactorDetail[] = [];
 
   // Factor 1: Carrier DB Rate (0-30 pts) — uses OPERATING carrier
-  const f1 = scoreCarrierRate(operatingCarrier, marketingCarrier);
-  factors.push(f1.factor);
-  factorsDetailed.push({ name: 'Carrier Rate', score: f1.score, maxScore: 30, description: f1.factor });
+  const f1Raw = scoreCarrierRate(operatingCarrier, marketingCarrier);
+  const f1Score = scaleScore(f1Raw.score, RAW_MAX.carrier, SCORE_WEIGHTS.carrier);
+  factors.push(f1Raw.factor);
+  factorsDetailed.push({ name: 'Carrier Rate', score: f1Score, maxScore: SCORE_WEIGHTS.carrier, description: f1Raw.factor });
 
   // Factor 2: Aircraft Size (0-20 pts)
-  const f2 = scoreAircraftSize(aircraft);
-  if (f2.factor) factors.push(f2.factor);
-  factorsDetailed.push({ name: 'Aircraft Size', score: f2.score, maxScore: 20, description: f2.factor || `${aircraft.name} (${aircraft.capacity} seats)` });
+  const f2Raw = scoreAircraftSize(aircraft);
+  const f2Score = scaleScore(f2Raw.score, RAW_MAX.aircraft, SCORE_WEIGHTS.aircraft);
+  if (f2Raw.factor) factors.push(f2Raw.factor);
+  factorsDetailed.push({ name: 'Aircraft Size', score: f2Score, maxScore: SCORE_WEIGHTS.aircraft, description: f2Raw.factor || `${aircraft.name} (${aircraft.capacity} seats)` });
 
   // Factor 3: Timing & Demand (0-15 pts)
   // Merges day-of-week signal with holiday/event calendar.
-  const f3 = scoreTimingAndDemand(dayOfWeek, params.date);
-  factors.push(...f3.factors);
-  factorsDetailed.push({ name: 'Timing & Demand', score: f3.score, maxScore: 15, description: f3.factors.length > 0 ? f3.factors.join(' · ') : 'Midweek (lower demand)' });
+  const f3Raw = scoreTimingAndDemand(dayOfWeek, params.date);
+  const f3Score = scaleScore(f3Raw.score, RAW_MAX.timing, SCORE_WEIGHTS.timing);
+  factors.push(...f3Raw.factors);
+  factorsDetailed.push({ name: 'Timing & Demand', score: f3Score, maxScore: SCORE_WEIGHTS.timing, description: f3Raw.factors.length > 0 ? f3Raw.factors.join(' · ') : 'Midweek (lower demand)' });
 
   // Factor 4: Time of Day (0-10 pts)
-  const f4 = scoreTimeOfDay(depTime);
-  if (f4.factor) factors.push(f4.factor);
-  factorsDetailed.push({ name: 'Time of Day', score: f4.score, maxScore: 10, description: f4.factor || `Departure at ${depTime}` });
+  const f4Raw = scoreTimeOfDay(depTime);
+  const f4Score = scaleScore(f4Raw.score, RAW_MAX.timeOfDay, SCORE_WEIGHTS.timeOfDay);
+  if (f4Raw.factor) factors.push(f4Raw.factor);
+  factorsDetailed.push({ name: 'Time of Day', score: f4Score, maxScore: SCORE_WEIGHTS.timeOfDay, description: f4Raw.factor || `Departure at ${depTime}` });
 
   // Factor 5: Weather & Disruption (0-15 pts) — max(weather, FAA)
-  const f5 = scoreWeatherAndDisruption(originWx, destWx, originFAA, destFAA, origin, dest);
-  factors.push(...f5.factors);
-  factorsDetailed.push({ name: 'Weather & Disruption', score: f5.score, maxScore: 15, description: f5.factors.length > 0 ? f5.factors.join(' · ') : 'Clear conditions, no FAA delays' });
+  const f5Raw = scoreWeatherAndDisruption(originWx, destWx, originFAA, destFAA, origin, dest);
+  const f5Score = scaleScore(f5Raw.score, RAW_MAX.weather, SCORE_WEIGHTS.weather);
+  factors.push(...f5Raw.factors);
+  factorsDetailed.push({ name: 'Weather & Disruption', score: f5Score, maxScore: SCORE_WEIGHTS.weather, description: f5Raw.factors.length > 0 ? f5Raw.factors.join(' · ') : 'Clear conditions, no FAA delays' });
 
-  // Factor 6: Route Type (0-10 pts)
-  const f6 = scoreRouteType(origin, dest, marketingCarrier);
-  if (f6.factor) factors.push(f6.factor);
-  factorsDetailed.push({ name: 'Route Type', score: f6.score, maxScore: 10, description: f6.factor || `${origin} → ${dest}` });
+  // Factor 6: Route Reliability (0-10 pts)
+  const f6Raw = scoreRouteReliability(routeReliability);
+  const f6Score = scaleScore(f6Raw.score, 10, SCORE_WEIGHTS.reliability);
+  if (f6Raw.factor) factors.push(f6Raw.factor);
+  factorsDetailed.push({ name: 'Route Reliability', score: f6Score, maxScore: SCORE_WEIGHTS.reliability, description: f6Raw.description });
+
+  // Factor 7: Route Type (0-10 pts)
+  const f7Raw = scoreRouteType(origin, dest, marketingCarrier);
+  const f7Score = scaleScore(f7Raw.score, RAW_MAX.route, SCORE_WEIGHTS.route);
+  if (f7Raw.factor) factors.push(f7Raw.factor);
+  factorsDetailed.push({ name: 'Route Type', score: f7Score, maxScore: SCORE_WEIGHTS.route, description: f7Raw.factor || `${origin} → ${dest}` });
 
   // Sum all factors (theoretical max = 100)
-  const rawScore = f1.score + f2.score + f3.score + f4.score + f5.score + f6.score;
+  const rawScore = f1Score + f2Score + f3Score + f4Score + f5Score + f6Score + f7Score;
   const score = Math.min(100, Math.max(5, rawScore));
 
-  return { score, factors, factorsDetailed, carrierDbRate: f1.dbRate };
+  return { score, factors, factorsDetailed, carrierDbRate: f1Raw.dbRate };
 }
 
 // =============================================================================
@@ -540,11 +615,12 @@ export async function scoreFlights(
   const date = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
   const dayOfWeek = date.getDay();
 
-  const [originWx, destWx, originFAA, destFAA] = await Promise.all([
+  const [originWx, destWx, originFAA, destFAA, routeReliability] = await Promise.all([
     getWeatherSeverity(originUpper),
     getWeatherSeverity(destUpper),
     getAirportStatus(originUpper),
     getAirportStatus(destUpper),
+    getRouteReliability(originUpper, destUpper),
   ]);
 
   // Fetch real flights from all sources
@@ -625,6 +701,7 @@ export async function scoreFlights(
       destWx,
       originFAA,
       destFAA,
+      routeReliability,
     });
 
     // Calculate DOT compensation estimate

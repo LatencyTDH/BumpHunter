@@ -10,6 +10,19 @@ vi.mock('../server/faa.js', () => ({
   getAirportStatus: vi.fn().mockResolvedValue({ airport: 'XXX', delay: false }),
 }));
 
+// Mock BTS on-time performance to avoid network calls
+vi.mock('../server/otp.js', () => ({
+  getRouteReliability: vi.fn().mockResolvedValue({
+    origin: 'ATL',
+    dest: 'LGA',
+    delayPct: 30.9,
+    totalFlights: 760,
+    periodLabel: 'Dec 2024–Nov 2025',
+    source: 'BTS On-Time (transtats.bts.gov)',
+    available: true,
+  }),
+}));
+
 // Mock opensky (FR24 + OpenSky + ADSBDB) to avoid network calls
 // Provide deterministic fake "real flight" data for scoring tests
 vi.mock('../server/opensky.js', () => ({
