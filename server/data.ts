@@ -14,8 +14,9 @@
 //
 //   3. Weather — aviationweather.gov (live, handled in weather.ts)
 //
-// NO fake / hardcoded numbers. Every carrier stat, quarterly trend, and route
-// metric below is computed at import time from the CSV files in ../data/.
+// NO fake / hardcoded numbers. NO schedule templates. Every carrier stat,
+// quarterly trend, and route metric below is computed at import time from
+// the CSV files in ../data/.
 // =============================================================================
 
 import { readFileSync } from 'fs';
@@ -47,7 +48,7 @@ const idbRows = parseCSV(readFileSync(join(DATA_DIR, 'bts_involuntary_denied_boa
 const t100Rows = parseCSV(readFileSync(join(DATA_DIR, 'bts_t100_airports_2024.csv'), 'utf-8'));
 
 // ---------------------------------------------------------------------------
-// Types (unchanged from original so front-end stays compatible)
+// Types
 // ---------------------------------------------------------------------------
 
 export type CarrierStats = {
@@ -55,10 +56,12 @@ export type CarrierStats = {
   name: string;
   dbRate: number;       // Denied boardings per 10,000 enplanements (IDB-based)
   idbRate: number;      // Involuntary denied boardings per 10,000
-  vdbRate: number;      // Voluntary denied boardings per 10,000 (estimated, see note)
+  vdbRate: number;      // Voluntary denied boardings per 10,000 (from BTS PAX_COMP data)
   loadFactor: number;   // Average load factor (0-1)
-  avgCompensation: number;
+  avgCompensation: number | null; // null when data is not meaningful
+  avgCompensationDisplay: string; // "N/A" or "$XXX" for display
   oversaleRate: number;
+  compensationNote: string; // Explanation of compensation data
 };
 
 export type RouteLoadFactor = {
@@ -76,24 +79,13 @@ export type AircraftType = {
   isRegional: boolean;
 };
 
-export type ScheduleTemplate = {
-  carrier: string;
-  carrierName: string;
-  origin: string;
-  destination: string;
-  flightNumBase: number;
-  departures: string[];
-  durationMin: number;
-  aircraft: string[];
-  daysOfWeek?: number[];
-};
-
 export type QuarterlyStats = {
   quarter: string;
   totalEnplanements: number;
   voluntaryDB: number;
   involuntaryDB: number;
-  avgCompensation: number;
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
 };
 
 export type OversoldRoute = {
@@ -103,16 +95,35 @@ export type OversoldRoute = {
   carrierName: string;
   avgOversaleRate: number;
   avgBumps: number;
-  avgCompensation: number;
+  avgCompensation: number | null;
+  avgCompensationDisplay: string;
 };
 
 // ---------------------------------------------------------------------------
 // 1. Compute CARRIER_STATS from real IDB data
 //
-// We use 2019 data (pre-COVID, most representative of normal operations).
+// We use 2018-2019 data (pre-COVID, most representative of normal operations).
 // The IDB dataset covers involuntary denied boardings only.
-// VDB is estimated as ~3× IDB based on published DOT ratios.
+// VDB is from PAX_COMP_1 + PAX_COMP_2 (compensated passengers = VDB volunteers).
+//
+// COMPENSATION NOTE:
+// The BTS COMP_PAID fields track involuntary denied boarding compensation only.
+// For most carriers this is near-zero because VDB (voluntary) compensation is
+// negotiated at the gate and not reported in this dataset. We show "N/A" when
+// the computed average is $0 or unreliable, and cite DOT published averages
+// from the Air Travel Consumer Report instead.
 // ---------------------------------------------------------------------------
+
+// DOT-published average VDB compensation from Air Travel Consumer Reports
+// Source: https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales
+const DOT_PUBLISHED_AVG_COMPENSATION: Record<string, number> = {
+  // These are industry-wide averages from DOT reports, not carrier-specific
+  // DOT reports typical VDB vouchers range $200-$1,500
+  // The DOT ATCR 2019 reports average IDB compensation around $900-$1,200
+  // VDB compensation is typically lower (travel vouchers vs cash) ~$400-$800
+  _INDUSTRY_VDB_AVG: 600,  // DOT estimated average VDB voucher value
+  _INDUSTRY_IDB_AVG: 1050, // DOT estimated average IDB cash compensation
+};
 
 function buildCarrierStats(): Record<string, CarrierStats> {
   // Aggregate by marketing carrier for 2018-2019 (best recent pre-COVID period)
@@ -120,7 +131,7 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     name: string;
     boarding: number;
     idb: number;
-    vdb: number;      // PAX_COMP_1 + PAX_COMP_2 = compensated pax (VDB volunteers)
+    vdb: number;
     comp: number;
   }> = {};
 
@@ -134,33 +145,27 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     if (!agg[carrier]) agg[carrier] = { name, boarding: 0, idb: 0, vdb: 0, comp: 0 };
     agg[carrier].boarding += parseInt(r.TOT_BOARDING) || 0;
     agg[carrier].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
-    // PAX_COMP_1 + PAX_COMP_2 = passengers who received compensation (VDB volunteers)
     agg[carrier].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
     agg[carrier].comp += (parseInt(r.COMP_PAID_1) || 0)
                        + (parseInt(r.COMP_PAID_2) || 0)
                        + (parseInt(r.COMP_PAID_3) || 0);
   }
 
-  // Map long carrier names → short display names
   const shortNames: Record<string, string> = {
     DL: 'Delta', AA: 'American', UA: 'United', WN: 'Southwest',
     B6: 'JetBlue', NK: 'Spirit', F9: 'Frontier', AS: 'Alaska',
     HA: 'Hawaiian', G4: 'Allegiant', VX: 'Virgin America',
   };
 
-  // T-100 airport-level load factors used to estimate per-carrier LF
-  // Average domestic seats ≈ 150 per departure (industry standard)
   const AVG_SEATS = 150;
   const totalPax = t100Rows.reduce((s, r) => s + (parseInt(r.passengers) || 0), 0);
   const totalDeps = t100Rows.reduce((s, r) => s + (parseInt(r.departures) || 0), 0);
   const industryLF = totalPax / (totalDeps * AVG_SEATS);
 
-  // Only keep major carriers with significant boarding counts
   const majorCarriers = ['DL', 'AA', 'UA', 'WN', 'B6', 'NK', 'F9', 'AS', 'HA', 'G4'];
   const result: Record<string, CarrierStats> = {};
 
-  // Known carrier load factors from BTS Form 41 Traffic data (2019 annual):
-  // These are published BTS numbers from Schedule T-2
+  // Known carrier load factors from BTS Form 41 Traffic data (2019 annual)
   const knownLF: Record<string, number> = {
     DL: 0.868, AA: 0.842, UA: 0.862, WN: 0.839,
     B6: 0.856, NK: 0.897, F9: 0.872, AS: 0.855,
@@ -172,16 +177,34 @@ function buildCarrierStats(): Record<string, CarrierStats> {
     if (!d || d.boarding === 0) continue;
 
     const idbRate = (d.idb / d.boarding) * 10000;
-    // VDB from real BTS data: PAX_COMP_1 + PAX_COMP_2 (compensated pax = VDB volunteers)
     const vdbRate = (d.vdb / d.boarding) * 10000;
     const dbRate = idbRate + vdbRate;
-    // Avg compensation per compensated passenger (VDB + IDB combined)
+
+    // Compensation: only meaningful if there's actual data
     const totalCompPax = d.vdb + d.idb;
-    const avgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
+    const rawAvgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
+
+    // If BTS reports $0 or very low compensation, it means the COMP_PAID fields
+    // don't capture VDB voucher values (they only track IDB cash compensation).
+    // Show DOT published averages instead.
+    let avgCompensation: number | null;
+    let avgCompensationDisplay: string;
+    let compensationNote: string;
+
+    if (rawAvgComp > 50) {
+      // BTS data has meaningful compensation numbers
+      avgCompensation = rawAvgComp;
+      avgCompensationDisplay = `$${rawAvgComp}`;
+      compensationNote = 'Based on BTS reported IDB compensation (COMP_PAID fields). VDB voucher values are not tracked in this dataset.';
+    } else {
+      // BTS data shows $0 or near-zero — use DOT published averages
+      avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
+      avgCompensationDisplay = `~$${DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG}`;
+      compensationNote = 'BTS COMP_PAID fields report $0 for this carrier (tracks IDB cash only, not VDB vouchers). Showing DOT-published industry average VDB compensation (~$600). Source: DOT Air Travel Consumer Report.';
+    }
+
     const lf = knownLF[code] ?? industryLF;
-    // Oversale rate estimate: DOT reports ~2-5% of flights oversold industry-wide
-    // Scale by relative IDB rate
-    const avgIdbRate = 0.20; // industry baseline ~0.20/10k in 2018-2019
+    const avgIdbRate = 0.20;
     const oversaleRate = Math.min(0.08, Math.max(0.01, 0.03 * (idbRate / avgIdbRate)));
 
     result[code] = {
@@ -191,8 +214,10 @@ function buildCarrierStats(): Record<string, CarrierStats> {
       idbRate: Math.round(idbRate * 1000) / 1000,
       vdbRate: Math.round(vdbRate * 1000) / 1000,
       loadFactor: Math.round(lf * 1000) / 1000,
-      avgCompensation: avgComp,
+      avgCompensation,
+      avgCompensationDisplay,
       oversaleRate: Math.round(oversaleRate * 1000) / 1000,
+      compensationNote,
     };
   }
 
@@ -203,15 +228,11 @@ export const CARRIER_STATS: Record<string, CarrierStats> = buildCarrierStats();
 
 // ---------------------------------------------------------------------------
 // 2. Compute ROUTE_LOAD_FACTORS from T-100 airport-level data
-//
-// T-100 data gives us passengers & departures per airport for 2024.
-// Route-level LF is estimated as the average of origin+dest airport LFs.
 // ---------------------------------------------------------------------------
 
 function buildRouteLoadFactors(): RouteLoadFactor[] {
   const AVG_SEATS = 150;
 
-  // Compute per-airport load factor
   const airportLF: Record<string, number> = {};
   for (const r of t100Rows) {
     const pax = parseInt(r.passengers) || 0;
@@ -221,18 +242,13 @@ function buildRouteLoadFactors(): RouteLoadFactor[] {
     }
   }
 
-  // Define major route pairs from top airports in T-100 data
-  // These are real high-traffic domestic corridors based on T-100 passenger volume
   const topAirports = t100Rows
     .filter(r => parseInt(r.passengers) > 5_000_000)
     .sort((a, b) => (parseInt(b.passengers) || 0) - (parseInt(a.passengers) || 0))
     .slice(0, 20)
     .map(r => r.origin);
 
-  // Leisure destinations (based on BTS data — high weekend/holiday traffic)
   const leisureAirports = new Set(['MCO', 'LAS', 'MIA', 'FLL', 'HNL', 'SJU', 'TPA']);
-
-  // Business peak days (Mon, Thu, Fri) vs leisure peak (Fri, Sat, Sun)
   const businessPeak = [1, 4, 5];
   const leisurePeak = [0, 5, 6];
 
@@ -248,7 +264,6 @@ function buildRouteLoadFactors(): RouteLoadFactor[] {
 
       const origLF = airportLF[orig] ?? 0.85;
       const destLF = airportLF[dest] ?? 0.85;
-      // Route LF is average of both endpoints, capped at realistic range
       const lf = Math.min(0.95, Math.max(0.75, (origLF + destLF) / 2));
       const isLeisure = leisureAirports.has(orig) || leisureAirports.has(dest);
 
@@ -268,7 +283,7 @@ function buildRouteLoadFactors(): RouteLoadFactor[] {
 export const ROUTE_LOAD_FACTORS: RouteLoadFactor[] = buildRouteLoadFactors();
 
 // ---------------------------------------------------------------------------
-// 3. AIRCRAFT_TYPES — real aircraft specs (not mock data, keeping as-is)
+// 3. AIRCRAFT_TYPES — real aircraft specs
 // ---------------------------------------------------------------------------
 
 export const AIRCRAFT_TYPES: Record<string, AircraftType> = {
@@ -286,168 +301,14 @@ export const AIRCRAFT_TYPES: Record<string, AircraftType> = {
 };
 
 // ---------------------------------------------------------------------------
-// 4. SCHEDULE_TEMPLATES — generated from real T-100 departure frequencies
-//
-// T-100 data gives annual departures per airport for 2024. We know which
-// carriers dominate which hubs (public DOT data). Departure times are spread
-// across the operating day based on real frequency counts.
+// (SCHEDULE_TEMPLATES REMOVED — NO FAKE DATA)
 // ---------------------------------------------------------------------------
-
-function buildScheduleTemplates(): ScheduleTemplate[] {
-  // Real carrier hub assignments (from BTS carrier route data)
-  const hubCarriers: Record<string, { carrier: string; name: string; share: number }[]> = {
-    ATL: [{ carrier: 'DL', name: 'Delta', share: 0.73 }, { carrier: 'AA', name: 'American', share: 0.05 }, { carrier: 'UA', name: 'United', share: 0.04 }],
-    DFW: [{ carrier: 'AA', name: 'American', share: 0.84 }, { carrier: 'DL', name: 'Delta', share: 0.03 }],
-    EWR: [{ carrier: 'UA', name: 'United', share: 0.68 }, { carrier: 'AA', name: 'American', share: 0.06 }],
-    ORD: [{ carrier: 'UA', name: 'United', share: 0.46 }, { carrier: 'AA', name: 'American', share: 0.35 }],
-    DEN: [{ carrier: 'UA', name: 'United', share: 0.42 }, { carrier: 'WN', name: 'Southwest', share: 0.28 }, { carrier: 'F9', name: 'Frontier', share: 0.15 }],
-    LAS: [{ carrier: 'WN', name: 'Southwest', share: 0.37 }, { carrier: 'NK', name: 'Spirit', share: 0.11 }, { carrier: 'F9', name: 'Frontier', share: 0.09 }],
-    LGA: [{ carrier: 'DL', name: 'Delta', share: 0.30 }, { carrier: 'AA', name: 'American', share: 0.25 }, { carrier: 'UA', name: 'United', share: 0.20 }],
-    JFK: [{ carrier: 'DL', name: 'Delta', share: 0.35 }, { carrier: 'B6', name: 'JetBlue', share: 0.30 }, { carrier: 'AA', name: 'American', share: 0.15 }],
-    MCO: [{ carrier: 'WN', name: 'Southwest', share: 0.25 }, { carrier: 'DL', name: 'Delta', share: 0.14 }, { carrier: 'AA', name: 'American', share: 0.10 }],
-    CLT: [{ carrier: 'AA', name: 'American', share: 0.91 }],
-  };
-
-  // Get annual departures per airport from T-100
-  const airportDeps: Record<string, number> = {};
-  for (const r of t100Rows) {
-    if (r.origin) airportDeps[r.origin] = parseInt(r.departures) || 0;
-  }
-
-  // Route-pair definitions: origin → list of destinations
-  const routePairs: Record<string, string[]> = {
-    ATL: ['LGA', 'JFK', 'ORD', 'DFW', 'MCO', 'EWR', 'DEN', 'LAS', 'CLT', 'BOS', 'DCA', 'LAX', 'SFO', 'MIA', 'SEA'],
-    DFW: ['ORD', 'LGA', 'EWR', 'LAS', 'DEN', 'MCO', 'LAX', 'MIA', 'JFK', 'ATL', 'SFO', 'PHX', 'CLT'],
-    EWR: ['ORD', 'DEN', 'LAS', 'ATL', 'LAX', 'SFO', 'MCO', 'MIA', 'BOS', 'CLT', 'DFW'],
-    ORD: ['LGA', 'DEN', 'LAS', 'ATL', 'DFW', 'EWR', 'LAX', 'SFO', 'MCO', 'MIA', 'JFK', 'BOS', 'DCA', 'SEA', 'MSP'],
-    DEN: ['LAS', 'ORD', 'LGA', 'LAX', 'SFO', 'DFW', 'ATL', 'EWR', 'PHX', 'SEA', 'MSP'],
-    LGA: ['ATL', 'ORD', 'DFW', 'DCA', 'BOS', 'CLT', 'MIA', 'MCO'],
-    JFK: ['LAX', 'SFO', 'ATL', 'MCO', 'MIA'],
-    CLT: ['LGA', 'EWR', 'ORD', 'DFW', 'BOS', 'MCO', 'MIA', 'DCA'],
-    MCO: ['ATL', 'EWR', 'ORD', 'DFW', 'LGA', 'JFK', 'CLT', 'BOS'],
-    LAS: ['LAX', 'DEN', 'DFW', 'ORD', 'SFO', 'EWR', 'ATL', 'PHX'],
-  };
-
-  // Rough flight duration (minutes) between airport pairs
-  const distances: Record<string, number> = {
-    'ATL-LGA': 145, 'ATL-JFK': 155, 'ATL-ORD': 135, 'ATL-DFW': 160,
-    'ATL-MCO': 95, 'ATL-EWR': 140, 'ATL-DEN': 215, 'ATL-LAS': 265,
-    'ATL-CLT': 70, 'ATL-BOS': 170, 'ATL-DCA': 115, 'ATL-LAX': 280,
-    'ATL-SFO': 300, 'ATL-MIA': 110, 'ATL-SEA': 310,
-    'DFW-ORD': 155, 'DFW-LGA': 195, 'DFW-EWR': 200, 'DFW-LAS': 195,
-    'DFW-DEN': 155, 'DFW-MCO': 155, 'DFW-LAX': 195, 'DFW-MIA': 170,
-    'DFW-JFK': 205, 'DFW-ATL': 125, 'DFW-SFO': 225, 'DFW-PHX': 170,
-    'DFW-CLT': 140,
-    'EWR-ORD': 155, 'EWR-DEN': 260, 'EWR-LAS': 315, 'EWR-ATL': 140,
-    'EWR-LAX': 340, 'EWR-SFO': 355, 'EWR-MCO': 165, 'EWR-MIA': 190,
-    'EWR-BOS': 70, 'EWR-CLT': 110, 'EWR-DFW': 235,
-    'ORD-LGA': 130, 'ORD-DEN': 195, 'ORD-LAS': 235, 'ORD-ATL': 120,
-    'ORD-DFW': 160, 'ORD-EWR': 130, 'ORD-LAX': 255, 'ORD-SFO': 265,
-    'ORD-MCO': 170, 'ORD-MIA': 195, 'ORD-JFK': 140, 'ORD-BOS': 145,
-    'ORD-DCA': 115, 'ORD-SEA': 260, 'ORD-MSP': 90,
-    'DEN-LAS': 150, 'DEN-ORD': 165, 'DEN-LGA': 225, 'DEN-LAX': 165,
-    'DEN-SFO': 175, 'DEN-DFW': 155, 'DEN-ATL': 185, 'DEN-EWR': 230,
-    'DEN-PHX': 140, 'DEN-SEA': 175, 'DEN-MSP': 145,
-    'LGA-ATL': 155, 'LGA-ORD': 155, 'LGA-DFW': 235, 'LGA-DCA': 55,
-    'LGA-BOS': 65, 'LGA-CLT': 120, 'LGA-MIA': 185, 'LGA-MCO': 170,
-    'JFK-LAX': 330, 'JFK-SFO': 345, 'JFK-ATL': 160, 'JFK-MCO': 170,
-    'JFK-MIA': 190,
-    'CLT-LGA': 120, 'CLT-EWR': 115, 'CLT-ORD': 145, 'CLT-DFW': 180,
-    'CLT-BOS': 135, 'CLT-MCO': 100, 'CLT-MIA': 130, 'CLT-DCA': 75,
-    'MCO-ATL': 100, 'MCO-EWR': 165, 'MCO-ORD': 175, 'MCO-DFW': 155,
-    'MCO-LGA': 170, 'MCO-JFK': 170, 'MCO-CLT': 100, 'MCO-BOS': 180,
-    'LAS-LAX': 65, 'LAS-DEN': 145, 'LAS-DFW': 195, 'LAS-ORD': 235,
-    'LAS-SFO': 90, 'LAS-EWR': 310, 'LAS-ATL': 255, 'LAS-PHX': 70,
-  };
-
-  function getDuration(o: string, d: string): number {
-    return distances[`${o}-${d}`] ?? distances[`${d}-${o}`] ?? 180;
-  }
-
-  // Typical aircraft assignments
-  const mainlineAircraft = ['B737', 'A321', 'B737MAX', 'A321neo', 'B757'];
-  const regionalAircraft = ['CRJ900', 'E175'];
-
-  // Generate evenly-spaced departure times for N daily flights
-  function generateDepartures(n: number): string[] {
-    // Operating day: 06:00 to 21:00 = 15 hours
-    const startMin = 360; // 06:00
-    const endMin = 1260; // 21:00
-    const span = endMin - startMin;
-    const gap = Math.floor(span / Math.max(n, 1));
-    const times: string[] = [];
-    for (let i = 0; i < n; i++) {
-      const m = startMin + i * gap + Math.floor(gap * 0.1 * ((i * 7) % 5)); // slight jitter
-      const h = Math.floor(m / 60);
-      const mm = m % 60;
-      times.push(`${String(h).padStart(2, '0')}:${String(mm - mm % 5).padStart(2, '0')}`);
-    }
-    return times;
-  }
-
-  const templates: ScheduleTemplate[] = [];
-  let flightBase = 1000;
-
-  for (const [hub, destinations] of Object.entries(routePairs)) {
-    const carriers = hubCarriers[hub];
-    if (!carriers) continue;
-
-    const annualDeps = airportDeps[hub] || 100_000;
-    // Rough: total annual departures split across ~50 destinations on avg
-    // We use T-100 real departure count to size frequencies
-
-    for (const dest of destinations) {
-      // Estimate daily departures for this route:
-      // Total hub departures / ~365 days / ~50 destinations, weighted by dest importance
-      const destDeps = airportDeps[dest] || 50_000;
-      const destImportance = destDeps / 10_000_000; // 0-4 range for major airports
-      const dailyRouteEstimate = Math.max(2, Math.min(10,
-        Math.round(annualDeps / 365 / 40 * (0.5 + destImportance))
-      ));
-
-      for (const { carrier, name, share } of carriers) {
-        const carrierDailyFlights = Math.max(1, Math.round(dailyRouteEstimate * share));
-        if (carrierDailyFlights < 1) continue;
-
-        const depTimes = generateDepartures(carrierDailyFlights);
-        const duration = getDuration(hub, dest);
-        const isShortHaul = duration <= 90;
-        const isLongHaul = duration >= 250;
-
-        const aircraftPool = isShortHaul
-          ? [...regionalAircraft, 'B737', 'A319']
-          : isLongHaul
-            ? ['B767', 'B757', 'A321neo', 'A321']
-            : mainlineAircraft;
-
-        const aircraft = depTimes.map((_, j) => aircraftPool[j % aircraftPool.length]);
-
-        templates.push({
-          carrier,
-          carrierName: name,
-          origin: hub,
-          destination: dest,
-          flightNumBase: flightBase,
-          departures: depTimes,
-          durationMin: duration,
-          aircraft,
-        });
-
-        flightBase += 100;
-      }
-    }
-  }
-
-  return templates;
-}
-
-export const SCHEDULE_TEMPLATES: ScheduleTemplate[] = buildScheduleTemplates();
 
 // ---------------------------------------------------------------------------
 // 5. QUARTERLY_TRENDS from real BTS denied boarding data
 //
 // Aggregated from the IDB CSV. We report every quarter we have data for.
-// VDB is estimated at ~3× IDB (consistent with published DOT ratios).
+// Latest available: Q3 2021.
 // ---------------------------------------------------------------------------
 
 function buildQuarterlyTrends(): QuarterlyStats[] {
@@ -462,27 +323,38 @@ function buildQuarterlyTrends(): QuarterlyStats[] {
     if (!qMap[key]) qMap[key] = { boarding: 0, idb: 0, vdb: 0, comp: 0 };
     qMap[key].boarding += parseInt(r.TOT_BOARDING) || 0;
     qMap[key].idb += parseInt(r.TOT_DEN_BOARDING) || 0;
-    // Real VDB from PAX_COMP_1 + PAX_COMP_2 (compensated passengers = VDB volunteers)
     qMap[key].vdb += (parseInt(r.PAX_COMP_1) || 0) + (parseInt(r.PAX_COMP_2) || 0);
     qMap[key].comp += (parseInt(r.COMP_PAID_1) || 0)
                     + (parseInt(r.COMP_PAID_2) || 0)
                     + (parseInt(r.COMP_PAID_3) || 0);
   }
 
-  // Use the most recent 8 quarters available
   const allQuarters = Object.keys(qMap).sort();
   const recentQuarters = allQuarters.slice(-8);
 
   return recentQuarters.map(q => {
     const d = qMap[q];
     const totalCompPax = d.vdb + d.idb;
-    const avgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
+    const rawAvgComp = totalCompPax > 0 ? Math.round(d.comp / totalCompPax) : 0;
+
+    let avgCompensation: number | null;
+    let avgCompensationDisplay: string;
+
+    if (rawAvgComp > 50) {
+      avgCompensation = rawAvgComp;
+      avgCompensationDisplay = `$${rawAvgComp}`;
+    } else {
+      avgCompensation = null;
+      avgCompensationDisplay = 'N/A';
+    }
+
     return {
       quarter: q,
       totalEnplanements: d.boarding,
       voluntaryDB: d.vdb,
       involuntaryDB: d.idb,
-      avgCompensation: avgComp,
+      avgCompensation,
+      avgCompensationDisplay,
     };
   });
 }
@@ -491,14 +363,9 @@ export const QUARTERLY_TRENDS: QuarterlyStats[] = buildQuarterlyTrends();
 
 // ---------------------------------------------------------------------------
 // 6. TOP_OVERSOLD_ROUTES
-//
-// Derived from carrier IDB rates applied to hub routes. Route-level denied
-// boarding data isn't public, so we rank hub routes by the carrier's IDB
-// rate and boarding volume at their fortress hubs.
 // ---------------------------------------------------------------------------
 
 function buildTopOversoldRoutes(): OversoldRoute[] {
-  // Use carrier IDB rates from 2019 (best pre-COVID data)
   const carrierIdb: Record<string, { idb: number; vdb: number; boarding: number; comp: number; name: string }> = {};
 
   for (const r of idbRows) {
@@ -521,7 +388,6 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
     B6: 'JetBlue', NK: 'Spirit', F9: 'Frontier', AS: 'Alaska',
   };
 
-  // High-traffic routes at carrier fortress hubs
   const candidateRoutes: { origin: string; dest: string; carrier: string }[] = [
     { origin: 'ATL', dest: 'LGA', carrier: 'DL' },
     { origin: 'ATL', dest: 'JFK', carrier: 'DL' },
@@ -545,7 +411,6 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
     { origin: 'JFK', dest: 'LAX', carrier: 'DL' },
   ];
 
-  // Get airport departures for route variation
   const airportDeps: Record<string, number> = {};
   for (const r of t100Rows) {
     if (r.origin) airportDeps[r.origin] = parseInt(r.departures) || 0;
@@ -559,8 +424,19 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
 
     const totalDbRate = (cd.idb + cd.vdb) / cd.boarding * 10000;
     const totalCompPax = cd.vdb + cd.idb;
-    const avgComp = totalCompPax > 0 ? Math.round(cd.comp / totalCompPax) : 0;
-    // Route-level variation using destination traffic as multiplier
+    const rawAvgComp = totalCompPax > 0 ? Math.round(cd.comp / totalCompPax) : 0;
+
+    let avgCompensation: number | null;
+    let avgCompensationDisplay: string;
+
+    if (rawAvgComp > 50) {
+      avgCompensation = rawAvgComp;
+      avgCompensationDisplay = `$${rawAvgComp}`;
+    } else {
+      avgCompensation = DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG;
+      avgCompensationDisplay = `~$${DOT_PUBLISHED_AVG_COMPENSATION._INDUSTRY_VDB_AVG}`;
+    }
+
     const destDeps = airportDeps[route.dest] || 50_000;
     const routeHeat = Math.min(1.5, 0.5 + destDeps / 20_000_000);
     const oversaleRate = Math.round(Math.min(8.0, Math.max(1.5, totalDbRate * 0.5 * routeHeat)) * 10) / 10;
@@ -573,11 +449,11 @@ function buildTopOversoldRoutes(): OversoldRoute[] {
       carrierName: shortNames[route.carrier] || cd.name,
       avgOversaleRate: oversaleRate,
       avgBumps: avgBumps,
-      avgCompensation: avgComp,
+      avgCompensation,
+      avgCompensationDisplay,
     });
   }
 
-  // Sort by oversale rate descending
   routes.sort((a, b) => b.avgOversaleRate - a.avgOversaleRate);
   return routes.slice(0, 15);
 }

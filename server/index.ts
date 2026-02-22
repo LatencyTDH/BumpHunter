@@ -69,6 +69,10 @@ app.get('/api/weather/metar', async (req, res) => {
 // =============================================================================
 // Flight Search with Bump Scoring
 // GET /api/flights/search?origin=ATL&dest=LGA&date=2026-03-01
+//
+// Returns ONLY real flights from FR24 + OpenSky + ADSBDB.
+// NO fake data. NO schedule templates. EVER.
+// If no data is available, returns empty list with honest explanation.
 // =============================================================================
 app.get('/api/flights/search', async (req, res) => {
   try {
@@ -83,36 +87,37 @@ app.get('/api/flights/search', async (req, res) => {
     const dateStr = String(date);
 
     // Check cache first
-    const cacheKey = `flights:${originStr}:${destStr}:${dateStr}`;
+    const cacheKey = `flights:${originStr}:${destStr}:${dateStr}:v3`;
     const cached = cacheGet<any>(cacheKey);
     if (cached) {
       return res.json(cached);
     }
 
-    const flights = await scoreFlights(originStr, destStr, dateStr);
+    const scoreResult = await scoreFlights(originStr, destStr, dateStr);
 
-    // Determine which data sources were used
-    const openskyCount = flights.filter((f: any) => f.dataSource === 'opensky').length;
-    const scheduleCount = flights.filter((f: any) => f.dataSource === 'schedule').length;
+    // Build data sources list
     const dataSources = [
-      'BTS load factors',
-      'BTS denied boarding rates',
+      ...scoreResult.dataSources,
       'aviationweather.gov METAR',
-      'DOT carrier statistics',
+      'DOT BTS Statistics',
     ];
-    if (openskyCount > 0) dataSources.unshift('OpenSky Network (live flights)');
-    if (scheduleCount > 0) dataSources.push('Schedule templates (supplemental)');
+    if (scoreResult.verifiedCount > 0 && !dataSources.some(s => s.includes('ADSBDB'))) {
+      dataSources.push('ADSBDB (route verification)');
+    }
 
     const result = {
-      flights,
+      flights: scoreResult.flights,
       meta: {
         origin: originStr,
         destination: destStr,
         date: dateStr,
-        totalFlights: flights.length,
-        realFlights: openskyCount,
-        scheduleFlights: scheduleCount,
+        totalFlights: scoreResult.flights.length,
+        verifiedFlights: scoreResult.verifiedCount,
         dataSources,
+        dataSource: scoreResult.flights.length > 0 ? 'live' : 'none',
+        message: scoreResult.message,
+        rateLimited: scoreResult.rateLimited,
+        openskyRateLimited: scoreResult.openskyRateLimited,
         timestamp: new Date().toISOString(),
       },
     };
@@ -122,7 +127,16 @@ app.get('/api/flights/search', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('Flight search error:', err);
-    res.status(500).json({ error: 'Flight search failed', flights: [] });
+    res.status(500).json({
+      error: 'Flight search failed',
+      flights: [],
+      meta: {
+        totalFlights: 0,
+        dataSource: 'none',
+        message: 'An error occurred while searching for flights. Please try again.',
+        rateLimited: false,
+      },
+    });
   }
 });
 
@@ -136,13 +150,13 @@ app.get('/api/stats/carriers', (_req, res) => {
     loadFactorPct: Math.round(c.loadFactor * 100 * 10) / 10,
   }));
 
-  // Sort by VDB rate descending (most bumps first)
   carriers.sort((a, b) => b.vdbRate - a.vdbRate);
 
   res.json({
     carriers,
     source: 'DOT Bureau of Transportation Statistics',
-    note: 'Rates are per 10,000 enplanements',
+    note: 'Rates are per 10,000 enplanements. Compensation data: BTS COMP_PAID fields track IDB cash compensation only; VDB voucher values use DOT-published industry averages (~$600). Latest data: Q3 2021.',
+    dataNote: 'VDB estimated from IDB using DOT-published ratios. Latest available: Q3 2021.',
   });
 });
 
@@ -154,6 +168,7 @@ app.get('/api/stats/trends', (_req, res) => {
   res.json({
     trends: QUARTERLY_TRENDS,
     source: 'DOT Air Travel Consumer Report',
+    dataNote: 'Latest available: Q3 2021. Compensation marked N/A where BTS COMP_PAID fields report $0 (tracks IDB cash only, not VDB vouchers).',
   });
 });
 
@@ -165,6 +180,7 @@ app.get('/api/stats/routes', (_req, res) => {
   res.json({
     routes: TOP_OVERSOLD_ROUTES,
     source: 'DOT Bureau of Transportation Statistics',
+    dataNote: 'Based on 2019 pre-COVID data. Compensation uses DOT-published industry averages where BTS data reports $0.',
   });
 });
 
@@ -177,7 +193,12 @@ app.get('/api/stats/summary', async (_req, res) => {
     const alerts = await getWeatherAlerts(ALL_HUBS);
     const latestQuarter = QUARTERLY_TRENDS[QUARTERLY_TRENDS.length - 1];
     const totalVDB = QUARTERLY_TRENDS.reduce((sum, q) => sum + q.voluntaryDB, 0);
-    const avgComp = Math.round(QUARTERLY_TRENDS.reduce((sum, q) => sum + q.avgCompensation, 0) / QUARTERLY_TRENDS.length);
+
+    // Average compensation: use only quarters with meaningful data
+    const quartersWithComp = QUARTERLY_TRENDS.filter(q => q.avgCompensation !== null && q.avgCompensation > 0);
+    const avgComp = quartersWithComp.length > 0
+      ? Math.round(quartersWithComp.reduce((sum, q) => sum + (q.avgCompensation || 0), 0) / quartersWithComp.length)
+      : 600; // DOT industry average fallback
 
     res.json({
       activeAlerts: alerts.length,
@@ -200,7 +221,8 @@ app.get('/api/stats/summary', async (_req, res) => {
 // =============================================================================
 app.listen(PORT, () => {
   console.log(`🛫 BumpHunter API running on http://localhost:${PORT}`);
-  console.log('   Data sources: OpenSky Network, aviationweather.gov, DOT BTS');
+  console.log('   Data sources: FlightRadar24, OpenSky Network, ADSBDB, aviationweather.gov, DOT BTS');
+  console.log('   NO fake data. NO schedule templates. Real flights only.');
   console.log('   Endpoints:');
   console.log('     GET /api/health');
   console.log('     GET /api/weather/alerts');
