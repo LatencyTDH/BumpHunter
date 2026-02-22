@@ -1,49 +1,12 @@
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
 // =============================================================================
-// Holiday / Event Calendar Scoring
+// Holiday / Event Calendar Scoring — ALGORITHMIC, NO HARDCODED DATES
 //
-// Loads static holiday data from data/holidays_events.json and scores a given
-// date based on proximity to high-demand travel periods.
+// All US federal holidays are computed from rules (e.g., "4th Thursday of
+// November"), NOT hardcoded dates. This works for any year, forever.
 //
-// Supports three entry types:
-//   - holidays: single-date events with travel windows (Thanksgiving, Christmas)
-//   - periods: date ranges (spring break, summer peak, holiday season)
-//   - events: major events with optional airport tags (Super Bowl, CES, SXSW)
-//
-// Returns the highest matching intensity (doesn't stack).
+// Seasonal periods (spring break, summer peak) use fixed month/day ranges
+// that are year-independent.
 // =============================================================================
-
-interface HolidayEntry {
-  name: string;
-  dates: string[];
-  travelWindowBefore: number;
-  travelWindowAfter: number;
-  intensity: number;
-}
-
-interface PeriodEntry {
-  name: string;
-  ranges: { start: string; end: string }[];
-  intensity: number;
-}
-
-interface EventEntry {
-  name: string;
-  dates: string[];
-  travelWindowBefore: number;
-  travelWindowAfter: number;
-  intensity: number;
-  airports?: string[];
-}
-
-interface HolidayData {
-  holidays: HolidayEntry[];
-  periods: PeriodEntry[];
-  events: EventEntry[];
-}
 
 export interface HolidayMatch {
   name: string;
@@ -52,60 +15,100 @@ export interface HolidayMatch {
 }
 
 // ---------------------------------------------------------------------------
-// Load holiday data once at module init
-// ---------------------------------------------------------------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const dataPath = join(__dirname, '..', 'data', 'holidays_events.json');
-const holidayData: HolidayData = JSON.parse(readFileSync(dataPath, 'utf-8'));
-
-// ---------------------------------------------------------------------------
-// Helpers
+// Holiday rule definitions
 // ---------------------------------------------------------------------------
 
-/** Format a Date as YYYY-MM-DD in local time */
-function toDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+interface FixedHoliday {
+  name: string;
+  month: number;      // 1-12
+  day: number;
+  intensity: number;
+  windowBefore: number;
+  windowAfter: number;
 }
 
-/** Days from dateStr1 → dateStr2 (positive if dateStr2 is later) */
-function daysBetween(dateStr1: string, dateStr2: string): number {
-  const d1 = new Date(dateStr1 + 'T00:00:00');
-  const d2 = new Date(dateStr2 + 'T00:00:00');
-  return Math.round((d2.getTime() - d1.getTime()) / (86400000));
+interface NthDayHoliday {
+  name: string;
+  month: number;       // 1-12
+  dayOfWeek: number;   // 0=Sun, 1=Mon, ..., 6=Sat
+  nth: number;         // 1=first, 2=second, ... -1=last
+  intensity: number;
+  windowBefore: number;
+  windowAfter: number;
 }
 
-/**
- * Check a single-date entry (holiday or event) against a target date.
- * Returns the decayed intensity score if within the travel window, else 0.
- */
-function scoreWindowEntry(
-  dateStr: string,
-  entryDate: string,
-  windowBefore: number,
-  windowAfter: number,
-  intensity: number,
-): { score: number; daysUntil: number } {
-  const diff = daysBetween(dateStr, entryDate); // positive = holiday in future
-  const absDiff = Math.abs(diff);
+interface SeasonalPeriod {
+  name: string;
+  startMonth: number; startDay: number;
+  endMonth: number;   endDay: number;
+  intensity: number;
+}
 
-  // Which side of the window are we on?
-  const windowSize = diff >= 0 ? windowBefore : windowAfter;
+type HolidayRule = FixedHoliday | NthDayHoliday;
 
-  if (absDiff > windowSize) {
-    return { score: 0, daysUntil: diff };
+// --- Fixed-date holidays (same date every year) ---
+const FIXED_HOLIDAYS: FixedHoliday[] = [
+  { name: "New Year's Day",   month: 1,  day: 1,  intensity: 12, windowBefore: 3, windowAfter: 1 },
+  { name: 'Juneteenth',       month: 6,  day: 19, intensity: 5,  windowBefore: 1, windowAfter: 1 },
+  { name: 'Independence Day', month: 7,  day: 4,  intensity: 12, windowBefore: 3, windowAfter: 2 },
+  { name: 'Veterans Day',     month: 11, day: 11, intensity: 5,  windowBefore: 1, windowAfter: 1 },
+  { name: 'Christmas',        month: 12, day: 25, intensity: 15, windowBefore: 4, windowAfter: 3 },
+];
+
+// --- Nth-weekday holidays (computed per year) ---
+const NTH_DAY_HOLIDAYS: NthDayHoliday[] = [
+  { name: 'MLK Jr. Day',     month: 1,  dayOfWeek: 1, nth: 3,  intensity: 6,  windowBefore: 2, windowAfter: 1 },
+  { name: "Presidents' Day", month: 2,  dayOfWeek: 1, nth: 3,  intensity: 6,  windowBefore: 2, windowAfter: 1 },
+  { name: 'Memorial Day',    month: 5,  dayOfWeek: 1, nth: -1, intensity: 10, windowBefore: 3, windowAfter: 1 },
+  { name: 'Labor Day',       month: 9,  dayOfWeek: 1, nth: 1,  intensity: 10, windowBefore: 3, windowAfter: 1 },
+  { name: 'Columbus Day',    month: 10, dayOfWeek: 1, nth: 2,  intensity: 5,  windowBefore: 2, windowAfter: 1 },
+  { name: 'Thanksgiving',    month: 11, dayOfWeek: 4, nth: 4,  intensity: 15, windowBefore: 3, windowAfter: 2 },
+];
+
+// --- Seasonal periods (month/day ranges, same every year) ---
+const SEASONAL_PERIODS: SeasonalPeriod[] = [
+  { name: 'Spring Break',   startMonth: 3, startDay: 5,  endMonth: 4, endDay: 5,   intensity: 8 },
+  { name: 'Summer Peak',    startMonth: 6, startDay: 15, endMonth: 8, endDay: 20,  intensity: 7 },
+  { name: 'Holiday Season', startMonth: 12, startDay: 20, endMonth: 12, endDay: 31, intensity: 10 },
+  // Jan 1-3 continuation of holiday season
+  { name: 'Holiday Season', startMonth: 1, startDay: 1,  endMonth: 1, endDay: 3,   intensity: 10 },
+];
+
+// ---------------------------------------------------------------------------
+// Date computation helpers
+// ---------------------------------------------------------------------------
+
+/** Get the nth occurrence of a weekday in a month, or last if nth = -1 */
+function getNthWeekday(year: number, month: number, dayOfWeek: number, nth: number): Date {
+  if (nth === -1) {
+    // Last occurrence: start from last day of month, walk backwards
+    const lastDay = new Date(year, month, 0); // day 0 of next month = last day of this month
+    const diff = (lastDay.getDay() - dayOfWeek + 7) % 7;
+    lastDay.setDate(lastDay.getDate() - diff);
+    return lastDay;
   }
 
-  // Decay: full intensity on the day, -1 per day distance, floor at 50% intensity
-  const score = Math.max(
-    Math.ceil(intensity * 0.5),
-    intensity - absDiff,
-  );
+  // Nth occurrence: find first occurrence then add (nth-1) weeks
+  const first = new Date(year, month - 1, 1);
+  const diff = (dayOfWeek - first.getDay() + 7) % 7;
+  first.setDate(1 + diff + (nth - 1) * 7);
+  return first;
+}
 
-  return { score, daysUntil: diff };
+/** Compute the actual date for a holiday rule in a given year */
+function getHolidayDate(rule: HolidayRule, year: number): Date {
+  if ('day' in rule && !('dayOfWeek' in rule)) {
+    return new Date(year, rule.month - 1, rule.day);
+  }
+  const r = rule as NthDayHoliday;
+  return getNthWeekday(year, r.month, r.dayOfWeek, r.nth);
+}
+
+/** Days between two Dates (positive if b is after a) */
+function daysDiff(a: Date, b: Date): number {
+  const msA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  const msB = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((msB - msA) / 86400000);
 }
 
 // ---------------------------------------------------------------------------
@@ -113,52 +116,50 @@ function scoreWindowEntry(
 // ---------------------------------------------------------------------------
 
 export function getHolidayScore(date: Date): { score: number; match: HolidayMatch | null } {
-  const dateStr = toDateStr(date);
+  const year = date.getFullYear();
 
   let bestScore = 0;
   let bestMatch: HolidayMatch | null = null;
 
-  // Check holidays (single-date with travel windows)
-  for (const holiday of holidayData.holidays) {
-    for (const hDate of holiday.dates) {
-      const { score, daysUntil } = scoreWindowEntry(
-        dateStr, hDate,
-        holiday.travelWindowBefore, holiday.travelWindowAfter,
-        holiday.intensity,
-      );
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = { name: holiday.name, intensity: score, daysUntil };
+  function consider(name: string, intensity: number, daysUntil: number) {
+    // Decay: full intensity on the day, -1 per day distance, floor at 50%
+    const absDist = Math.abs(daysUntil);
+    const score = Math.max(Math.ceil(intensity * 0.5), intensity - absDist);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = { name, intensity: score, daysUntil };
+    }
+  }
+
+  // Check all holiday rules for this year (and adjacent years for window overlap)
+  const allRules: HolidayRule[] = [...FIXED_HOLIDAYS, ...NTH_DAY_HOLIDAYS];
+
+  for (const rule of allRules) {
+    // Check this year and the one before/after (for window edge cases around Jan/Dec)
+    for (const y of [year - 1, year, year + 1]) {
+      const holidayDate = getHolidayDate(rule, y);
+      const diff = daysDiff(date, holidayDate); // positive = holiday in future
+
+      // Check if within the travel window
+      const windowSize = diff >= 0 ? rule.windowBefore : rule.windowAfter;
+      if (Math.abs(diff) <= windowSize) {
+        consider(rule.name, rule.intensity, diff);
       }
     }
   }
 
-  // Check events (single-date with travel windows, optionally airport-scoped)
-  for (const event of holidayData.events) {
-    for (const eDate of event.dates) {
-      const { score, daysUntil } = scoreWindowEntry(
-        dateStr, eDate,
-        event.travelWindowBefore, event.travelWindowAfter,
-        event.intensity,
-      );
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = { name: event.name, intensity: score, daysUntil };
-      }
-    }
-  }
+  // Check seasonal periods
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
 
-  // Check periods (date ranges — full intensity for every day in range)
-  for (const period of holidayData.periods) {
-    for (const range of period.ranges) {
-      const afterStart = daysBetween(range.start, dateStr); // >= 0 means date is on or after start
-      const beforeEnd = daysBetween(dateStr, range.end);    // >= 0 means date is on or before end
+  for (const period of SEASONAL_PERIODS) {
+    const afterStart = m > period.startMonth || (m === period.startMonth && d >= period.startDay);
+    const beforeEnd = m < period.endMonth || (m === period.endMonth && d <= period.endDay);
 
-      if (afterStart >= 0 && beforeEnd >= 0) {
-        if (period.intensity > bestScore) {
-          bestScore = period.intensity;
-          bestMatch = { name: period.name, intensity: period.intensity, daysUntil: 0 };
-        }
+    if (afterStart && beforeEnd) {
+      if (period.intensity > bestScore) {
+        bestScore = period.intensity;
+        bestMatch = { name: period.name, intensity: period.intensity, daysUntil: 0 };
       }
     }
   }
@@ -178,21 +179,13 @@ const MAJOR_HOLIDAYS = new Set([
 export function formatHolidayTag(match: HolidayMatch): string {
   const { name } = match;
 
-  // Period-specific tags
   if (name === 'Spring Break') return 'Spring break window';
   if (name === 'Summer Peak') return 'Summer peak travel period';
   if (name === 'Holiday Season') return 'Holiday season travel corridor';
 
-  // Major events
-  if (name.startsWith('Super Bowl') || name === 'CES' || name === 'SXSW') {
-    return `${name} travel surge`;
-  }
-
-  // Major holidays → DOT peak period tag
   if (MAJOR_HOLIDAYS.has(name)) {
     return `${name} travel week (DOT peak period)`;
   }
 
-  // Minor holidays / 3-day weekends
   return `${name} weekend`;
 }
