@@ -5,6 +5,7 @@ import { scoreFlights } from './scoring.js';
 import { cacheGet, cacheSet } from './cache.js';
 import { buildHeatmap } from './heatmap.js';
 import { getAirportStatus } from './faa.js';
+import { getFR24ScheduleDepartures } from './fr24.js';
 import {
   CARRIER_STATS,
   QUARTERLY_TRENDS,
@@ -198,6 +199,84 @@ app.get('/api/flights/heatmap', (req, res) => {
   } catch (err) {
     console.error('Heatmap error:', err);
     res.status(500).json({ error: 'Failed to build heatmap' });
+  }
+});
+
+// =============================================================================
+// Flight Lookup by Flight Number
+// GET /api/flights/lookup?flight=DL323&date=2026-03-08
+// =============================================================================
+app.get('/api/flights/lookup', async (req, res) => {
+  try {
+    const { flight, date } = req.query;
+    if (!flight || !date) {
+      return res.status(400).json({ error: 'flight and date are required' });
+    }
+
+    const flightRaw = String(flight).replace(/\s+/g, '').toUpperCase();
+    const dateStr = String(date);
+    const match = flightRaw.match(/^([A-Z]{2})(\d+)$/);
+    if (!match) {
+      return res.status(400).json({ error: 'Flight must look like DL323' });
+    }
+
+    const normalizedFlight = `${match[1]}${match[2]}`;
+    const cacheKey = `lookup:${normalizedFlight}:${dateStr}:v1`;
+    const cached = cacheGet<any>(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    let origin: string | null = null;
+    let destination: string | null = null;
+
+    for (const hub of ALL_HUBS) {
+      const schedule = await getFR24ScheduleDepartures(hub, dateStr);
+      if (schedule.error) continue;
+
+      const found = schedule.flights.find(f => f.flightNumber.toUpperCase() === normalizedFlight);
+      if (found) {
+        origin = hub;
+        destination = found.destination.toUpperCase();
+        break;
+      }
+    }
+
+    if (!origin || !destination) {
+      const result = {
+        flight: null,
+        meta: {
+          flightNumber: normalizedFlight,
+          date: dateStr,
+          message: 'Flight not found in FR24 schedules for major hubs.',
+          timestamp: new Date().toISOString(),
+        },
+      };
+      cacheSet(cacheKey, result, 5 * 60 * 1000);
+      return res.json(result);
+    }
+
+    const scored = await scoreFlights(origin, destination, dateStr);
+    const scoredFlight = scored.flights.find(f => f.flightNumber.replace(/\s+/g, '') === normalizedFlight) || null;
+
+    const result = {
+      flight: scoredFlight,
+      meta: {
+        flightNumber: normalizedFlight,
+        date: dateStr,
+        origin,
+        destination,
+        dataSources: scored.dataSources,
+        message: scoredFlight ? null : 'Flight found in schedule but not available in scored results.',
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    cacheSet(cacheKey, result, 5 * 60 * 1000);
+    return res.json(result);
+  } catch (err) {
+    console.error('Flight lookup error:', err);
+    return res.status(500).json({ error: 'Flight lookup failed' });
   }
 });
 
