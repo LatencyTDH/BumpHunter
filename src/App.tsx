@@ -470,6 +470,9 @@ function Scanner() {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<Flight[]>([]);
   const [searchMeta, setSearchMeta] = useState<FlightSearchMeta | null>(null);
+  const [heatmap, setHeatmap] = useState<HeatmapDay[]>([]);
+  const [heatmapLoading, setHeatmapLoading] = useState(false);
+  const [heatmapError, setHeatmapError] = useState<string | null>(null);
   const [monitoredHubs, setMonitoredHubs] = useState<string[]>(['ATL', 'EWR', 'DFW', 'ORD']);
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
@@ -507,22 +510,33 @@ function Scanner() {
     setSearchError(null);
     setOriginFAAStatus(null);
     setDestFAAStatus(null);
+    setHeatmap([]);
+    setHeatmapError(null);
+    setHeatmapLoading(true);
 
     try {
       // Fetch flights and FAA status in parallel
-      const [data, originFAA, destFAA] = await Promise.all([
+      const [data, originFAA, destFAA, heatmapResult] = await Promise.all([
         searchFlights(origin, dest, date),
         getFAAStatus(origin).catch(() => null),
         getFAAStatus(dest).catch(() => null),
+        getHeatmapSafe(origin, dest, 4),
       ]);
       setResults(data.flights);
       setSearchMeta(data.meta);
       setOriginFAAStatus(originFAA);
       setDestFAAStatus(destFAA);
+      if (heatmapResult.ok) {
+        setHeatmap(heatmapResult.data);
+      } else {
+        setHeatmapError(heatmapResult.error);
+      }
     } catch (err: any) {
       setSearchError(err.message || 'Search failed');
+      setHeatmapError('Unable to load heatmap');
     } finally {
       setIsSearching(false);
+      setHeatmapLoading(false);
     }
   };
 
@@ -665,6 +679,30 @@ function Scanner() {
           </button>
         </div>
       </form>
+
+      {(heatmapLoading || heatmap.length > 0 || heatmapError) && (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-50 flex items-center">
+              <Calendar className="w-4 h-4 mr-2 text-indigo-400" />
+              Best Days to Fly (next 4 weeks)
+            </h3>
+            <span className="text-xs text-slate-500">Predictive heatmap</span>
+          </div>
+
+          {heatmapLoading ? (
+            <LoadingSpinner text="Building heatmap..." />
+          ) : heatmapError ? (
+            <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-300">
+              {heatmapError}
+            </div>
+          ) : (
+            <HeatmapGrid days={heatmap} />
+          )}
+
+          <DataSourceBadge sources={['DOT ATCR 2025', 'BTS quarterly trends', 'Holiday calendar']} />
+        </div>
+      )}
 
       {searchError && (
         <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 flex items-start space-x-3">
