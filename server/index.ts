@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { getWeatherAlerts, fetchMetar } from './weather.js';
-import { scoreFlights } from './scoring.js';
+import { scoreFlights, scoreOriginDepartures } from './scoring.js';
 import { cacheGet, cacheSet } from './cache.js';
 import { buildHeatmap } from './heatmap.js';
 import { getAirportStatus } from './faa.js';
@@ -106,22 +106,26 @@ app.get('/api/flights/search', async (req, res) => {
   try {
     const { origin, dest, date } = req.query;
 
-    if (!origin || !dest || !date) {
-      return res.status(400).json({ error: 'origin, dest, and date are required' });
+    if (!origin || !date) {
+      return res.status(400).json({ error: 'origin and date are required' });
     }
 
     const originStr = String(origin).toUpperCase();
-    const destStr = String(dest).toUpperCase();
+    const destStr = dest ? String(dest).toUpperCase() : '';
     const dateStr = String(date);
+    const anyDestination = !destStr || destStr === 'ANY';
 
     // Check cache first
-    const cacheKey = `flights:${originStr}:${destStr}:${dateStr}:v3`;
+    const destKey = anyDestination ? 'ANY' : destStr;
+    const cacheKey = `flights:${originStr}:${destKey}:${dateStr}:v4`;
     const cached = cacheGet<any>(cacheKey);
     if (cached) {
       return res.json(cached);
     }
 
-    const scoreResult = await scoreFlights(originStr, destStr, dateStr);
+    const scoreResult = anyDestination
+      ? await scoreOriginDepartures(originStr, dateStr)
+      : await scoreFlights(originStr, destStr, dateStr);
 
     // Build data sources list
     const dataSources = [
@@ -137,7 +141,7 @@ app.get('/api/flights/search', async (req, res) => {
       flights: scoreResult.flights,
       meta: {
         origin: originStr,
-        destination: destStr,
+        destination: destKey,
         date: dateStr,
         totalFlights: scoreResult.flights.length,
         verifiedFlights: scoreResult.verifiedCount,

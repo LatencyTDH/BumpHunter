@@ -34,6 +34,7 @@ import {
   getQuarterlyTrends,
   getTopRoutes,
   getFAAStatus,
+  getHeatmapSafe,
   type Flight,
   type FactorDetail,
   type WeatherAlert,
@@ -43,11 +44,34 @@ import {
   type OversoldRoute,
   type FlightSearchMeta,
   type FAAStatus,
+  type HeatmapDay,
 } from './api';
 
 // --- Components ---
 
 const ALL_HUBS = ['ATL', 'DFW', 'EWR', 'ORD', 'DEN', 'LAS', 'LGA', 'JFK', 'MCO', 'CLT'];
+
+function HeatmapGrid({ days }: { days: HeatmapDay[] }) {
+  if (!days || days.length === 0) return null;
+  const maxScore = Math.max(...days.map(d => d.predictedScore));
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
+        <div key={d} className="text-xs text-center text-slate-500 py-1">{d}</div>
+      ))}
+      {days.map((day) => {
+        const intensity = maxScore > 0 ? day.predictedScore / maxScore : 0;
+        const bg = intensity > 0.7 ? 'bg-amber-500/40' : intensity > 0.4 ? 'bg-amber-500/20' : 'bg-slate-700/40';
+        return (
+          <div key={day.date} className={`${bg} rounded p-1 text-center`} title={day.factors?.join(', ')}>
+            <div className="text-xs text-slate-400">{new Date(day.date + 'T12:00').getDate()}</div>
+            <div className="text-sm font-bold text-white">{day.predictedScore}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function DataSourceBadge({ sources }: { sources?: string[] }) {
   if (!sources || sources.length === 0) return null;
@@ -467,6 +491,7 @@ function Scanner() {
   const [origin, setOrigin] = useState('ATL');
   const [dest, setDest] = useState('LGA');
   const [date, setDate] = useState('');
+  const [searchMode, setSearchMode] = useState<'route' | 'flex'>('route');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<Flight[]>([]);
   const [searchMeta, setSearchMeta] = useState<FlightSearchMeta | null>(null);
@@ -516,11 +541,16 @@ function Scanner() {
 
     try {
       // Fetch flights and FAA status in parallel
+      const destQuery = searchMode === 'flex' ? 'ANY' : dest;
+      const destFAARequest = searchMode === 'route'
+        ? getFAAStatus(dest).catch(() => null)
+        : Promise.resolve(null);
+
       const [data, originFAA, destFAA, heatmapResult] = await Promise.all([
-        searchFlights(origin, dest, date),
+        searchFlights(origin, destQuery, date),
         getFAAStatus(origin).catch(() => null),
-        getFAAStatus(dest).catch(() => null),
-        getHeatmapSafe(origin, dest, 4),
+        destFAARequest,
+        searchMode === 'route' ? getHeatmapSafe(origin, dest, 4) : Promise.resolve(null),
       ]);
       setResults(data.flights);
       setSearchMeta(data.meta);
@@ -620,6 +650,31 @@ function Scanner() {
         )}
       </div>
 
+      <div className="flex items-center gap-2 mb-4">
+        <button
+          type="button"
+          onClick={() => setSearchMode('route')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            searchMode === 'route'
+              ? 'bg-indigo-600/10 text-indigo-300 border-indigo-500/40'
+              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+          }`}
+        >
+          Specific route
+        </button>
+        <button
+          type="button"
+          onClick={() => setSearchMode('flex')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            searchMode === 'flex'
+              ? 'bg-indigo-600/10 text-indigo-300 border-indigo-500/40'
+              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+          }`}
+        >
+          Best opportunities from origin
+        </button>
+      </div>
+
       <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -642,11 +697,12 @@ function Scanner() {
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
               <input
                 type="text"
-                value={dest}
+                value={searchMode === 'flex' ? 'ANY' : dest}
                 onChange={(e) => setDest(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
+                disabled={searchMode === 'flex'}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase disabled:opacity-60"
                 placeholder="e.g. LGA"
-                required
+                required={searchMode === 'route'}
               />
             </div>
           </div>
@@ -675,7 +731,7 @@ function Scanner() {
             ) : (
               <Search className="w-5 h-5 mr-2" />
             )}
-            {isSearching ? 'Scanning Live Data...' : 'Scan Flights'}
+            {isSearching ? 'Scanning Live Data...' : (searchMode === 'flex' ? 'Find Best Opportunities' : 'Scan Flights')}
           </button>
         </div>
       </form>
@@ -733,7 +789,9 @@ function Scanner() {
             {results.length > 0 && (
               <>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-50">Target Opportunities</h3>
+                  <h3 className="text-lg font-semibold text-slate-50">
+                    {searchMode === 'flex' ? `Best Opportunities from ${origin.toUpperCase()}` : 'Target Opportunities'}
+                  </h3>
                   <div className="flex items-center space-x-3">
                     {searchMeta && searchMeta.verifiedFlights > 0 && (
                       <span className="text-xs text-emerald-400 flex items-center">
