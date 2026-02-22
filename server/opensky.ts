@@ -351,7 +351,7 @@ export async function getFlightsForRoute(
         }
 
         // Build callsign for FlightAware URL
-        const callsign = sf.callsign || sf.airlineIcao + flightNum || '';
+        const callsign = sf.callsign || (sf.airlineIcao ? sf.airlineIcao + flightNum : '');
 
         verifiedCount++; // Schedule API gives us verified origin/destination
 
