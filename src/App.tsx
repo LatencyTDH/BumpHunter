@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plane,
   Search,
@@ -564,11 +564,7 @@ function Scanner() {
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadAlerts();
-  }, [monitoredHubs]);
-
-  const loadAlerts = async () => {
+    const loadAlerts = useCallback(async () => {
     setAlertsLoading(true);
     try {
       const data = await getWeatherAlerts(monitoredHubs);
@@ -578,7 +574,11 @@ function Scanner() {
     } finally {
       setAlertsLoading(false);
     }
-  };
+  }, [monitoredHubs]);
+
+  useEffect(() => {
+    loadAlerts();
+  }, [loadAlerts]);
 
   const toggleHub = (hub: string) => {
     setMonitoredHubs(prev =>
@@ -1094,6 +1094,7 @@ function HistoricalAnalysis() {
   const [trends, setTrends] = useState<QuarterlyTrend[]>([]);
   const [routes, setRoutes] = useState<OversoldRoute[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'carriers' | 'trends' | 'routes'>('carriers');
   const [dataNote, setDataNote] = useState<string>('');
 
@@ -1103,11 +1104,18 @@ function HistoricalAnalysis() {
       getQuarterlyTrends().then(d => setTrends(d.trends)),
       getTopRoutes().then(d => setRoutes(d.routes)),
     ])
-      .catch(() => {})
+      .catch((err) => setError(err.message || 'Failed to load historical data'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <LoadingSpinner text="Loading BTS industry data..." />;
+
+  if (error) return (
+    <div className="p-4 bg-red-900/30 border border-red-700 rounded-lg text-red-300">
+      <p className="font-medium">Error loading historical data</p>
+      <p className="text-sm mt-1">{error}</p>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
