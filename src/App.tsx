@@ -8,6 +8,7 @@ import {
   Calendar,
   MapPin,
   ChevronRight,
+  ChevronDown,
   CheckCircle2,
   TrendingUp,
   ShieldAlert,
@@ -32,13 +33,16 @@ import {
   getCarrierStats,
   getQuarterlyTrends,
   getTopRoutes,
+  getFAAStatus,
   type Flight,
+  type FactorDetail,
   type WeatherAlert,
   type SummaryData,
   type CarrierStats,
   type QuarterlyTrend,
   type OversoldRoute,
   type FlightSearchMeta,
+  type FAAStatus,
 } from './api';
 
 // --- Components ---
@@ -157,11 +161,178 @@ function RateLimitBanner({ meta }: { meta: FlightSearchMeta }) {
   return null;
 }
 
+function FAADelayBanner({ originStatus, destStatus }: { originStatus: FAAStatus | null; destStatus: FAAStatus | null }) {
+  const statuses = [originStatus, destStatus].filter(
+    (s): s is FAAStatus => s !== null && s.delay === true
+  );
+  if (statuses.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      {statuses.map((s) => {
+        const isGroundStop = s.delayType === 'GS' || s.delayType === 'CLOSURE';
+        const isGDP = s.delayType === 'GDP';
+        // Red for Ground Stop/Closure, Orange for GDP, Yellow for general delays
+        const borderColor = isGroundStop ? 'border-rose-500/20' : isGDP ? 'border-orange-500/20' : 'border-yellow-500/20';
+        const bgColor = isGroundStop ? 'bg-rose-500/10' : isGDP ? 'bg-orange-500/10' : 'bg-yellow-500/10';
+        const textColor = isGroundStop ? 'text-rose-400' : isGDP ? 'text-orange-400' : 'text-yellow-400';
+        const iconColor = isGroundStop ? 'text-rose-500' : isGDP ? 'text-orange-500' : 'text-yellow-500';
+        const label = isGroundStop
+          ? (s.delayType === 'CLOSURE' ? 'Airport Closure' : 'Ground Stop')
+          : isGDP
+          ? 'Ground Delay Program'
+          : 'Airport Delays';
+
+        return (
+          <div key={`faa-${s.airport}`} className={`p-4 rounded-xl border ${borderColor} ${bgColor} flex items-start space-x-3`}>
+            <AlertTriangle className={`w-5 h-5 ${iconColor} mt-0.5 flex-shrink-0`} />
+            <div>
+              <div className="flex items-center gap-2">
+                <p className={`font-semibold ${textColor}`}>
+                  ✈️ FAA {label} — {s.airport}
+                </p>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${bgColor} ${textColor} border ${borderColor}`}>
+                  {s.delayType}
+                </span>
+              </div>
+              <p className={`text-sm mt-1 ${textColor} opacity-80`}>
+                {s.reason || label}
+                {s.avgDelay ? ` · ${s.avgDelay}` : ''}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">Source: FAA NASSTATUS</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LoadingSpinner({ text }: { text?: string }) {
   return (
     <div className="flex items-center justify-center py-12">
       <Loader2 className="w-6 h-6 text-indigo-400 animate-spin mr-3" />
       <span className="text-slate-400">{text || 'Loading...'}</span>
+    </div>
+  );
+}
+
+// --- Score color utility ---
+
+function getScoreColor(score: number, maxScore: number): string {
+  const pct = (score / maxScore) * 100;
+  if (pct >= 80) return 'text-rose-400';
+  if (pct >= 60) return 'text-orange-400';
+  if (pct >= 30) return 'text-amber-400';
+  return 'text-sky-400';
+}
+
+function getScoreBarBg(score: number, maxScore: number): string {
+  const pct = (score / maxScore) * 100;
+  if (pct >= 80) return 'bg-rose-500';
+  if (pct >= 60) return 'bg-orange-500';
+  if (pct >= 30) return 'bg-amber-500';
+  return 'bg-sky-500';
+}
+
+function getScoreStroke(score: number): string {
+  if (score >= 80) return '#ef4444';  // red
+  if (score >= 60) return '#f97316';  // orange
+  if (score >= 30) return '#eab308';  // yellow
+  return '#3b82f6';                   // blue
+}
+
+function getScoreTextColor(score: number): string {
+  if (score >= 80) return 'text-rose-400';
+  if (score >= 60) return 'text-orange-400';
+  if (score >= 30) return 'text-amber-400';
+  return 'text-sky-400';
+}
+
+// --- Score Ring (SVG donut) ---
+
+function ScoreRing({ score, size = 56 }: { score: number; size?: number }) {
+  const strokeColor = getScoreStroke(score);
+  const textColor = getScoreTextColor(score);
+  // SVG circle math — radius 15.9155 gives circumference ~100
+  const dashArray = `${score}, 100`;
+
+  return (
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+        <circle
+          cx="18" cy="18" r="15.9155"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          className="text-slate-800"
+        />
+        <circle
+          cx="18" cy="18" r="15.9155"
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="3"
+          strokeDasharray={dashArray}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`text-sm font-bold ${textColor}`}>{score}</span>
+      </div>
+    </div>
+  );
+}
+
+// --- Score Breakdown Bars (collapsible) ---
+
+function ScoreBreakdown({ factors }: { factors: FactorDetail[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-800">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between py-2 px-1 text-sm text-slate-400 hover:text-slate-200 transition-colors active:bg-slate-800/30 rounded-lg -mx-1"
+        aria-expanded={expanded}
+      >
+        <span className="flex items-center gap-1.5">
+          <BarChart3 className="w-4 h-4" />
+          {expanded ? 'Hide breakdown' : 'Show breakdown'}
+        </span>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          expanded ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="space-y-3">
+            {factors.map((factor, i) => {
+              const pct = Math.round((factor.score / factor.maxScore) * 100);
+              return (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-slate-300">{factor.name}</span>
+                    <span className={`text-xs font-mono ${getScoreColor(factor.score, factor.maxScore)}`}>
+                      {factor.score}/{factor.maxScore}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${getScoreBarBg(factor.score, factor.maxScore)}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">{factor.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -303,6 +474,8 @@ function Scanner() {
   const [alerts, setAlerts] = useState<WeatherAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [originFAAStatus, setOriginFAAStatus] = useState<FAAStatus | null>(null);
+  const [destFAAStatus, setDestFAAStatus] = useState<FAAStatus | null>(null);
 
   useEffect(() => {
     loadAlerts();
@@ -332,11 +505,20 @@ function Scanner() {
     setResults([]);
     setSearchMeta(null);
     setSearchError(null);
+    setOriginFAAStatus(null);
+    setDestFAAStatus(null);
 
     try {
-      const data = await searchFlights(origin, dest, date);
+      // Fetch flights and FAA status in parallel
+      const [data, originFAA, destFAA] = await Promise.all([
+        searchFlights(origin, dest, date),
+        getFAAStatus(origin).catch(() => null),
+        getFAAStatus(dest).catch(() => null),
+      ]);
       setResults(data.flights);
       setSearchMeta(data.meta);
+      setOriginFAAStatus(originFAA);
+      setDestFAAStatus(destFAA);
     } catch (err: any) {
       setSearchError(err.message || 'Search failed');
     } finally {
@@ -495,6 +677,11 @@ function Scanner() {
         </div>
       )}
 
+      {/* FAA Delay Banner */}
+      {(originFAAStatus || destFAAStatus) && (
+        <FAADelayBanner originStatus={originFAAStatus} destStatus={destFAAStatus} />
+      )}
+
       {/* Rate limit / no data banner */}
       {searchMeta && <RateLimitBanner meta={searchMeta} />}
 
@@ -540,6 +727,9 @@ function Scanner() {
                             {flight.isRegional && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Regional</span>
                             )}
+                            {flight.lastFlightOfDay && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 font-semibold">🎰 Last Flight</span>
+                            )}
                             <VerificationBadge flight={flight} />
                             <FlightStatusBadge status={flight.status} />
                           </div>
@@ -577,35 +767,18 @@ function Scanner() {
                         <div className="flex items-center space-x-3">
                           <div className="text-right">
                             <p className="text-xs text-slate-400 uppercase tracking-wider">Bump Score</p>
-                            <p className={`text-2xl font-bold ${flight.bumpScore > 80 ? 'text-emerald-400' : flight.bumpScore > 60 ? 'text-amber-400' : 'text-slate-300'}`}>
+                            <p className={`text-2xl font-bold ${getScoreTextColor(flight.bumpScore)}`}>
                               {flight.bumpScore}<span className="text-sm font-normal text-slate-500">/100</span>
                             </p>
                           </div>
-                          <div className="w-16 h-16 relative">
-                            <svg className="w-full h-full" viewBox="0 0 36 36">
-                              <path
-                                className="text-slate-800"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                              />
-                              <path
-                                className={flight.bumpScore > 80 ? 'text-emerald-500' : flight.bumpScore > 60 ? 'text-amber-500' : 'text-indigo-500'}
-                                strokeDasharray={`${flight.bumpScore}, 100`}
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                              />
-                            </svg>
-                          </div>
+                          <ScoreRing score={flight.bumpScore} size={56} />
                         </div>
                         <p className="text-xs text-slate-500 mt-1 max-w-[200px] text-right">Relative opportunity index — not a probability</p>
                       </div>
 
                     </div>
 
+                    {/* Factor pills (legacy text factors) */}
                     <div className="mt-4 pt-4 border-t border-slate-800 flex flex-wrap gap-2">
                       {flight.factors.map((factor, i) => (
                         <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-slate-950 text-slate-400 border border-slate-800">
@@ -613,6 +786,32 @@ function Scanner() {
                         </span>
                       ))}
                     </div>
+
+                    {/* Score Breakdown Bars */}
+                    {flight.factorsDetailed && flight.factorsDetailed.length > 0 && (
+                      <ScoreBreakdown factors={flight.factorsDetailed} />
+                    )}
+
+                    {/* DOT Compensation Estimate */}
+                    {flight.compensation && flight.compensation.tier !== 'none' && (
+                      <div className={`mt-3 p-3 rounded-lg border ${flight.lastFlightOfDay ? 'bg-yellow-500/5 border-yellow-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">💰</span>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-semibold ${flight.lastFlightOfDay ? 'text-yellow-300' : 'text-emerald-300'}`}>
+                              If bumped: {flight.compensation.compensationDisplay}
+                              {flight.lastFlightOfDay && ' (next flight tomorrow, 400% rule)'}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {flight.compensation.explanation}
+                            </p>
+                            <p className="text-xs text-amber-400/80 mt-1 italic">
+                              💡 Demand cash — DOT requires airlines to offer check/cash on request
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
