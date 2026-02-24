@@ -767,7 +767,7 @@ function Scanner() {
       </div>
 
       <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Origin</label>
             <div className="relative">
@@ -797,7 +797,7 @@ function Scanner() {
               />
             </div>
           </div>
-          <div className="col-span-2 md:col-span-1">
+          <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -860,7 +860,7 @@ function Scanner() {
           <span className="text-xs text-slate-500">Flight number + date</span>
         </div>
 
-        <form onSubmit={handleLookup} className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+        <form onSubmit={handleLookup} className="grid grid-cols-3 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Flight Number</label>
             <input
@@ -882,7 +882,7 @@ function Scanner() {
               required
             />
           </div>
-          <div className="col-span-2 md:col-span-1 flex items-end">
+          <div className="flex items-end">
             <button
               type="submit"
               disabled={lookupLoading}
