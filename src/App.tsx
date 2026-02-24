@@ -774,7 +774,7 @@ function Scanner() {
 
         <form
           onSubmit={handleSearch}
-          className="relative bg-gradient-to-b from-slate-900 to-slate-900/80 border border-slate-700/50 rounded-2xl px-6 py-5 md:p-7 overflow-hidden"
+          className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl p-5 md:p-7 overflow-hidden"
         >
           {/* Subtle corner glow */}
           <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.07)_0%,transparent_60%)]" />
@@ -790,7 +790,7 @@ function Scanner() {
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value.toUpperCase())}
                   maxLength={3}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base"
+                  className="w-full bg-slate-950 border border-slate-600 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base"
                   placeholder="ATL"
                   required
                 />
@@ -814,7 +814,7 @@ function Scanner() {
                   onChange={(e) => setDest(e.target.value.toUpperCase())}
                   maxLength={3}
                   disabled={searchMode === 'flex'}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-slate-950 border border-slate-600 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="LGA"
                   required={searchMode === 'route'}
                 />
@@ -822,8 +822,8 @@ function Scanner() {
             </div>
           </div>
 
-          {/* Row 2: Date — full width, prominent */}
-          <div className="mb-5">
+          {/* Row 2: Date — half width, left-aligned so right border never meets card edge */}
+          <div className="mb-5 w-3/5">
             <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Date</label>
             <div className="relative">
               <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400/70 pointer-events-none" />
@@ -831,7 +831,7 @@ function Scanner() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3.5 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all [color-scheme:dark]"
+                className="w-full bg-slate-950 border border-slate-600 rounded-xl py-3.5 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all [color-scheme:dark]"
                 required
               />
             </div>
@@ -889,7 +889,7 @@ function Scanner() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.1, ease: 'easeOut' }}
-        className="relative bg-gradient-to-b from-slate-900 to-slate-900/80 border border-slate-700/50 rounded-2xl px-6 py-5 md:p-7 overflow-hidden"
+        className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl p-5 md:p-7 overflow-hidden"
       >
         {/* Subtle amber corner glow — differentiates from main search */}
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_bottom_left,rgba(245,158,11,0.05)_0%,transparent_55%)]" />
@@ -916,14 +916,14 @@ function Scanner() {
                 type="text"
                 value={lookupFlightNumber}
                 onChange={(e) => setLookupFlightNumber(e.target.value.toUpperCase())}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 px-4 text-xl font-bold tracking-wider text-slate-50 text-center focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-sm"
+                className="w-full bg-slate-950 border border-slate-600 rounded-xl py-3 px-4 text-xl font-bold tracking-wider text-slate-50 text-center focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-sm"
                 placeholder="DL323"
                 required
               />
             </div>
 
-            {/* Date — wider, right */}
-            <div className="flex-1">
+            {/* Date — constrained width */}
+            <div className="w-3/5">
               <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Date</label>
               <div className="relative">
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/60 pointer-events-none" />
@@ -931,7 +931,7 @@ function Scanner() {
                   type="date"
                   value={lookupDate}
                   onChange={(e) => setLookupDate(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all [color-scheme:dark]"
+                  className="w-full bg-slate-950 border border-slate-600 rounded-xl py-3 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all [color-scheme:dark]"
                   required
                 />
               </div>
