@@ -544,7 +544,7 @@ function Dashboard({ setActiveTab }: { setActiveTab: (t: string) => void }) {
 function Scanner() {
   const [origin, setOrigin] = useState('ATL');
   const [dest, setDest] = useState('LGA');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [searchMode, setSearchMode] = useState<'route' | 'flex'>('route');
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<Flight[]>([]);
@@ -559,7 +559,7 @@ function Scanner() {
   const [originFAAStatus, setOriginFAAStatus] = useState<FAAStatus | null>(null);
   const [destFAAStatus, setDestFAAStatus] = useState<FAAStatus | null>(null);
   const [lookupFlightNumber, setLookupFlightNumber] = useState('');
-  const [lookupDate, setLookupDate] = useState('');
+  const [lookupDate, setLookupDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [lookupResult, setLookupResult] = useState<Flight | null>(null);
   const [lookupMeta, setLookupMeta] = useState<FlightLookupMeta | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -741,91 +741,125 @@ function Scanner() {
         )}
       </div>
 
-      <div className="flex items-center gap-2 mb-4">
-        <button
-          type="button"
-          onClick={() => setSearchMode('route')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-            searchMode === 'route'
-              ? 'bg-indigo-600/10 text-indigo-300 border-indigo-500/40'
-              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-          }`}
-        >
-          Specific route
-        </button>
-        <button
-          type="button"
-          onClick={() => setSearchMode('flex')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-            searchMode === 'flex'
-              ? 'bg-indigo-600/10 text-indigo-300 border-indigo-500/40'
-              : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-          }`}
-        >
-          Best opportunities from origin
-        </button>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+      >
+        {/* Search mode toggle */}
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setSearchMode('route')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 border ${
+              searchMode === 'route'
+                ? 'bg-indigo-600/15 text-indigo-300 border-indigo-500/40 shadow-sm shadow-indigo-900/30'
+                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            Specific route
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchMode('flex')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 border ${
+              searchMode === 'flex'
+                ? 'bg-indigo-600/15 text-indigo-300 border-indigo-500/40 shadow-sm shadow-indigo-900/30'
+                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
+            }`}
+          >
+            Best opportunities from origin
+          </button>
+        </div>
 
-      <form onSubmit={handleSearch} className="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Origin</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-              <input
-                type="text"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
-                placeholder="ATL"
-                required
-              />
+        <form
+          onSubmit={handleSearch}
+                    className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl p-6 md:p-7 overflow-hidden"
+        >
+          {/* Subtle corner glow */}
+          <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.07)_0%,transparent_60%)]" />
+
+          {/* Row 1: Origin + Arrow + Destination */}
+          <div className="flex items-end gap-3 mb-4">
+            {/* Origin */}
+            <div className="flex-1">
+              <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">From</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value.toUpperCase())}
+                  maxLength={3}
+                  className="w-full bg-slate-950 border border-indigo-900/60 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base"
+                  placeholder="ATL"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Swap arrow */}
+            <div className="pb-3 flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center">
+                <Plane className="w-4 h-4 text-indigo-400 rotate-90" />
+              </div>
+            </div>
+
+            {/* Destination */}
+            <div className="flex-1">
+              <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">To</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchMode === 'flex' ? 'ANY' : dest}
+                  onChange={(e) => setDest(e.target.value.toUpperCase())}
+                  maxLength={3}
+                  disabled={searchMode === 'flex'}
+                  className="w-full bg-slate-950 border border-indigo-900/60 rounded-xl py-3 px-4 text-2xl font-bold tracking-widest text-slate-50 text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="LGA"
+                  required={searchMode === 'route'}
+                />
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Destination</label>
+
+          {/* Row 2: Date */}
+          <div className="mb-5 max-w-[240px]">
+            <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Date</label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-              <input
-                type="text"
-                value={searchMode === 'flex' ? 'ANY' : dest}
-                onChange={(e) => setDest(e.target.value)}
-                disabled={searchMode === 'flex'}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase disabled:opacity-60"
-                placeholder="LGA"
-                required={searchMode === 'route'}
-              />
-            </div>
-          </div>
-          <div className="col-span-2 md:col-span-1">
-            <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400/70 pointer-events-none" />
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 [color-scheme:dark]"
+                className="w-full bg-slate-950 border border-indigo-900/60 rounded-xl py-3.5 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all [color-scheme:dark]"
                 required
               />
             </div>
           </div>
-        </div>
-        <div className="mt-4 md:mt-6">
-          <button
+
+          {/* CTA Button */}
+          <motion.button
             type="submit"
             disabled={isSearching}
-            className="w-full md:w-auto md:float-right bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center transition-colors disabled:opacity-50"
+            whileHover={{ scale: isSearching ? 1 : 1.01 }}
+            whileTap={{ scale: isSearching ? 1 : 0.98 }}
+            className="relative w-full overflow-hidden bg-indigo-600 hover:bg-indigo-500 text-white py-3.5 px-6 rounded-xl font-semibold text-base flex items-center justify-center transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-900/30"
           >
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.06)_0%,transparent_60%)] rounded-xl" />
             {isSearching ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+              <>
+                <Loader2 className="w-5 h-5 mr-2.5 animate-spin" />
+                Scanning Live Data…
+              </>
             ) : (
-              <Search className="w-5 h-5 mr-2" />
+              <>
+                <Crosshair className="w-5 h-5 mr-2.5" />
+                {searchMode === 'flex' ? 'Find Best Opportunities' : 'Scan Flights'}
+              </>
             )}
-            {isSearching ? 'Scanning Live Data...' : (searchMode === 'flex' ? 'Find Best Opportunities' : 'Scan Flights')}
-          </button>
-        </div>
-      </form>
+          </motion.button>
+        </form>
+      </motion.div>
 
       {(heatmapLoading || heatmap.length > 0 || heatmapError) && (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
@@ -851,56 +885,83 @@ function Scanner() {
         </div>
       )}
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-50 flex items-center">
-            <Search className="w-4 h-4 mr-2 text-indigo-400" />
-            Reverse Flight Lookup
-          </h3>
-          <span className="text-xs text-slate-500">Flight number + date</span>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1, ease: 'easeOut' }}
+        className="relative bg-slate-900/60 backdrop-blur-sm rounded-2xl p-6 md:p-7 overflow-hidden"
+      >
+        {/* Subtle amber corner glow — differentiates from main search */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_bottom_left,rgba(245,158,11,0.05)_0%,transparent_55%)]" />
+
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-base font-semibold text-slate-100 flex items-center gap-2">
+              <Search className="w-4 h-4 text-amber-400" />
+              Reverse Flight Lookup
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">Score any specific flight by number</p>
+          </div>
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 border border-slate-800 px-2 py-1 rounded-md">
+            Flight # + Date
+          </span>
         </div>
 
-        <form onSubmit={handleLookup} className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Flight Number</label>
-            <input
-              type="text"
-              value={lookupFlightNumber}
-              onChange={(e) => setLookupFlightNumber(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
-              placeholder="DL323"
-              required
-            />
+        <form onSubmit={handleLookup}>
+          <div className="flex gap-3 mb-4">
+            {/* Flight number — smaller, left */}
+            <div className="w-2/5">
+              <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Flight #</label>
+              <input
+                type="text"
+                value={lookupFlightNumber}
+                onChange={(e) => setLookupFlightNumber(e.target.value.toUpperCase())}
+                className="w-full bg-slate-950 border border-indigo-900/60 rounded-xl py-3 px-4 text-xl font-bold tracking-wider text-slate-50 text-center focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all uppercase placeholder:text-slate-700 placeholder:font-normal placeholder:text-sm"
+                placeholder="DL323"
+                required
+              />
+            </div>
+
+            {/* Date */}
+            <div className="flex-1 max-w-[200px]">
+              <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400/60 pointer-events-none" />
+                <input
+                  type="date"
+                  value={lookupDate}
+                  onChange={(e) => setLookupDate(e.target.value)}
+                  className="w-full bg-slate-950 border border-indigo-900/60 rounded-xl py-3 pl-11 pr-4 text-slate-50 text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all [color-scheme:dark]"
+                  required
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Date</label>
-            <input
-              type="date"
-              value={lookupDate}
-              onChange={(e) => setLookupDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-4 text-slate-50 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 [color-scheme:dark]"
-              required
-            />
-          </div>
-          <div className="col-span-2 md:col-span-1 flex items-end">
-            <button
-              type="submit"
-              disabled={lookupLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium flex items-center justify-center transition-colors disabled:opacity-50"
-            >
-              {lookupLoading ? 'Looking up…' : 'Lookup Flight'}
-            </button>
-          </div>
+
+          <motion.button
+            type="submit"
+            disabled={lookupLoading}
+            whileHover={{ scale: lookupLoading ? 1 : 1.01 }}
+            whileTap={{ scale: lookupLoading ? 1 : 0.98 }}
+            className="relative w-full overflow-hidden bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 px-6 py-3 rounded-xl font-semibold text-sm flex items-center justify-center transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.04)_0%,transparent_60%)] rounded-xl" />
+            {lookupLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin text-amber-400" />
+                Searching schedules…
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 mr-2 text-amber-400" />
+                Lookup Flight Score
+              </>
+            )}
+          </motion.button>
         </form>
 
-        {lookupLoading && (
-          <div className="mt-4">
-            <LoadingSpinner text="Searching schedules..." />
-          </div>
-        )}
-
         {lookupError && (
-          <div className="mt-4 p-3 rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300">
+          <div className="mt-4 p-3 rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300 text-sm">
             {lookupError}
           </div>
         )}
@@ -914,7 +975,7 @@ function Scanner() {
             {lookupMeta.message}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {searchError && (
         <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 flex items-start space-x-3">
@@ -1399,7 +1460,7 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-[Outfit,ui-sans-serif,system-ui] flex flex-col md:flex-row">
       {/* Sidebar — desktop only */}
       <aside
         className={`hidden md:flex flex-col bg-slate-900 border-r border-slate-800 flex-shrink-0 transition-all duration-300 ease-in-out ${
